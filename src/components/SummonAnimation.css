@@ -1,0 +1,151 @@
+.summon-animation {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Dark cosmic background */
+.summon-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(180deg, #050510 0%, #0a0f1e 50%, #1a2744 100%);
+  z-index: 0;
+}
+
+/* Flash overlay */
+.flash-overlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(
+    circle,
+    rgba(255, 255, 255, 1) 0%,
+    rgba(125, 211, 252, 0.8) 20%,
+    rgba(79, 179, 212, 0.4) 40%,
+    transparent 70%
+  );
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* Energy streaks container */
+.energy-streaks {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100%;
+  height: 100%;
+  z-index: 2;
+  pointer-events: none;
+}
+
+/* Individual energy streak */
+.energy-streak {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 3px;
+  height: 60%;
+  background: linear-gradient(
+    to top,
+    rgba(79, 179, 212, 0) 0%,
+    rgba(125, 211, 252, 1) 20%,
+    rgba(79, 179, 212, 0.8) 50%,
+    rgba(125, 211, 252, 0.4) 80%,
+    transparent 100%
+  );
+  transform-origin: bottom center;
+  box-shadow: 0 0 10px rgba(125, 211, 252, 0.8);
+  filter: blur(0.5px);
+}
+
+/* Light pillar */
+.light-pillar {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 200px;
+  height: 100%;
+  background: linear-gradient(
+    to top,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.3) 20%,
+    rgba(125, 211, 252, 0.8) 40%,
+    rgba(125, 211, 252, 0.9) 60%,
+    rgba(255, 255, 255, 0.8) 80%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  transform-origin: bottom center;
+  box-shadow:
+    0 0 60px rgba(125, 211, 252, 0.8),
+    0 0 120px rgba(79, 179, 212, 0.6),
+    inset 0 0 80px rgba(255, 255, 255, 0.4);
+  z-index: 3;
+  pointer-events: none;
+}
+
+/* Pillar glow effect */
+.pillar-glow {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 400px;
+  height: 100%;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(125, 211, 252, 0.4) 0%,
+    rgba(79, 179, 212, 0.2) 40%,
+    transparent 70%
+  );
+  z-index: 2;
+  pointer-events: none;
+  filter: blur(40px);
+}
+
+/* Card container */
+.card-container {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .light-pillar {
+    width: 150px;
+  }
+
+  .pillar-glow {
+    width: 300px;
+  }
+
+  .energy-streak {
+    width: 2px;
+    height: 50%;
+  }
+}
+
+@media (max-width: 480px) {
+  .light-pillar {
+    width: 120px;
+  }
+
+  .pillar-glow {
+    width: 240px;
+  }
+}

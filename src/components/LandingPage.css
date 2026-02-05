@@ -1,0 +1,359 @@
+.landing-page {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #050510;
+}
+
+/* Cosmic Background */
+.cosmic-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background:
+    radial-gradient(ellipse at 50% 30%, rgba(107, 168, 194, 0.12) 0%, transparent 50%),
+    radial-gradient(ellipse at 20% 70%, rgba(140, 120, 180, 0.08) 0%, transparent 40%),
+    radial-gradient(ellipse at 80% 60%, rgba(45, 74, 124, 0.15) 0%, transparent 50%),
+    linear-gradient(180deg, #050510 0%, #0a0f1e 50%, #1a2744 100%);
+  z-index: 0;
+}
+
+/* Stars */
+.stars-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+
+.star {
+  position: absolute;
+  background: radial-gradient(circle, rgba(255, 255, 255, 1) 0%, rgba(168, 212, 230, 0.5) 40%, transparent 70%);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+/* Summoning Circles */
+.summon-circle-outer {
+  position: absolute;
+  width: 600px;
+  height: 600px;
+  border: 2px solid rgba(107, 168, 194, 0.3);
+  border-radius: 50%;
+  z-index: 2;
+  box-shadow:
+    0 0 40px rgba(107, 168, 194, 0.2),
+    inset 0 0 60px rgba(107, 168, 194, 0.1);
+}
+
+.summon-circle-outer::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 120%;
+  height: 120%;
+  border: 1px solid rgba(168, 212, 230, 0.12);
+  border-radius: 50%;
+}
+
+.summon-circle-inner {
+  position: absolute;
+  width: 400px;
+  height: 400px;
+  border: 3px solid rgba(168, 212, 230, 0.35);
+  border-radius: 50%;
+  z-index: 2;
+  box-shadow:
+    0 0 60px rgba(168, 212, 230, 0.25),
+    inset 0 0 40px rgba(168, 212, 230, 0.15);
+}
+
+.summon-circle-inner::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 80%;
+  height: 80%;
+  border: 2px solid rgba(201, 169, 97, 0.2);
+  border-radius: 50%;
+  box-shadow: 0 0 30px rgba(201, 169, 97, 0.15);
+}
+
+/* Energy Particles */
+.energy-particles {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 3;
+  pointer-events: none;
+}
+
+.energy-particle {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background: radial-gradient(circle, rgba(107, 168, 194, 1) 0%, rgba(168, 212, 230, 0.7) 50%, transparent 70%);
+  border-radius: 50%;
+  box-shadow: 0 0 10px rgba(107, 168, 194, 0.7);
+}
+
+/* Central Content */
+.landing-content {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+/* Title Area (for future text) */
+.title-area {
+  position: relative;
+  width: 400px;
+  height: 80px;
+}
+
+.title-glow {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 200px;
+  height: 200px;
+  background: radial-gradient(circle, rgba(107, 168, 194, 0.25) 0%, transparent 70%);
+  filter: blur(40px);
+  pointer-events: none;
+}
+
+/* Summon Button */
+.summon-button {
+  position: relative;
+  margin-top: 30px;
+  padding: 20px 80px;
+  background: linear-gradient(135deg, rgba(45, 74, 124, 0.9) 0%, rgba(26, 39, 68, 0.95) 100%);
+  border: 3px solid;
+  border-image: linear-gradient(135deg, rgba(168, 212, 230, 0.7), rgba(107, 168, 194, 0.5), rgba(201, 169, 97, 0.4)) 1;
+  color: #ffffff;
+  font-size: 32px;
+  font-weight: 900;
+  letter-spacing: 6px;
+  text-transform: uppercase;
+  cursor: pointer;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  font-family: 'Impact', 'Arial Black', sans-serif;
+  text-shadow:
+    0 0 20px rgba(168, 212, 230, 0.7),
+    0 0 40px rgba(107, 168, 194, 0.5),
+    0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.button-glow {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(ellipse at center, rgba(107, 168, 194, 0.25) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: -1;
+}
+
+.button-text {
+  position: relative;
+  z-index: 2;
+  display: inline-block;
+  background: linear-gradient(180deg, #ffffff 0%, #a8d4e6 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.button-shine {
+  position: absolute;
+  top: 0;
+  left: -10%;
+  width: 40%;
+  height: 100%;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.35) 50%,
+    transparent 100%
+  );
+  transform: skewX(-20deg);
+  pointer-events: none;
+  z-index: 3;
+}
+
+/* Hint Text */
+.hint-text {
+  font-size: 14px;
+  color: rgba(168, 212, 230, 0.65);
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  font-weight: 500;
+  text-shadow: 0 0 10px rgba(168, 212, 230, 0.4);
+}
+
+/* Light Rays */
+.light-rays {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.light-ray {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 2px;
+  height: 50%;
+  background: linear-gradient(
+    to bottom,
+    rgba(107, 168, 194, 0) 0%,
+    rgba(107, 168, 194, 0.35) 50%,
+    rgba(107, 168, 194, 0) 100%
+  );
+  transform-origin: top center;
+  filter: blur(1px);
+}
+
+/* Bottom Decoration */
+.bottom-decoration {
+  position: absolute;
+  bottom: 60px;
+  left: 0;
+  right: 0;
+  margin: 0 auto;
+  width: fit-content;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  z-index: 10;
+}
+
+.deco-line {
+  width: 100px;
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(107, 168, 194, 0.5) 50%,
+    transparent 100%
+  );
+}
+
+.deco-gem {
+  width: 12px;
+  height: 12px;
+  background: linear-gradient(135deg, rgba(201, 169, 97, 0.85) 0%, rgba(107, 168, 194, 0.7) 100%);
+  border: 2px solid rgba(168, 212, 230, 0.5);
+  transform: rotate(45deg);
+  box-shadow:
+    0 0 20px rgba(107, 168, 194, 0.5),
+    inset 0 0 10px rgba(255, 255, 255, 0.25);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .summon-circle-outer {
+    width: 400px;
+    height: 400px;
+  }
+
+  .summon-circle-inner {
+    width: 280px;
+    height: 280px;
+  }
+
+  .summon-button {
+    padding: 16px 60px;
+    font-size: 24px;
+    letter-spacing: 4px;
+  }
+
+  .title-area {
+    width: 300px;
+    height: 60px;
+  }
+}
+
+@media (max-width: 480px) {
+  .summon-button {
+    padding: 12px 40px;
+    font-size: 20px;
+    letter-spacing: 3px;
+  }
+
+  .summon-circle-outer {
+    width: 300px;
+    height: 300px;
+  }
+
+  .summon-circle-inner {
+    width: 200px;
+    height: 200px;
+  }
+}
+
+/* Star twinkle animation - GPU accelerated */
+@keyframes twinkle {
+  0%, 100% {
+    opacity: 0.3;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.2);
+  }
+}
+
+.star-twinkle {
+  will-change: opacity, transform;
+}
+
+/* Electric ring effects */
+@keyframes electric-flicker {
+  0%, 100% {
+    filter: brightness(1) blur(0px);
+  }
+  25% {
+    filter: brightness(1.3) blur(1px);
+  }
+  50% {
+    filter: brightness(0.9) blur(0px);
+  }
+  75% {
+    filter: brightness(1.2) blur(0.5px);
+  }
+}
+
+@keyframes spin-fast {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
