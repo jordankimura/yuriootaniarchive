@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gacha Landing Page Playground</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #0a0a0a;
+      color: #e0e0e0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .container {
+      display: grid;
+      grid-template-columns: 340px 1fr;
+      flex: 1;
+      height: calc(100vh - 180px);
+    }
+
+    .controls {
+      background: #111;
+      padding: 20px;
+      overflow-y: auto;
+      border-right: 1px solid #222;
+    }
+
+    .controls h2 {
+      font-size: 13px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 16px;
+      color: #888;
+      position: sticky;
+      top: 0;
+      background: #111;
+      padding: 8px 0;
+      z-index: 10;
+    }
+
+    .preset-buttons {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+      margin-bottom: 20px;
+    }
+
+    .preset-btn {
+      padding: 8px;
+      background: #1a1a1a;
+      border: 1px solid #333;
+      border-radius: 4px;
+      color: #e0e0e0;
+      font-size: 11px;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .preset-btn:hover {
+      background: #222;
+      border-color: #444;
+    }
+
+    .control-section {
+      margin-bottom: 24px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid #1a1a1a;
+    }
+
+    .control-section h3 {
+      font-size: 11px;
+      font-weight: 600;
+      color: #666;
+      margin-bottom: 12px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .control-group {
+      margin-bottom: 14px;
+    }
+
+    .control-group label {
+      display: block;
+      font-size: 12px;
+      font-weight: 500;
+      margin-bottom: 6px;
+      color: #aaa;
+    }
+
+    .control-group input[type="range"],
+    .control-group input[type="number"],
+    .control-group input[type="text"],
+    .control-group select {
+      width: 100%;
+      padding: 6px 10px;
+      background: #1a1a1a;
+      border: 1px solid #333;
+      border-radius: 4px;
+      color: #e0e0e0;
+      font-size: 12px;
+    }
+
+    .control-group input[type="range"] {
+      padding: 0;
+      height: 24px;
+    }
+
+    .control-group input[type="color"] {
+      width: 100%;
+      height: 36px;
+      border: 1px solid #333;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .range-value {
+      display: inline-block;
+      margin-left: 8px;
+      color: #666;
+      font-size: 11px;
+    }
+
+    /* Preview */
+    .preview {
+      position: relative;
+      overflow: hidden;
+      background: #000;
+    }
+
+    .preview-canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .stars-layer {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+
+    .star {
+      position: absolute;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255,255,255,1) 0%, rgba(125,211,252,0.8) 40%, transparent 70%);
+    }
+
+    .circle {
+      position: absolute;
+      border-radius: 50%;
+      border: 2px solid;
+    }
+
+    .particles-layer {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+
+    .particle {
+      position: absolute;
+      border-radius: 50%;
+      width: 4px;
+      height: 4px;
+    }
+
+    .light-rays-layer {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+
+    .light-ray {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 2px;
+      height: 50%;
+      transform-origin: top center;
+      filter: blur(1px);
+    }
+
+    .summon-btn {
+      position: relative;
+      z-index: 100;
+      padding: 20px 80px;
+      border: 3px solid;
+      cursor: pointer;
+      overflow: hidden;
+      font-weight: 900;
+      letter-spacing: 6px;
+      text-transform: uppercase;
+      font-family: 'Impact', 'Arial Black', sans-serif;
+      transition: transform 0.2s;
+    }
+
+    .summon-btn:hover {
+      transform: scale(1.05);
+    }
+
+    /* Prompt Output */
+    .prompt-output {
+      background: #111;
+      border-top: 1px solid #222;
+      padding: 16px 20px;
+      height: 180px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .prompt-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .prompt-header h3 {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #888;
+      font-weight: 600;
+    }
+
+    .copy-btn {
+      padding: 6px 14px;
+      background: #1a1a1a;
+      border: 1px solid #333;
+      border-radius: 4px;
+      color: #e0e0e0;
+      font-size: 11px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .copy-btn:hover {
+      background: #222;
+      border-color: #444;
+    }
+
+    .copy-btn.copied {
+      background: #0a5;
+      border-color: #0a5;
+      color: white;
+    }
+
+    .prompt-text {
+      flex: 1;
+      padding: 12px;
+      background: #0a0a0a;
+      border: 1px solid #222;
+      border-radius: 4px;
+      font-family: 'SF Mono', Monaco, 'Courier New', monospace;
+      font-size: 11px;
+      line-height: 1.6;
+      overflow-y: auto;
+      color: #aaa;
+      white-space: pre-wrap;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="controls">
+      <h2>Gacha Landing Playground</h2>
+
+      <div class="preset-buttons">
+        <button class="preset-btn" onclick="applyPreset('current')">Current</button>
+        <button class="preset-btn" onclick="applyPreset('intense')">Intense</button>
+        <button class="preset-btn" onclick="applyPreset('minimal')">Minimal</button>
+        <button class="preset-btn" onclick="applyPreset('cyberpunk')">Cyberpunk</button>
+        <button class="preset-btn" onclick="applyPreset('gold')">Gold Luxury</button>
+      </div>
+
+      <div class="control-section">
+        <h3>Visual Effects</h3>
+        <div class="control-group">
+          <label>Star Count <span class="range-value" id="starCountVal">150</span></label>
+          <input type="range" id="starCount" min="50" max="300" value="150" step="10" oninput="updateAll()">
+        </div>
+        <div class="control-group">
+          <label>Star Speed <span class="range-value" id="starSpeedVal">3s</span></label>
+          <input type="range" id="starSpeed" min="1" max="5" value="3" step="0.5" oninput="updateAll()">
+        </div>
+        <div class="control-group">
+          <label>Particle Count <span class="range-value" id="particleCountVal">30</span></label>
+          <input type="range" id="particleCount" min="10" max="60" value="30" step="5" oninput="updateAll()">
+        </div>
+        <div class="control-group">
+          <label>Particle Speed <span class="range-value" id="particleSpeedVal">3s</span></label>
+          <input type="range" id="particleSpeed" min="1" max="5" value="3" step="0.5" oninput="updateAll()">
+        </div>
+        <div class="control-group">
+          <label>Circle Rotation <span class="range-value" id="circleRotVal">20s</span></label>
+          <input type="range" id="circleRot" min="10" max="30" value="20" step="2" oninput="updateAll()">
+        </div>
+        <div class="control-group">
+          <label>Glow Intensity <span class="range-value" id="glowIntVal">50</span></label>
+          <input type="range" id="glowInt" min="0" max="100" value="50" oninput="updateAll()">
+        </div>
+        <div class="control-group">
+          <label>Light Rays <span class="range-value" id="rayCountVal">12</span></label>
+          <select id="rayCount" onchange="updateAll()">
+            <option value="6">6</option>
+            <option value="12" selected>12</option>
+            <option value="18">18</option>
+            <option value="24">24</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="control-section">
+        <h3>Colors</h3>
+        <div class="control-group">
+          <label>Background Start</label>
+          <input type="color" id="bgStart" value="#050510" oninput="updateAll()">
+        </div>
+        <div class="control-group">
+          <label>Background End</label>
+          <input type="color" id="bgEnd" value="#1a2744" oninput="updateAll()">
+        </div>
+        <div class="control-group">
+          <label>Outer Circle</label>
+          <input type="color" id="outerCircle" value="#4fb3d4" oninput="updateAll()">
+        </div>
+        <div class="control-group">
+          <label>Inner Circle</label>
+          <input type="color" id="innerCircle" value="#7dd3fc" oninput="updateAll()">
+        </div>
+        <div class="control-group">
+          <label>Button Glow</label>
+          <input type="color" id="btnGlow" value="#4fb3d4" oninput="updateAll()">
+        </div>
+        <div class="control-group">
+          <label>Particles</label>
+          <input type="color" id="particleColor" value="#4fb3d4" oninput="updateAll()">
+        </div>
+      </div>
+
+      <div class="control-section">
+        <h3>Button</h3>
+        <div class="control-group">
+          <label>Button Text</label>
+          <input type="text" id="btnText" value="SUMMON" oninput="updateAll()">
+        </div>
+        <div class="control-group">
+          <label>Font Size <span class="range-value" id="fontSizeVal">32px</span></label>
+          <input type="range" id="fontSize" min="20" max="48" value="32" oninput="updateAll()">
+        </div>
+        <div class="control-group">
+          <label>Button Glow <span class="range-value" id="btnGlowIntVal">50</span></label>
+          <input type="range" id="btnGlowInt" min="0" max="100" value="50" oninput="updateAll()">
+        </div>
+        <div class="control-group">
+          <label>Pulse Speed <span class="range-value" id="pulseSpeedVal">2s</span></label>
+          <input type="range" id="pulseSpeed" min="1" max="4" value="2" step="0.5" oninput="updateAll()">
+        </div>
+      </div>
+
+      <div class="control-section">
+        <h3>Layout</h3>
+        <div class="control-group">
+          <label>Outer Circle Size <span class="range-value" id="outerSizeVal">600px</span></label>
+          <input type="range" id="outerSize" min="400" max="800" value="600" step="50" oninput="updateAll()">
+        </div>
+        <div class="control-group">
+          <label>Inner Circle Size <span class="range-value" id="innerSizeVal">400px</span></label>
+          <input type="range" id="innerSize" min="200" max="500" value="400" step="50" oninput="updateAll()">
+        </div>
+        <div class="control-group">
+          <label>Button Y Offset <span class="range-value" id="btnOffsetVal">0px</span></label>
+          <input type="range" id="btnOffset" min="-100" max="100" value="0" step="10" oninput="updateAll()">
+        </div>
+      </div>
+
+      <div class="control-section">
+        <h3>Animations</h3>
+        <div class="control-group">
+          <label>Speed Multiplier <span class="range-value" id="speedMultVal">1.0x</span></label>
+          <input type="range" id="speedMult" min="0.5" max="2" value="1" step="0.1" oninput="updateAll()">
+        </div>
+        <div class="control-group">
+          <label>Shine Speed <span class="range-value" id="shineSpeedVal">3s</span></label>
+          <input type="range" id="shineSpeed" min="2" max="6" value="3" step="0.5" oninput="updateAll()">
+        </div>
+      </div>
+    </div>
+
+    <div class="preview">
+      <div class="preview-canvas" id="previewCanvas"></div>
+    </div>
+  </div>
+
+  <div class="prompt-output">
+    <div class="prompt-header">
+      <h3>Configuration Output</h3>
+      <button class="copy-btn" id="copyBtn" onclick="copyPrompt()">Copy</button>
+    </div>
+    <div class="prompt-text" id="promptText"></div>
+  </div>
+
+  <script>
+    const PRESETS = {
+      current: {
+        starCount: 150, starSpeed: 3, particleCount: 30, particleSpeed: 3,
+        circleRot: 20, glowInt: 50, rayCount: 12,
+        bgStart: '#050510', bgEnd: '#1a2744',
+        outerCircle: '#4fb3d4', innerCircle: '#7dd3fc',
+        btnGlow: '#4fb3d4', particleColor: '#4fb3d4',
+        btnText: 'SUMMON', fontSize: 32, btnGlowInt: 50, pulseSpeed: 2,
+        outerSize: 600, innerSize: 400, btnOffset: 0,
+        speedMult: 1, shineSpeed: 3
+      },
+      intense: {
+        starCount: 250, starSpeed: 2, particleCount: 50, particleSpeed: 2,
+        circleRot: 12, glowInt: 80, rayCount: 18,
+        bgStart: '#000000', bgEnd: '#1a0033',
+        outerCircle: '#7dd3fc', innerCircle: '#fbbf24',
+        btnGlow: '#7dd3fc', particleColor: '#7dd3fc',
+        btnText: 'SUMMON', fontSize: 40, btnGlowInt: 90, pulseSpeed: 1.5,
+        outerSize: 700, innerSize: 450, btnOffset: 0,
+        speedMult: 1.5, shineSpeed: 2
+      },
+      minimal: {
+        starCount: 60, starSpeed: 4, particleCount: 15, particleSpeed: 4,
+        circleRot: 25, glowInt: 20, rayCount: 6,
+        bgStart: '#0a0a0a', bgEnd: '#1a1a2e',
+        outerCircle: '#4fb3d4', innerCircle: '#7dd3fc',
+        btnGlow: '#4fb3d4', particleColor: '#4fb3d4',
+        btnText: 'BEGIN', fontSize: 28, btnGlowInt: 30, pulseSpeed: 3,
+        outerSize: 500, innerSize: 350, btnOffset: 0,
+        speedMult: 0.8, shineSpeed: 4
+      },
+      cyberpunk: {
+        starCount: 200, starSpeed: 1.5, particleCount: 40, particleSpeed: 2,
+        circleRot: 15, glowInt: 70, rayCount: 18,
+        bgStart: '#000000', bgEnd: '#0a0a0a',
+        outerCircle: '#00ff41', innerCircle: '#ff0080',
+        btnGlow: '#00ff41', particleColor: '#ff0080',
+        btnText: 'INITIATE', fontSize: 36, btnGlowInt: 80, pulseSpeed: 1,
+        outerSize: 650, innerSize: 400, btnOffset: 0,
+        speedMult: 1.8, shineSpeed: 2.5
+      },
+      gold: {
+        starCount: 120, starSpeed: 4, particleCount: 25, particleSpeed: 4,
+        circleRot: 28, glowInt: 40, rayCount: 12,
+        bgStart: '#0f0f0f', bgEnd: '#2c2416',
+        outerCircle: '#d4af37', innerCircle: '#fbbf24',
+        btnGlow: '#d4af37', particleColor: '#fbbf24',
+        btnText: 'SUMMON', fontSize: 32, btnGlowInt: 60, pulseSpeed: 2.5,
+        outerSize: 600, innerSize: 400, btnOffset: 0,
+        speedMult: 0.7, shineSpeed: 4
+      }
+    };
+
+    function applyPreset(name) {
+      const preset = PRESETS[name];
+      Object.keys(preset).forEach(key => {
+        const el = document.getElementById(key);
+        if (el) el.value = preset[key];
+      });
+      updateAll();
+    }
+
+    function updateAll() {
+      updateValues();
+      renderPreview();
+      updatePrompt();
+    }
+
+    function updateValues() {
+      const ids = ['starCount', 'starSpeed', 'particleCount', 'particleSpeed', 'circleRot',
+                   'glowInt', 'rayCount', 'fontSize', 'btnGlowInt', 'pulseSpeed',
+                   'outerSize', 'innerSize', 'btnOffset', 'speedMult', 'shineSpeed'];
+
+      document.getElementById('starCountVal').textContent = document.getElementById('starCount').value;
+      document.getElementById('starSpeedVal').textContent = document.getElementById('starSpeed').value + 's';
+      document.getElementById('particleCountVal').textContent = document.getElementById('particleCount').value;
+      document.getElementById('particleSpeedVal').textContent = document.getElementById('particleSpeed').value + 's';
+      document.getElementById('circleRotVal').textContent = document.getElementById('circleRot').value + 's';
+      document.getElementById('glowIntVal').textContent = document.getElementById('glowInt').value;
+      document.getElementById('rayCountVal').textContent = document.getElementById('rayCount').value;
+      document.getElementById('fontSizeVal').textContent = document.getElementById('fontSize').value + 'px';
+      document.getElementById('btnGlowIntVal').textContent = document.getElementById('btnGlowInt').value;
+      document.getElementById('pulseSpeedVal').textContent = document.getElementById('pulseSpeed').value + 's';
+      document.getElementById('outerSizeVal').textContent = document.getElementById('outerSize').value + 'px';
+      document.getElementById('innerSizeVal').textContent = document.getElementById('innerSize').value + 'px';
+      document.getElementById('btnOffsetVal').textContent = document.getElementById('btnOffset').value + 'px';
+      document.getElementById('speedMultVal').textContent = document.getElementById('speedMult').value + 'x';
+      document.getElementById('shineSpeedVal').textContent = document.getElementById('shineSpeed').value + 's';
+    }
+
+    function renderPreview() {
+      const canvas = document.getElementById('previewCanvas');
+      const starCount = parseInt(document.getElementById('starCount').value);
+      const particleCount = parseInt(document.getElementById('particleCount').value);
+      const rayCount = parseInt(document.getElementById('rayCount').value);
+
+      const bgStart = document.getElementById('bgStart').value;
+      const bgEnd = document.getElementById('bgEnd').value;
+      const outerCircleColor = document.getElementById('outerCircle').value;
+      const innerCircleColor = document.getElementById('innerCircle').value;
+      const btnGlowColor = document.getElementById('btnGlow').value;
+      const particleColor = document.getElementById('particleColor').value;
+
+      const outerSize = parseInt(document.getElementById('outerSize').value);
+      const innerSize = parseInt(document.getElementById('innerSize').value);
+      const btnOffset = parseInt(document.getElementById('btnOffset').value);
+      const fontSize = parseInt(document.getElementById('fontSize').value);
+      const btnText = document.getElementById('btnText').value;
+
+      const glowInt = parseInt(document.getElementById('glowInt').value) / 100;
+      const btnGlowInt = parseInt(document.getElementById('btnGlowInt').value) / 100;
+
+      // Background
+      canvas.style.background = `linear-gradient(180deg, ${bgStart} 0%, ${bgEnd} 100%)`;
+
+      // Clear and rebuild
+      canvas.innerHTML = '';
+
+      // Stars
+      const starsLayer = document.createElement('div');
+      starsLayer.className = 'stars-layer';
+      for (let i = 0; i < starCount; i++) {
+        const star = document.createElement('div');
+        star.className = 'star';
+        star.style.left = Math.random() * 100 + '%';
+        star.style.top = Math.random() * 100 + '%';
+        star.style.width = (Math.random() * 2 + 0.5) + 'px';
+        star.style.height = star.style.width;
+        star.style.animation = `twinkle ${Math.random() * 3 + 2}s ease-in-out infinite`;
+        star.style.animationDelay = Math.random() * 2 + 's';
+        starsLayer.appendChild(star);
+      }
+      canvas.appendChild(starsLayer);
+
+      // Light rays
+      const raysLayer = document.createElement('div');
+      raysLayer.className = 'light-rays-layer';
+      for (let i = 0; i < rayCount; i++) {
+        const ray = document.createElement('div');
+        ray.className = 'light-ray';
+        ray.style.transform = `rotate(${i * (360 / rayCount)}deg)`;
+        ray.style.background = `linear-gradient(to bottom, transparent 0%, ${hexToRgba(outerCircleColor, glowInt * 0.4)} 50%, transparent 100%)`;
+        ray.style.animation = `pulse ${4 / parseInt(document.getElementById('speedMult').value)}s ease-in-out infinite`;
+        ray.style.animationDelay = (i * 0.2) + 's';
+        raysLayer.appendChild(ray);
+      }
+      canvas.appendChild(raysLayer);
+
+      // Circles
+      const outerCircle = document.createElement('div');
+      outerCircle.className = 'circle';
+      outerCircle.style.width = outerSize + 'px';
+      outerCircle.style.height = outerSize + 'px';
+      outerCircle.style.borderColor = hexToRgba(outerCircleColor, 0.3);
+      outerCircle.style.boxShadow = `0 0 ${40 * glowInt}px ${hexToRgba(outerCircleColor, 0.2 * glowInt)}`;
+      outerCircle.style.animation = `rotate ${document.getElementById('circleRot').value}s linear infinite`;
+      canvas.appendChild(outerCircle);
+
+      const innerCircle = document.createElement('div');
+      innerCircle.className = 'circle';
+      innerCircle.style.width = innerSize + 'px';
+      innerCircle.style.height = innerSize + 'px';
+      innerCircle.style.borderWidth = '3px';
+      innerCircle.style.borderColor = hexToRgba(innerCircleColor, 0.4);
+      innerCircle.style.boxShadow = `0 0 ${60 * glowInt}px ${hexToRgba(innerCircleColor, 0.3 * glowInt)}`;
+      innerCircle.style.animation = `rotateReverse ${parseInt(document.getElementById('circleRot').value) * 0.75}s linear infinite`;
+      canvas.appendChild(innerCircle);
+
+      // Particles
+      const particlesLayer = document.createElement('div');
+      particlesLayer.className = 'particles-layer';
+      for (let i = 0; i < particleCount; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'particle';
+        particle.style.background = `radial-gradient(circle, ${particleColor} 0%, ${hexToRgba(particleColor, 0.8)} 50%, transparent 70%)`;
+        particle.style.boxShadow = `0 0 10px ${hexToRgba(particleColor, 0.8)}`;
+        particle.style.left = '50%';
+        particle.style.top = '50%';
+        particle.style.animation = `float${i % 8} ${Math.random() * 3 + 2}s ease-out infinite`;
+        particle.style.animationDelay = Math.random() * 2 + 's';
+        particlesLayer.appendChild(particle);
+      }
+      canvas.appendChild(particlesLayer);
+
+      // Button
+      const btn = document.createElement('button');
+      btn.className = 'summon-btn';
+      btn.textContent = btnText;
+      btn.style.fontSize = fontSize + 'px';
+      btn.style.marginTop = btnOffset + 'px';
+      btn.style.background = `linear-gradient(135deg, rgba(45, 74, 124, 0.9) 0%, rgba(26, 39, 68, 0.95) 100%)`;
+      btn.style.borderColor = hexToRgba(btnGlowColor, 0.8);
+      btn.style.boxShadow = `0 0 ${40 * btnGlowInt}px ${hexToRgba(btnGlowColor, 0.6 * btnGlowInt)}`;
+      btn.style.animation = `btnPulse ${document.getElementById('pulseSpeed').value}s ease-in-out infinite`;
+      btn.style.color = '#fff';
+      btn.style.textShadow = `0 0 20px ${hexToRgba(btnGlowColor, 0.8)}`;
+      canvas.appendChild(btn);
+
+      // Add CSS animations if not exists
+      if (!document.getElementById('dynamicStyles')) {
+        const style = document.createElement('style');
+        style.id = 'dynamicStyles';
+        style.textContent = `
+          @keyframes twinkle {
+            0%, 100% { opacity: 0.3; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.2); }
+          }
+          @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+          @keyframes rotateReverse { from { transform: rotate(360deg); } to { transform: rotate(0deg); } }
+          @keyframes pulse { 0%, 100% { opacity: 0.1; } 50% { opacity: 0.3; } }
+          @keyframes btnPulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.02); } }
+          ${Array.from({length: 8}, (_, i) => `
+            @keyframes float${i} {
+              0% { transform: translate(0, 0); opacity: 0; }
+              20% { opacity: 0.8; }
+              100% { transform: translate(${(Math.random() - 0.5) * 400}px, ${(Math.random() - 0.5) * 400}px); opacity: 0; }
+            }
+          `).join('\n')}
+        `;
+        document.head.appendChild(style);
+      }
+    }
+
+    function hexToRgba(hex, alpha) {
+      const r = parseInt(hex.slice(1, 3), 16);
+      const g = parseInt(hex.slice(3, 5), 16);
+      const b = parseInt(hex.slice(5, 7), 16);
+      return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+    }
+
+    function updatePrompt() {
+      const config = {
+        starCount: parseInt(document.getElementById('starCount').value),
+        starSpeed: parseFloat(document.getElementById('starSpeed').value),
+        particleCount: parseInt(document.getElementById('particleCount').value),
+        particleSpeed: parseFloat(document.getElementById('particleSpeed').value),
+        circleRot: parseInt(document.getElementById('circleRot').value),
+        glowInt: parseInt(document.getElementById('glowInt').value),
+        rayCount: parseInt(document.getElementById('rayCount').value),
+        bgStart: document.getElementById('bgStart').value,
+        bgEnd: document.getElementById('bgEnd').value,
+        outerCircle: document.getElementById('outerCircle').value,
+        innerCircle: document.getElementById('innerCircle').value,
+        btnGlow: document.getElementById('btnGlow').value,
+        particleColor: document.getElementById('particleColor').value,
+        btnText: document.getElementById('btnText').value,
+        fontSize: parseInt(document.getElementById('fontSize').value),
+        btnGlowInt: parseInt(document.getElementById('btnGlowInt').value),
+        pulseSpeed: parseFloat(document.getElementById('pulseSpeed').value),
+        outerSize: parseInt(document.getElementById('outerSize').value),
+        innerSize: parseInt(document.getElementById('innerSize').value),
+        btnOffset: parseInt(document.getElementById('btnOffset').value),
+        speedMult: parseFloat(document.getElementById('speedMult').value),
+        shineSpeed: parseFloat(document.getElementById('shineSpeed').value)
+      };
+
+      let output = `Update the gacha landing page with these settings:\n\n`;
+      output += `Visual Effects:\n`;
+      output += `- ${config.starCount} stars (animation: ${config.starSpeed}s)\n`;
+      output += `- ${config.particleCount} energy particles (speed: ${config.particleSpeed}s)\n`;
+      output += `- Circle rotation: ${config.circleRot}s\n`;
+      output += `- Glow intensity: ${config.glowInt}%\n`;
+      output += `- ${config.rayCount} light rays\n\n`;
+
+      output += `Colors:\n`;
+      output += `- Background: ${config.bgStart} → ${config.bgEnd}\n`;
+      output += `- Outer circle: ${config.outerCircle}\n`;
+      output += `- Inner circle: ${config.innerCircle}\n`;
+      output += `- Button glow: ${config.btnGlow}\n`;
+      output += `- Particles: ${config.particleColor}\n\n`;
+
+      output += `Button:\n`;
+      output += `- Text: "${config.btnText}"\n`;
+      output += `- Font size: ${config.fontSize}px\n`;
+      output += `- Glow intensity: ${config.btnGlowInt}%\n`;
+      output += `- Pulse speed: ${config.pulseSpeed}s\n\n`;
+
+      output += `Layout:\n`;
+      output += `- Outer circle: ${config.outerSize}px\n`;
+      output += `- Inner circle: ${config.innerSize}px\n`;
+      output += `- Button offset: ${config.btnOffset}px\n\n`;
+
+      output += `Animations:\n`;
+      output += `- Speed multiplier: ${config.speedMult}x\n`;
+      output += `- Shine sweep: ${config.shineSpeed}s\n\n`;
+
+      output += `CSS Variables:\n`;
+      output += `--star-count: ${config.starCount};\n`;
+      output += `--star-speed: ${config.starSpeed}s;\n`;
+      output += `--particle-count: ${config.particleCount};\n`;
+      output += `--bg-start: ${config.bgStart};\n`;
+      output += `--bg-end: ${config.bgEnd};\n`;
+      output += `--outer-circle-color: ${config.outerCircle};\n`;
+      output += `--inner-circle-color: ${config.innerCircle};\n`;
+      output += `--btn-glow-color: ${config.btnGlow};\n`;
+      output += `--btn-text: "${config.btnText}";\n`;
+      output += `--font-size: ${config.fontSize}px;\n`;
+      output += `--outer-size: ${config.outerSize}px;\n`;
+      output += `--inner-size: ${config.innerSize}px;`;
+
+      document.getElementById('promptText').textContent = output;
+    }
+
+    function copyPrompt() {
+      const text = document.getElementById('promptText').textContent;
+      navigator.clipboard.writeText(text).then(() => {
+        const btn = document.getElementById('copyBtn');
+        btn.textContent = 'Copied!';
+        btn.classList.add('copied');
+        setTimeout(() => {
+          btn.textContent = 'Copy';
+          btn.classList.remove('copied');
+        }, 2000);
+      });
+    }
+
+    // Initialize
+    applyPreset('current');
+  </script>
+</body>
+</html>

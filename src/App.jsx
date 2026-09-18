@@ -699,13 +699,13 @@ function App() {
           animate={{
             opacity: 1,
             y: mobileDetailsOpen ? 0 : 0,
-            top: mobileDetailsOpen ? '8vh' : '28%'
+            top: mobileDetailsOpen ? '8vh' : '20%'
           }}
           exit={{ opacity: 0, y: 10 }}
           transition={{ duration: 0.4, ease: 'easeOut' }}
           style={{
             position: 'absolute',
-            top: '28%',
+            top: '20%',
             left: 0,
             right: 0,
             display: 'flex',

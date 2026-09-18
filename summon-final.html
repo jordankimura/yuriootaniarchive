@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Arcane Summon - Final</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #000;
+      color: #e0e0e0;
+      display: flex;
+      min-height: 100vh;
+    }
+
+    .controls {
+      width: 300px;
+      background: #0a0a0a;
+      padding: 20px;
+      overflow-y: auto;
+      border-right: 1px solid #222;
+      height: 100vh;
+      position: fixed;
+      left: 0;
+      top: 0;
+      z-index: 100;
+    }
+
+    .preview-area {
+      flex: 1;
+      margin-left: 300px;
+      position: relative;
+    }
+
+    h1 {
+      font-size: 15px;
+      color: #7dd3fc;
+      margin-bottom: 4px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+
+    .subtitle {
+      font-size: 10px;
+      color: #555;
+      margin-bottom: 20px;
+    }
+
+    .section {
+      margin-bottom: 20px;
+      padding-bottom: 15px;
+      border-bottom: 1px solid #1a1a1a;
+    }
+
+    .section-title {
+      font-size: 10px;
+      color: #4fb3d4;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 10px;
+      font-weight: 600;
+    }
+
+    .control {
+      margin-bottom: 10px;
+    }
+
+    label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 10px;
+      color: #666;
+      margin-bottom: 3px;
+    }
+
+    .value {
+      color: #7dd3fc;
+      font-family: monospace;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      height: 3px;
+      background: #222;
+      outline: none;
+      border-radius: 2px;
+      -webkit-appearance: none;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 12px;
+      height: 12px;
+      background: #7dd3fc;
+      cursor: pointer;
+      border-radius: 50%;
+    }
+
+    input[type="color"] {
+      width: 100%;
+      height: 28px;
+      border: 1px solid #222;
+      border-radius: 4px;
+      background: #111;
+      cursor: pointer;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      background: linear-gradient(135deg, #1a365d 0%, #0f172a 100%);
+      border: 2px solid #7dd3fc;
+      border-radius: 6px;
+      color: #7dd3fc;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-top: 10px;
+      transition: all 0.3s;
+    }
+
+    button:hover {
+      box-shadow: 0 0 20px rgba(125, 211, 252, 0.3);
+    }
+
+    #canvas-container {
+      width: 100%;
+      height: 100vh;
+      position: relative;
+    }
+
+    #glyph-svg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    canvas {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <div class="controls">
+    <h1>✧ Arcane Summon</h1>
+    <p class="subtitle">Energy wisp + Magic circles</p>
+
+    <div class="section">
+      <div class="section-title">Wisp</div>
+      <div class="control">
+        <label>Core Size <span class="value" id="coreSize-val">40</span></label>
+        <input type="range" id="coreSize" min="10" max="100" value="40">
+      </div>
+      <div class="control">
+        <label>Wisp Energy <span class="value" id="wispEnergy-val">0.5</span></label>
+        <input type="range" id="wispEnergy" min="0.1" max="2" value="0.5" step="0.1">
+      </div>
+      <div class="control">
+        <label>Glow Radius <span class="value" id="glowRadius-val">120</span></label>
+        <input type="range" id="glowRadius" min="50" max="250" value="120">
+      </div>
+      <div class="control">
+        <label>Pulse Speed <span class="value" id="pulseSpeed-val">1.0</span></label>
+        <input type="range" id="pulseSpeed" min="0.2" max="3" value="1.0" step="0.1">
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Energy Streaks</div>
+      <div class="control">
+        <label>Streak Count <span class="value" id="streakCount-val">16</span></label>
+        <input type="range" id="streakCount" min="0" max="36" value="16" step="2">
+      </div>
+      <div class="control">
+        <label>Streak Length <span class="value" id="streakLength-val">180</span></label>
+        <input type="range" id="streakLength" min="50" max="400" value="180">
+      </div>
+      <div class="control">
+        <label>Streak Flicker <span class="value" id="streakFlicker-val">0.4</span></label>
+        <input type="range" id="streakFlicker" min="0" max="1" value="0.4" step="0.1">
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Magic Circles</div>
+      <div class="control">
+        <label>Ring Count <span class="value" id="ringCount-val">5</span></label>
+        <input type="range" id="ringCount" min="2" max="8" value="5">
+      </div>
+      <div class="control">
+        <label>Inner Radius <span class="value" id="innerRadius-val">100</span></label>
+        <input type="range" id="innerRadius" min="60" max="180" value="100">
+      </div>
+      <div class="control">
+        <label>Ring Spacing <span class="value" id="ringSpacing-val">50</span></label>
+        <input type="range" id="ringSpacing" min="25" max="80" value="50">
+      </div>
+      <div class="control">
+        <label>Rotation Speed <span class="value" id="rotationSpeed-val">0.8</span></label>
+        <input type="range" id="rotationSpeed" min="0" max="3" value="0.8" step="0.1">
+      </div>
+      <div class="control">
+        <label>Rune Density <span class="value" id="runeDensity-val">12</span></label>
+        <input type="range" id="runeDensity" min="4" max="24" value="12" step="2">
+      </div>
+      <div class="control">
+        <label>Detail Level <span class="value" id="detailLevel-val">4</span></label>
+        <input type="range" id="detailLevel" min="1" max="5" value="4">
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Post-Processing</div>
+      <div class="control">
+        <label>Bloom <span class="value" id="bloom-val">0.5</span></label>
+        <input type="range" id="bloom" min="0" max="3" value="0.5" step="0.1">
+      </div>
+      <div class="control">
+        <label>Chromatic Aberration <span class="value" id="chromatic-val">0.010</span></label>
+        <input type="range" id="chromatic" min="0" max="0.015" value="0.010" step="0.001">
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Colors</div>
+      <div class="control">
+        <label>Core Color</label>
+        <input type="color" id="coreColor" value="#ffffff">
+      </div>
+      <div class="control">
+        <label>Glow Color</label>
+        <input type="color" id="glowColor" value="#7dd3fc">
+      </div>
+      <div class="control">
+        <label>Glyph Color</label>
+        <input type="color" id="glyphColor" value="#4fb3d4">
+      </div>
+    </div>
+
+    <button onclick="triggerSummon()">⚡ SUMMON ⚡</button>
+  </div>
+
+  <div class="preview-area">
+    <div id="canvas-container">
+      <svg id="glyph-svg"></svg>
+    </div>
+  </div>
+
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+    }
+  }
+  </script>
+  <script type="module">
+    import * as THREE from 'three';
+    import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+    import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+    import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+    import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
+
+    // ==================== STATE ====================
+    const state = {
+      coreSize: 40,
+      wispEnergy: 0.5,
+      glowRadius: 120,
+      pulseSpeed: 1.0,
+      streakCount: 16,
+      streakLength: 180,
+      streakFlicker: 0.4,
+      ringCount: 5,
+      innerRadius: 100,
+      ringSpacing: 50,
+      rotationSpeed: 0.8,
+      runeDensity: 12,
+      detailLevel: 4,
+      bloom: 0.5,
+      chromatic: 0.010,
+      coreColor: '#ffffff',
+      glowColor: '#7dd3fc',
+      glyphColor: '#4fb3d4'
+    };
+
+    // ==================== RUNES ====================
+    const RUNES = [
+      "ᚠ", "ᚢ", "ᚦ", "ᚨ", "ᚱ", "ᚲ", "ᚷ", "ᚹ", "ᚺ", "ᚾ", "ᛁ", "ᛃ", "ᛇ", "ᛈ", "ᛉ", "ᛊ", "ᛏ", "ᛒ", "ᛖ", "ᛗ", "ᛚ", "ᛜ", "ᛞ", "ᛟ",
+      "☉", "☽", "☿", "♀", "♂", "♃", "♄", "✧", "✦", "⬡", "⬢", "◇", "◆", "△", "▽", "☆", "★", "⊕", "⊗",
+      "♈", "♉", "♊", "♋", "♌", "♍", "♎", "♏", "♐", "♑", "♒", "♓"
+    ];
+
+    // ==================== THREE.JS SETUP ====================
+    const container = document.getElementById('canvas-container');
+    let width = container.clientWidth;
+    let height = container.clientHeight;
+
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x050510);
+
+    const camera = new THREE.OrthographicCamera(
+      width / -2, width / 2, height / 2, height / -2, 0.1, 1000
+    );
+    camera.position.z = 100;
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(width, height);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    container.insertBefore(renderer.domElement, container.firstChild);
+
+    // ==================== POST-PROCESSING ====================
+    const composer = new EffectComposer(renderer);
+    composer.addPass(new RenderPass(scene, camera));
+
+    const bloomPass = new UnrealBloomPass(
+      new THREE.Vector2(width, height),
+      state.bloom, 0.4, 0.85
+    );
+    composer.addPass(bloomPass);
+
+    // Chromatic Aberration Shader
+    const ChromaticShader = {
+      uniforms: {
+        tDiffuse: { value: null },
+        amount: { value: state.chromatic },
+        time: { value: 0 }
+      },
+      vertexShader: `
+        varying vec2 vUv;
+        void main() {
+          vUv = uv;
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+        }
+      `,
+      fragmentShader: `
+        uniform sampler2D tDiffuse;
+        uniform float amount;
+        uniform float time;
+        varying vec2 vUv;
+
+        void main() {
+          vec2 center = vUv - 0.5;
+          float dist = length(center);
+          vec2 offset = normalize(center) * amount * dist;
+
+          float r = texture2D(tDiffuse, vUv + offset).r;
+          float g = texture2D(tDiffuse, vUv).g;
+          float b = texture2D(tDiffuse, vUv - offset).b;
+
+          gl_FragColor = vec4(r, g, b, 1.0);
+        }
+      `
+    };
+
+    const chromaPass = new ShaderPass(ChromaticShader);
+    composer.addPass(chromaPass);
+
+    // ==================== WISP SHADER ====================
+    const wispMaterial = new THREE.ShaderMaterial({
+      uniforms: {
+        time: { value: 0 },
+        energy: { value: state.wispEnergy },
+        coreSize: { value: state.coreSize },
+        glowRadius: { value: state.glowRadius },
+        pulseSpeed: { value: state.pulseSpeed },
+        coreColor: { value: new THREE.Color(state.coreColor) },
+        glowColor: { value: new THREE.Color(state.glowColor) }
+      },
+      vertexShader: `
+        varying vec2 vUv;
+        void main() {
+          vUv = uv;
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+        }
+      `,
+      fragmentShader: `
+        uniform float time;
+        uniform float energy;
+        uniform float coreSize;
+        uniform float glowRadius;
+        uniform float pulseSpeed;
+        uniform vec3 coreColor;
+        uniform vec3 glowColor;
+        varying vec2 vUv;
+
+        void main() {
+          vec2 center = vUv - 0.5;
+          float dist = length(center) * 2.0;
+
+          // Pulse
+          float pulse = 1.0 + sin(time * pulseSpeed * 2.0) * 0.2 * energy;
+
+          // Core (normalized to 0-1 range)
+          float coreRadius = coreSize / 500.0 * pulse;
+          float core = 1.0 - smoothstep(0.0, coreRadius, dist);
+          core = pow(core, 2.0);
+
+          // Glow
+          float glowR = glowRadius / 500.0 * pulse;
+          float glow = 1.0 - smoothstep(0.0, glowR, dist);
+          glow = pow(glow, 3.0);
+
+          // Mix colors
+          vec3 color = mix(glowColor, coreColor, core);
+          float alpha = (glow * 0.6 + core * 0.8) * energy;
+
+          gl_FragColor = vec4(color, alpha);
+        }
+      `,
+      transparent: true,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false
+    });
+
+    const wispGeometry = new THREE.PlaneGeometry(500, 500);
+    const wisp = new THREE.Mesh(wispGeometry, wispMaterial);
+    scene.add(wisp);
+
+    // ==================== ENERGY STREAKS ====================
+    let streaks = [];
+
+    function createStreaks() {
+      streaks.forEach(s => scene.remove(s));
+      streaks = [];
+
+      if (state.streakCount === 0) return;
+
+      for (let i = 0; i < state.streakCount; i++) {
+        const angle = (i / state.streakCount) * Math.PI * 2;
+
+        const geometry = new THREE.BufferGeometry();
+        const positions = new Float32Array([0, 0, 0, 0, 0, 0]);
+        geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+
+        const material = new THREE.LineBasicMaterial({
+          color: new THREE.Color(state.glowColor),
+          transparent: true,
+          opacity: 0.6,
+          blending: THREE.AdditiveBlending
+        });
+
+        const line = new THREE.Line(geometry, material);
+        line.userData = { angle, baseLength: state.streakLength };
+        scene.add(line);
+        streaks.push(line);
+      }
+    }
+
+    // ==================== GLYPH SVG ====================
+    let ringRotations = [];
+
+    function createGlyph() {
+      const svg = document.getElementById('glyph-svg');
+      const rect = container.getBoundingClientRect();
+      svg.setAttribute('viewBox', `0 0 ${rect.width} ${rect.height}`);
+      svg.innerHTML = '';
+
+      const cx = rect.width / 2;
+      const cy = rect.height / 2;
+
+      // Defs
+      const defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
+      defs.innerHTML = `
+        <filter id="glow">
+          <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+          <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+        <filter id="glow-strong">
+          <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+          <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+      `;
+      svg.appendChild(defs);
+
+      ringRotations = [];
+
+      // Create rings
+      for (let ring = 0; ring < state.ringCount; ring++) {
+        const radius = state.innerRadius + ring * state.ringSpacing;
+        const direction = ring % 2 === 0 ? 1 : -1;
+        ringRotations.push({ angle: 0, direction, speed: 0.8 + ring * 0.15 });
+
+        const ringGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
+        ringGroup.setAttribute("id", `ring-${ring}`);
+        ringGroup.setAttribute("data-cx", cx);
+        ringGroup.setAttribute("data-cy", cy);
+
+        // Main circle
+        const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+        circle.setAttribute("cx", cx);
+        circle.setAttribute("cy", cy);
+        circle.setAttribute("r", radius);
+        circle.setAttribute("fill", "none");
+        circle.setAttribute("stroke", state.glyphColor);
+        circle.setAttribute("stroke-width", ring === state.ringCount - 1 ? "2" : "1.5");
+        circle.setAttribute("filter", "url(#glow)");
+        circle.setAttribute("opacity", "0.8");
+        ringGroup.appendChild(circle);
+
+        // Inner decorative circle
+        if (ring > 0) {
+          const inner = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+          inner.setAttribute("cx", cx);
+          inner.setAttribute("cy", cy);
+          inner.setAttribute("r", radius - 5);
+          inner.setAttribute("fill", "none");
+          inner.setAttribute("stroke", state.glyphColor);
+          inner.setAttribute("stroke-width", "0.5");
+          inner.setAttribute("stroke-dasharray", "2,5");
+          inner.setAttribute("opacity", "0.4");
+          ringGroup.appendChild(inner);
+        }
+
+        // Ticks and runes
+        const tickCount = state.runeDensity + ring * 3;
+        for (let i = 0; i < tickCount; i++) {
+          const angle = (i / tickCount) * Math.PI * 2;
+          const isMajor = i % 4 === 0;
+          const tickLen = isMajor ? 8 : 4;
+
+          const x1 = cx + Math.cos(angle) * (radius - tickLen);
+          const y1 = cy + Math.sin(angle) * (radius - tickLen);
+          const x2 = cx + Math.cos(angle) * (radius + tickLen);
+          const y2 = cy + Math.sin(angle) * (radius + tickLen);
+
+          const tick = document.createElementNS("http://www.w3.org/2000/svg", "line");
+          tick.setAttribute("x1", x1);
+          tick.setAttribute("y1", y1);
+          tick.setAttribute("x2", x2);
+          tick.setAttribute("y2", y2);
+          tick.setAttribute("stroke", state.glyphColor);
+          tick.setAttribute("stroke-width", isMajor ? "1.5" : "0.8");
+          tick.setAttribute("opacity", isMajor ? "0.7" : "0.4");
+          ringGroup.appendChild(tick);
+
+          // Runes
+          if (isMajor && state.detailLevel >= 2) {
+            const runeR = radius + 15;
+            const rx = cx + Math.cos(angle) * runeR;
+            const ry = cy + Math.sin(angle) * runeR;
+
+            const rune = document.createElementNS("http://www.w3.org/2000/svg", "text");
+            rune.setAttribute("x", rx);
+            rune.setAttribute("y", ry);
+            rune.setAttribute("text-anchor", "middle");
+            rune.setAttribute("dominant-baseline", "middle");
+            rune.setAttribute("fill", state.glyphColor);
+            rune.setAttribute("font-size", "11");
+            rune.setAttribute("filter", "url(#glow)");
+            rune.setAttribute("opacity", "0.7");
+            rune.textContent = RUNES[Math.floor(Math.random() * RUNES.length)];
+            ringGroup.appendChild(rune);
+          }
+        }
+
+        // Connectors between rings
+        if (ring < state.ringCount - 1 && state.detailLevel >= 3) {
+          const nextRadius = state.innerRadius + (ring + 1) * state.ringSpacing;
+          const connCount = 6 + ring * 2;
+
+          for (let i = 0; i < connCount; i++) {
+            const angle = (i / connCount) * Math.PI * 2;
+            const x1 = cx + Math.cos(angle) * radius;
+            const y1 = cy + Math.sin(angle) * radius;
+            const x2 = cx + Math.cos(angle + 0.08) * nextRadius;
+            const y2 = cy + Math.sin(angle + 0.08) * nextRadius;
+            const midR = (radius + nextRadius) / 2 + 8;
+            const mx = cx + Math.cos(angle + 0.04) * midR;
+            const my = cy + Math.sin(angle + 0.04) * midR;
+
+            const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+            path.setAttribute("d", `M ${x1} ${y1} Q ${mx} ${my} ${x2} ${y2}`);
+            path.setAttribute("fill", "none");
+            path.setAttribute("stroke", state.glyphColor);
+            path.setAttribute("stroke-width", "0.8");
+            path.setAttribute("opacity", "0.3");
+            ringGroup.appendChild(path);
+
+            // Diamonds
+            if (i % 2 === 0 && state.detailLevel >= 4) {
+              const dx = cx + Math.cos(angle) * ((radius + nextRadius) / 2);
+              const dy = cy + Math.sin(angle) * ((radius + nextRadius) / 2);
+              const diamond = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
+              diamond.setAttribute("points", `${dx},${dy-4} ${dx+4},${dy} ${dx},${dy+4} ${dx-4},${dy}`);
+              diamond.setAttribute("fill", state.glyphColor);
+              diamond.setAttribute("opacity", "0.5");
+              ringGroup.appendChild(diamond);
+            }
+          }
+        }
+
+        // Triangles
+        if (state.detailLevel >= 4 && ring < state.ringCount - 1) {
+          const nextRadius = state.innerRadius + (ring + 1) * state.ringSpacing;
+          const triR = (radius + nextRadius) / 2;
+          const triCount = 3 + ring;
+
+          for (let i = 0; i < triCount; i++) {
+            const angle = (i / triCount) * Math.PI * 2 + Math.PI / 6;
+            const tx = cx + Math.cos(angle) * triR;
+            const ty = cy + Math.sin(angle) * triR;
+
+            const tri = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
+            const pts = [];
+            for (let j = 0; j < 3; j++) {
+              const a = angle + (j / 3) * Math.PI * 2;
+              pts.push(`${tx + Math.cos(a) * 6},${ty + Math.sin(a) * 6}`);
+            }
+            tri.setAttribute("points", pts.join(" "));
+            tri.setAttribute("fill", "none");
+            tri.setAttribute("stroke", state.glyphColor);
+            tri.setAttribute("stroke-width", "0.8");
+            tri.setAttribute("opacity", "0.4");
+            ringGroup.appendChild(tri);
+          }
+        }
+
+        // Arcane script
+        if (state.detailLevel >= 5 && ring < state.ringCount - 1) {
+          const nextRadius = state.innerRadius + (ring + 1) * state.ringSpacing;
+          const scriptR = (radius + nextRadius) / 2;
+
+          for (let i = 0; i < 4; i++) {
+            const angle = (i / 4) * Math.PI * 2 + Math.PI / 4;
+            const sx = cx + Math.cos(angle) * scriptR;
+            const sy = cy + Math.sin(angle) * scriptR;
+
+            let runeStr = '';
+            for (let j = 0; j < 3; j++) {
+              runeStr += RUNES[Math.floor(Math.random() * RUNES.length)];
+            }
+
+            const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+            text.setAttribute("x", sx);
+            text.setAttribute("y", sy);
+            text.setAttribute("text-anchor", "middle");
+            text.setAttribute("dominant-baseline", "middle");
+            text.setAttribute("fill", state.glyphColor);
+            text.setAttribute("font-size", "8");
+            text.setAttribute("letter-spacing", "1");
+            text.setAttribute("opacity", "0.4");
+            text.textContent = runeStr;
+            ringGroup.appendChild(text);
+          }
+        }
+
+        svg.appendChild(ringGroup);
+      }
+
+      // Center hexagram
+      const centerG = document.createElementNS("http://www.w3.org/2000/svg", "g");
+      for (let i = 0; i < 2; i++) {
+        const hex = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
+        const pts = [];
+        for (let j = 0; j < 3; j++) {
+          const a = (j / 3) * Math.PI * 2 + (i * Math.PI / 3) - Math.PI / 2;
+          pts.push(`${cx + Math.cos(a) * 35},${cy + Math.sin(a) * 35}`);
+        }
+        hex.setAttribute("points", pts.join(" "));
+        hex.setAttribute("fill", "none");
+        hex.setAttribute("stroke", state.glyphColor);
+        hex.setAttribute("stroke-width", "1.5");
+        hex.setAttribute("filter", "url(#glow-strong)");
+        hex.setAttribute("opacity", "0.8");
+        centerG.appendChild(hex);
+      }
+      svg.appendChild(centerG);
+    }
+
+    // ==================== ANIMATION ====================
+    let time = 0;
+    let isAnimating = false;
+
+    function animate() {
+      requestAnimationFrame(animate);
+      time += 0.016;
+
+      // Update wisp
+      wispMaterial.uniforms.time.value = time;
+
+      // Update streaks
+      streaks.forEach((streak, i) => {
+        const flicker = 1 - Math.random() * state.streakFlicker;
+        const pulse = 1 + Math.sin(time * state.pulseSpeed * 2) * 0.2;
+        const length = state.streakLength * pulse * flicker * state.wispEnergy;
+
+        const positions = streak.geometry.attributes.position.array;
+        const angle = streak.userData.angle;
+        positions[3] = Math.cos(angle) * length;
+        positions[4] = Math.sin(angle) * length;
+        streak.geometry.attributes.position.needsUpdate = true;
+        streak.material.opacity = 0.5 * flicker * state.wispEnergy;
+      });
+
+      // Rotate glyph rings
+      if (state.rotationSpeed > 0) {
+        ringRotations.forEach((rot, i) => {
+          rot.angle += rot.direction * state.rotationSpeed * rot.speed * 0.3;
+          const ring = document.getElementById(`ring-${i}`);
+          if (ring) {
+            const cx = ring.getAttribute('data-cx');
+            const cy = ring.getAttribute('data-cy');
+            ring.setAttribute('transform', `rotate(${rot.angle}, ${cx}, ${cy})`);
+          }
+        });
+      }
+
+      // Update chromatic
+      chromaPass.uniforms.time.value = time;
+
+      composer.render();
+    }
+
+    // ==================== SUMMON ====================
+    window.triggerSummon = async function() {
+      if (isAnimating) return;
+      isAnimating = true;
+
+      const origEnergy = state.wispEnergy;
+      const origCore = state.coreSize;
+      const origBloom = state.bloom;
+
+      // Build up
+      for (let i = 0; i <= 30; i++) {
+        await sleep(40);
+        state.wispEnergy = origEnergy + (i / 30) * 1;
+        state.coreSize = origCore * (1 + (i / 30) * 0.5);
+        wispMaterial.uniforms.energy.value = state.wispEnergy;
+        wispMaterial.uniforms.coreSize.value = state.coreSize;
+        bloomPass.strength = origBloom + (i / 30) * 2;
+      }
+
+      // Flash
+      state.coreSize = origCore * 3;
+      state.wispEnergy = origEnergy * 4;
+      wispMaterial.uniforms.coreSize.value = state.coreSize;
+      wispMaterial.uniforms.energy.value = state.wispEnergy;
+      bloomPass.strength = 4;
+
+      await sleep(150);
+
+      // Settle
+      for (let i = 0; i <= 20; i++) {
+        await sleep(25);
+        const t = i / 20;
+        state.coreSize = origCore * 3 - (origCore * 2) * t;
+        state.wispEnergy = origEnergy * 4 - (origEnergy * 3) * t;
+        wispMaterial.uniforms.coreSize.value = state.coreSize;
+        wispMaterial.uniforms.energy.value = state.wispEnergy;
+        bloomPass.strength = 4 - (4 - origBloom) * t;
+      }
+
+      state.coreSize = origCore;
+      state.wispEnergy = origEnergy;
+      wispMaterial.uniforms.coreSize.value = origCore;
+      wispMaterial.uniforms.energy.value = origEnergy;
+      bloomPass.strength = origBloom;
+      isAnimating = false;
+    };
+
+    function sleep(ms) {
+      return new Promise(r => setTimeout(r, ms));
+    }
+
+    // ==================== CONTROLS ====================
+    const controls = [
+      { id: 'coreSize', uniform: 'coreSize', material: wispMaterial },
+      { id: 'wispEnergy', uniform: 'energy', material: wispMaterial },
+      { id: 'glowRadius', uniform: 'glowRadius', material: wispMaterial },
+      { id: 'pulseSpeed', uniform: 'pulseSpeed', material: wispMaterial },
+      { id: 'streakCount', rebuild: createStreaks },
+      { id: 'streakLength' },
+      { id: 'streakFlicker' },
+      { id: 'ringCount', rebuild: createGlyph },
+      { id: 'innerRadius', rebuild: createGlyph },
+      { id: 'ringSpacing', rebuild: createGlyph },
+      { id: 'rotationSpeed' },
+      { id: 'runeDensity', rebuild: createGlyph },
+      { id: 'detailLevel', rebuild: createGlyph },
+      { id: 'bloom', pass: bloomPass, prop: 'strength' },
+      { id: 'chromatic', pass: chromaPass, uniform: 'amount' }
+    ];
+
+    controls.forEach(ctrl => {
+      const input = document.getElementById(ctrl.id);
+      if (!input) return;
+
+      input.addEventListener('input', (e) => {
+        const val = parseFloat(e.target.value);
+        state[ctrl.id] = val;
+        document.getElementById(ctrl.id + '-val').textContent =
+          Number.isInteger(val) ? val : val.toFixed(ctrl.id === 'chromatic' ? 3 : 1);
+
+        if (ctrl.material && ctrl.uniform) {
+          ctrl.material.uniforms[ctrl.uniform].value = val;
+        }
+        if (ctrl.pass && ctrl.prop) {
+          ctrl.pass[ctrl.prop] = val;
+        }
+        if (ctrl.pass && ctrl.uniform) {
+          ctrl.pass.uniforms[ctrl.uniform].value = val;
+        }
+        if (ctrl.rebuild) {
+          ctrl.rebuild();
+        }
+      });
+    });
+
+    // Color controls
+    ['coreColor', 'glowColor'].forEach(id => {
+      document.getElementById(id).addEventListener('input', (e) => {
+        state[id] = e.target.value;
+        wispMaterial.uniforms[id].value = new THREE.Color(e.target.value);
+        streaks.forEach(s => s.material.color = new THREE.Color(state.glowColor));
+      });
+    });
+
+    document.getElementById('glyphColor').addEventListener('input', (e) => {
+      state.glyphColor = e.target.value;
+      createGlyph();
+    });
+
+    // ==================== INIT ====================
+    createStreaks();
+    createGlyph();
+    animate();
+
+    // Resize
+    window.addEventListener('resize', () => {
+      width = container.clientWidth;
+      height = container.clientHeight;
+      camera.left = width / -2;
+      camera.right = width / 2;
+      camera.top = height / 2;
+      camera.bottom = height / -2;
+      camera.updateProjectionMatrix();
+      renderer.setSize(width, height);
+      composer.setSize(width, height);
+      createGlyph();
+    });
+  </script>
+</body>
+</html>

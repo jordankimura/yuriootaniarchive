@@ -1,0 +1,1040 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dr. Benis Portfolio - Right Panel Playground</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background: #0a0a0f;
+      color: #e0e0e0;
+      min-height: 100vh;
+      display: flex;
+    }
+
+    /* Layout */
+    .playground {
+      display: flex;
+      width: 100%;
+      height: 100vh;
+    }
+
+    .controls {
+      width: 320px;
+      min-width: 320px;
+      background: #111118;
+      border-right: 1px solid #2a2a35;
+      padding: 1.5rem;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .preview-area {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      background: #030308;
+    }
+
+    .preview-container {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .preview-container::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse at 30% 30%, rgba(107, 168, 194, 0.08) 0%, transparent 50%),
+        radial-gradient(ellipse at 70% 60%, rgba(140, 120, 180, 0.05) 0%, transparent 40%);
+      pointer-events: none;
+    }
+
+    .output-area {
+      background: #111118;
+      border-top: 1px solid #2a2a35;
+      padding: 1rem 1.5rem;
+    }
+
+    /* Controls styling */
+    .section-title {
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: #888;
+      margin-bottom: 0.75rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid #2a2a35;
+    }
+
+    .control-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .control-row {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .control-label {
+      font-size: 0.75rem;
+      color: #aaa;
+      width: 110px;
+      flex-shrink: 0;
+    }
+
+    .control-value {
+      font-size: 0.7rem;
+      color: #666;
+      font-family: monospace;
+      min-width: 50px;
+      text-align: right;
+    }
+
+    input[type="range"] {
+      flex: 1;
+      height: 4px;
+      background: #2a2a35;
+      border-radius: 2px;
+      -webkit-appearance: none;
+      cursor: pointer;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 14px;
+      height: 14px;
+      background: #c9a961;
+      border-radius: 50%;
+      cursor: pointer;
+    }
+
+    input[type="color"] {
+      width: 32px;
+      height: 24px;
+      border: 1px solid #2a2a35;
+      border-radius: 4px;
+      background: transparent;
+      cursor: pointer;
+      padding: 0;
+    }
+
+    input[type="checkbox"] {
+      width: 16px;
+      height: 16px;
+      accent-color: #c9a961;
+      cursor: pointer;
+    }
+
+    /* Presets */
+    .presets {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .preset-btn {
+      padding: 0.4rem 0.8rem;
+      background: transparent;
+      border: 1px solid #3a3a45;
+      border-radius: 4px;
+      color: #888;
+      font-size: 0.7rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .preset-btn:hover {
+      border-color: #c9a961;
+      color: #c9a961;
+    }
+
+    .preset-btn.active {
+      background: rgba(201, 169, 97, 0.15);
+      border-color: #c9a961;
+      color: #c9a961;
+    }
+
+    /* Preview panel */
+    .panel-preview {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      border-left: 1px solid var(--border-color);
+      background: linear-gradient(180deg, rgba(10, 15, 25, 0.95) 0%, rgba(5, 8, 15, 0.98) 100%);
+      overflow: hidden;
+      box-shadow: -10px 0 40px rgba(0, 0, 0, 0.3);
+    }
+
+    .banner {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-bottom: 1px solid var(--border-color);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .banner-gradient-overlay {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 60px;
+      background: linear-gradient(to top, rgba(10, 15, 25, 0.9), transparent);
+    }
+
+    .banner-symbol {
+      opacity: 0.2;
+    }
+
+    .panel-content {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      overflow: auto;
+    }
+
+    .project-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 0.5rem;
+    }
+
+    .project-title {
+      color: var(--text-primary);
+      line-height: 1.2;
+    }
+
+    .type-badge {
+      padding: 0.25rem 0.6rem;
+      border-radius: 4px;
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      white-space: nowrap;
+    }
+
+    .project-description {
+      color: var(--text-secondary);
+      line-height: 1.7;
+    }
+
+    .divider {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--border-color), transparent);
+    }
+
+    .project-meta {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .meta-label {
+      color: rgba(168, 212, 230, 0.5);
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .meta-value {
+      color: rgba(168, 212, 230, 0.8);
+      font-size: 0.75rem;
+      font-family: monospace;
+    }
+
+    .button-group {
+      display: flex;
+      flex-direction: column;
+      border-top: 1px solid var(--border-color);
+    }
+
+    .btn-primary {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      cursor: pointer;
+      border: none;
+    }
+
+    .btn-secondary {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      background: transparent;
+      font-size: 0.75rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      cursor: pointer;
+    }
+
+    /* Output */
+    .output-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 0.75rem;
+    }
+
+    .output-title {
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: #888;
+    }
+
+    .copy-btn {
+      padding: 0.4rem 0.8rem;
+      background: rgba(201, 169, 97, 0.15);
+      border: 1px solid rgba(201, 169, 97, 0.4);
+      border-radius: 4px;
+      color: #c9a961;
+      font-size: 0.7rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .copy-btn:hover {
+      background: rgba(201, 169, 97, 0.25);
+    }
+
+    .copy-btn.copied {
+      background: rgba(100, 200, 100, 0.2);
+      border-color: rgba(100, 200, 100, 0.4);
+      color: #64c864;
+    }
+
+    .output-text {
+      font-size: 0.8rem;
+      line-height: 1.6;
+      color: #ccc;
+      background: #0a0a0f;
+      padding: 1rem;
+      border-radius: 6px;
+      border: 1px solid #2a2a35;
+      max-height: 150px;
+      overflow-y: auto;
+    }
+
+    code {
+      font-family: 'SF Mono', Monaco, monospace;
+      background: rgba(201, 169, 97, 0.1);
+      padding: 0.1rem 0.3rem;
+      border-radius: 3px;
+      color: #c9a961;
+    }
+
+    .collapsible {
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .collapsible::before {
+      content: '▼';
+      display: inline-block;
+      margin-right: 0.5rem;
+      font-size: 0.6rem;
+      transition: transform 0.2s;
+    }
+
+    .collapsible.collapsed::before {
+      transform: rotate(-90deg);
+    }
+
+    .collapsible-content {
+      overflow: hidden;
+      transition: max-height 0.3s ease;
+    }
+
+    .collapsible-content.collapsed {
+      max-height: 0 !important;
+    }
+  </style>
+</head>
+<body>
+  <div class="playground">
+    <!-- Controls -->
+    <div class="controls">
+      <div>
+        <div class="section-title">Presets</div>
+        <div class="presets">
+          <button class="preset-btn active" data-preset="current">Current</button>
+          <button class="preset-btn" data-preset="compact">Compact</button>
+          <button class="preset-btn" data-preset="spacious">Spacious</button>
+          <button class="preset-btn" data-preset="contrast">High Contrast</button>
+        </div>
+      </div>
+
+      <!-- Panel Sizing -->
+      <div>
+        <div class="section-title">Panel Sizing</div>
+        <div class="control-group">
+          <div class="control-row">
+            <span class="control-label">Panel Width</span>
+            <input type="range" id="panelWidth" min="280" max="400" value="340">
+            <span class="control-value" id="panelWidthVal">340px</span>
+          </div>
+          <div class="control-row">
+            <span class="control-label">Banner Height</span>
+            <input type="range" id="bannerHeight" min="120" max="280" value="200">
+            <span class="control-value" id="bannerHeightVal">200px</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Colors -->
+      <div>
+        <div class="section-title">Colors</div>
+        <div class="control-group">
+          <div class="control-row">
+            <span class="control-label">Border</span>
+            <input type="color" id="borderColor" value="#1a2a3a">
+            <span class="control-value" id="borderColorVal">#1a2a3a</span>
+          </div>
+          <div class="control-row">
+            <span class="control-label">Accent (Gold)</span>
+            <input type="color" id="accentColor" value="#c9a961">
+            <span class="control-value" id="accentColorVal">#c9a961</span>
+          </div>
+          <div class="control-row">
+            <span class="control-label">Text Primary</span>
+            <input type="color" id="textPrimary" value="#f0f0f5">
+            <span class="control-value" id="textPrimaryVal">#f0f0f5</span>
+          </div>
+          <div class="control-row">
+            <span class="control-label">Text Secondary</span>
+            <input type="color" id="textSecondary" value="#9090a0">
+            <span class="control-value" id="textSecondaryVal">#9090a0</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Banner -->
+      <div>
+        <div class="section-title">Banner</div>
+        <div class="control-group">
+          <div class="control-row">
+            <span class="control-label">Show Symbol</span>
+            <input type="checkbox" id="showSymbol" checked>
+          </div>
+          <div class="control-row">
+            <span class="control-label">Symbol Size</span>
+            <input type="range" id="symbolSize" min="2" max="6" step="0.5" value="4">
+            <span class="control-value" id="symbolSizeVal">4rem</span>
+          </div>
+          <div class="control-row">
+            <span class="control-label">Gradient Angle</span>
+            <input type="range" id="gradientAngle" min="0" max="360" value="135">
+            <span class="control-value" id="gradientAngleVal">135°</span>
+          </div>
+          <div class="control-row">
+            <span class="control-label">Gradient 1</span>
+            <input type="color" id="gradientColor1" value="#1a4a6a">
+            <span class="control-value" id="gradientColor1Val">#1a4a6a</span>
+          </div>
+          <div class="control-row">
+            <span class="control-label">Gradient 2</span>
+            <input type="color" id="gradientColor2" value="#3a2a5a">
+            <span class="control-value" id="gradientColor2Val">#3a2a5a</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Typography -->
+      <div>
+        <div class="section-title">Typography</div>
+        <div class="control-group">
+          <div class="control-row">
+            <span class="control-label">Title Size</span>
+            <input type="range" id="titleSize" min="1" max="2" step="0.1" value="1.25">
+            <span class="control-value" id="titleSizeVal">1.25rem</span>
+          </div>
+          <div class="control-row">
+            <span class="control-label">Title Weight</span>
+            <input type="range" id="titleWeight" min="400" max="800" step="100" value="700">
+            <span class="control-value" id="titleWeightVal">700</span>
+          </div>
+          <div class="control-row">
+            <span class="control-label">Desc Size</span>
+            <input type="range" id="descSize" min="0.7" max="1" step="0.05" value="0.875">
+            <span class="control-value" id="descSizeVal">0.875rem</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Spacing -->
+      <div>
+        <div class="section-title">Spacing</div>
+        <div class="control-group">
+          <div class="control-row">
+            <span class="control-label">Panel Padding</span>
+            <input type="range" id="panelPadding" min="1" max="2.5" step="0.25" value="1.5">
+            <span class="control-value" id="panelPaddingVal">1.5rem</span>
+          </div>
+          <div class="control-row">
+            <span class="control-label">Section Gap</span>
+            <input type="range" id="sectionGap" min="0.5" max="2" step="0.25" value="1">
+            <span class="control-value" id="sectionGapVal">1rem</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Buttons -->
+      <div>
+        <div class="section-title">Buttons</div>
+        <div class="control-group">
+          <div class="control-row">
+            <span class="control-label">Border Radius</span>
+            <input type="range" id="buttonRadius" min="4" max="12" value="6">
+            <span class="control-value" id="buttonRadiusVal">6px</span>
+          </div>
+          <div class="control-row">
+            <span class="control-label">Button Padding</span>
+            <input type="range" id="buttonPadding" min="0.5" max="1" step="0.05" value="0.75">
+            <span class="control-value" id="buttonPaddingVal">0.75rem</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Badge -->
+      <div>
+        <div class="section-title collapsible" onclick="toggleSection(this)">Badge</div>
+        <div class="collapsible-content" style="max-height: 200px;">
+          <div class="control-group" style="padding-top: 0.5rem;">
+            <div class="control-row">
+              <span class="control-label">BG Opacity</span>
+              <input type="range" id="badgeBgOpacity" min="0.1" max="0.4" step="0.05" value="0.15">
+              <span class="control-value" id="badgeBgOpacityVal">0.15</span>
+            </div>
+            <div class="control-row">
+              <span class="control-label">Border Opacity</span>
+              <input type="range" id="badgeBorderOpacity" min="0.2" max="0.5" step="0.05" value="0.3">
+              <span class="control-value" id="badgeBorderOpacityVal">0.3</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Preview + Output -->
+    <div class="preview-area">
+      <div class="preview-container">
+        <div class="panel-preview" id="preview">
+          <!-- Banner -->
+          <div class="banner" id="banner">
+            <span class="banner-symbol" id="bannerSymbol">✧</span>
+            <div class="banner-gradient-overlay"></div>
+          </div>
+
+          <!-- Content -->
+          <div class="panel-content" id="panelContent">
+            <div class="project-header">
+              <span class="project-title" id="projectTitle">The Manifesto</span>
+              <span class="type-badge" id="typeBadge">writing</span>
+            </div>
+
+            <p class="project-description" id="projectDesc">
+              My thoughts and philosophy on creativity, art, and the absurdity of existence. A collection of essays written over three years.
+            </p>
+
+            <div class="divider"></div>
+
+            <div class="project-meta">
+              <span class="meta-label">Project ID:</span>
+              <span class="meta-value">#001</span>
+            </div>
+
+            <div style="flex: 1;"></div>
+
+            <div class="button-group" id="buttonGroup">
+              <button class="btn-primary" id="btnPrimary">
+                <span>View Project</span>
+                <span>→</span>
+              </button>
+              <button class="btn-secondary" id="btnSecondary">
+                <span>✧</span>
+                <span>Reveal Another</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Output -->
+      <div class="output-area">
+        <div class="output-header">
+          <span class="output-title">Style Output</span>
+          <button class="copy-btn" id="copyBtn" onclick="copyOutput()">Copy Styles</button>
+        </div>
+        <div class="output-text" id="output"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Defaults (Current Design)
+    const DEFAULTS = {
+      panelWidth: 340,
+      bannerHeight: 200,
+      borderColor: '#1a2a3a',
+      accentColor: '#c9a961',
+      textPrimary: '#f0f0f5',
+      textSecondary: '#9090a0',
+      showSymbol: true,
+      symbolSize: 4,
+      gradientAngle: 135,
+      gradientColor1: '#1a4a6a',
+      gradientColor2: '#3a2a5a',
+      titleSize: 1.25,
+      titleWeight: 700,
+      descSize: 0.875,
+      panelPadding: 1.5,
+      sectionGap: 1,
+      buttonRadius: 6,
+      buttonPadding: 0.75,
+      badgeBgOpacity: 0.15,
+      badgeBorderOpacity: 0.3
+    };
+
+    const PRESETS = {
+      current: { ...DEFAULTS },
+      compact: {
+        panelWidth: 300,
+        bannerHeight: 140,
+        borderColor: '#1a2a3a',
+        accentColor: '#c9a961',
+        textPrimary: '#f0f0f5',
+        textSecondary: '#9090a0',
+        showSymbol: true,
+        symbolSize: 3,
+        gradientAngle: 135,
+        gradientColor1: '#1a4a6a',
+        gradientColor2: '#3a2a5a',
+        titleSize: 1.1,
+        titleWeight: 600,
+        descSize: 0.8,
+        panelPadding: 1,
+        sectionGap: 0.75,
+        buttonRadius: 4,
+        buttonPadding: 0.6,
+        badgeBgOpacity: 0.15,
+        badgeBorderOpacity: 0.3
+      },
+      spacious: {
+        panelWidth: 380,
+        bannerHeight: 240,
+        borderColor: '#1a2a3a',
+        accentColor: '#c9a961',
+        textPrimary: '#f0f0f5',
+        textSecondary: '#a0a0b0',
+        showSymbol: true,
+        symbolSize: 5,
+        gradientAngle: 145,
+        gradientColor1: '#1a4a6a',
+        gradientColor2: '#3a2a5a',
+        titleSize: 1.5,
+        titleWeight: 700,
+        descSize: 0.95,
+        panelPadding: 2,
+        sectionGap: 1.5,
+        buttonRadius: 8,
+        buttonPadding: 0.9,
+        badgeBgOpacity: 0.15,
+        badgeBorderOpacity: 0.3
+      },
+      contrast: {
+        panelWidth: 340,
+        bannerHeight: 200,
+        borderColor: '#2a4a6a',
+        accentColor: '#e0c080',
+        textPrimary: '#ffffff',
+        textSecondary: '#b0b0c0',
+        showSymbol: true,
+        symbolSize: 4,
+        gradientAngle: 135,
+        gradientColor1: '#2a5a8a',
+        gradientColor2: '#4a3a6a',
+        titleSize: 1.25,
+        titleWeight: 700,
+        descSize: 0.875,
+        panelPadding: 1.5,
+        sectionGap: 1,
+        buttonRadius: 6,
+        buttonPadding: 0.75,
+        badgeBgOpacity: 0.2,
+        badgeBorderOpacity: 0.4
+      }
+    };
+
+    // State
+    const state = { ...DEFAULTS };
+
+    // Elements
+    const controls = {
+      panelWidth: document.getElementById('panelWidth'),
+      bannerHeight: document.getElementById('bannerHeight'),
+      borderColor: document.getElementById('borderColor'),
+      accentColor: document.getElementById('accentColor'),
+      textPrimary: document.getElementById('textPrimary'),
+      textSecondary: document.getElementById('textSecondary'),
+      showSymbol: document.getElementById('showSymbol'),
+      symbolSize: document.getElementById('symbolSize'),
+      gradientAngle: document.getElementById('gradientAngle'),
+      gradientColor1: document.getElementById('gradientColor1'),
+      gradientColor2: document.getElementById('gradientColor2'),
+      titleSize: document.getElementById('titleSize'),
+      titleWeight: document.getElementById('titleWeight'),
+      descSize: document.getElementById('descSize'),
+      panelPadding: document.getElementById('panelPadding'),
+      sectionGap: document.getElementById('sectionGap'),
+      buttonRadius: document.getElementById('buttonRadius'),
+      buttonPadding: document.getElementById('buttonPadding'),
+      badgeBgOpacity: document.getElementById('badgeBgOpacity'),
+      badgeBorderOpacity: document.getElementById('badgeBorderOpacity')
+    };
+
+    // Update state from controls
+    function syncState() {
+      state.panelWidth = parseInt(controls.panelWidth.value);
+      state.bannerHeight = parseInt(controls.bannerHeight.value);
+      state.borderColor = controls.borderColor.value;
+      state.accentColor = controls.accentColor.value;
+      state.textPrimary = controls.textPrimary.value;
+      state.textSecondary = controls.textSecondary.value;
+      state.showSymbol = controls.showSymbol.checked;
+      state.symbolSize = parseFloat(controls.symbolSize.value);
+      state.gradientAngle = parseInt(controls.gradientAngle.value);
+      state.gradientColor1 = controls.gradientColor1.value;
+      state.gradientColor2 = controls.gradientColor2.value;
+      state.titleSize = parseFloat(controls.titleSize.value);
+      state.titleWeight = parseInt(controls.titleWeight.value);
+      state.descSize = parseFloat(controls.descSize.value);
+      state.panelPadding = parseFloat(controls.panelPadding.value);
+      state.sectionGap = parseFloat(controls.sectionGap.value);
+      state.buttonRadius = parseInt(controls.buttonRadius.value);
+      state.buttonPadding = parseFloat(controls.buttonPadding.value);
+      state.badgeBgOpacity = parseFloat(controls.badgeBgOpacity.value);
+      state.badgeBorderOpacity = parseFloat(controls.badgeBorderOpacity.value);
+    }
+
+    // Update controls from state
+    function syncControls() {
+      controls.panelWidth.value = state.panelWidth;
+      controls.bannerHeight.value = state.bannerHeight;
+      controls.borderColor.value = state.borderColor;
+      controls.accentColor.value = state.accentColor;
+      controls.textPrimary.value = state.textPrimary;
+      controls.textSecondary.value = state.textSecondary;
+      controls.showSymbol.checked = state.showSymbol;
+      controls.symbolSize.value = state.symbolSize;
+      controls.gradientAngle.value = state.gradientAngle;
+      controls.gradientColor1.value = state.gradientColor1;
+      controls.gradientColor2.value = state.gradientColor2;
+      controls.titleSize.value = state.titleSize;
+      controls.titleWeight.value = state.titleWeight;
+      controls.descSize.value = state.descSize;
+      controls.panelPadding.value = state.panelPadding;
+      controls.sectionGap.value = state.sectionGap;
+      controls.buttonRadius.value = state.buttonRadius;
+      controls.buttonPadding.value = state.buttonPadding;
+      controls.badgeBgOpacity.value = state.badgeBgOpacity;
+      controls.badgeBorderOpacity.value = state.badgeBorderOpacity;
+    }
+
+    // Update value displays
+    function updateValueDisplays() {
+      document.getElementById('panelWidthVal').textContent = state.panelWidth + 'px';
+      document.getElementById('bannerHeightVal').textContent = state.bannerHeight + 'px';
+      document.getElementById('borderColorVal').textContent = state.borderColor;
+      document.getElementById('accentColorVal').textContent = state.accentColor;
+      document.getElementById('textPrimaryVal').textContent = state.textPrimary;
+      document.getElementById('textSecondaryVal').textContent = state.textSecondary;
+      document.getElementById('symbolSizeVal').textContent = state.symbolSize + 'rem';
+      document.getElementById('gradientAngleVal').textContent = state.gradientAngle + '°';
+      document.getElementById('gradientColor1Val').textContent = state.gradientColor1;
+      document.getElementById('gradientColor2Val').textContent = state.gradientColor2;
+      document.getElementById('titleSizeVal').textContent = state.titleSize + 'rem';
+      document.getElementById('titleWeightVal').textContent = state.titleWeight;
+      document.getElementById('descSizeVal').textContent = state.descSize + 'rem';
+      document.getElementById('panelPaddingVal').textContent = state.panelPadding + 'rem';
+      document.getElementById('sectionGapVal').textContent = state.sectionGap + 'rem';
+      document.getElementById('buttonRadiusVal').textContent = state.buttonRadius + 'px';
+      document.getElementById('buttonPaddingVal').textContent = state.buttonPadding + 'rem';
+      document.getElementById('badgeBgOpacityVal').textContent = state.badgeBgOpacity;
+      document.getElementById('badgeBorderOpacityVal').textContent = state.badgeBorderOpacity;
+    }
+
+    // Render preview
+    function renderPreview() {
+      const preview = document.getElementById('preview');
+      const banner = document.getElementById('banner');
+      const bannerSymbol = document.getElementById('bannerSymbol');
+      const panelContent = document.getElementById('panelContent');
+      const projectTitle = document.getElementById('projectTitle');
+      const typeBadge = document.getElementById('typeBadge');
+      const projectDesc = document.getElementById('projectDesc');
+      const buttonGroup = document.getElementById('buttonGroup');
+      const btnPrimary = document.getElementById('btnPrimary');
+      const btnSecondary = document.getElementById('btnSecondary');
+
+      // CSS variables
+      preview.style.setProperty('--border-color', `rgba(${hexToRgb(state.borderColor)}, 0.3)`);
+      preview.style.setProperty('--accent-color', state.accentColor);
+      preview.style.setProperty('--text-primary', state.textPrimary);
+      preview.style.setProperty('--text-secondary', state.textSecondary);
+
+      // Panel
+      preview.style.width = state.panelWidth + 'px';
+
+      // Banner
+      banner.style.height = state.bannerHeight + 'px';
+      banner.style.background = `linear-gradient(${state.gradientAngle}deg,
+        rgba(${hexToRgb(state.gradientColor1)}, 0.3),
+        rgba(${hexToRgb(state.gradientColor2)}, 0.25),
+        rgba(${hexToRgb(state.accentColor)}, 0.1))`;
+
+      bannerSymbol.style.display = state.showSymbol ? 'block' : 'none';
+      bannerSymbol.style.fontSize = state.symbolSize + 'rem';
+      bannerSymbol.style.color = `rgba(${hexToRgb(state.borderColor)}, 0.5)`;
+
+      // Content
+      panelContent.style.padding = state.panelPadding + 'rem';
+      panelContent.style.gap = state.sectionGap + 'rem';
+
+      // Typography
+      projectTitle.style.fontSize = state.titleSize + 'rem';
+      projectTitle.style.fontWeight = state.titleWeight;
+      projectTitle.style.color = state.textPrimary;
+
+      projectDesc.style.fontSize = state.descSize + 'rem';
+      projectDesc.style.color = state.textSecondary;
+
+      // Badge
+      typeBadge.style.background = `rgba(${hexToRgb(state.accentColor)}, ${state.badgeBgOpacity})`;
+      typeBadge.style.border = `1px solid rgba(${hexToRgb(state.accentColor)}, ${state.badgeBorderOpacity})`;
+      typeBadge.style.color = state.accentColor;
+
+      // Buttons
+      buttonGroup.style.padding = `${state.panelPadding}rem`;
+      buttonGroup.style.gap = '0.75rem';
+
+      btnPrimary.style.padding = `${state.buttonPadding}rem 1rem`;
+      btnPrimary.style.borderRadius = state.buttonRadius + 'px';
+      btnPrimary.style.background = `linear-gradient(135deg, ${state.accentColor} 0%, ${darkenColor(state.accentColor, 15)} 100%)`;
+      btnPrimary.style.color = '#0a0f1a';
+      btnPrimary.style.boxShadow = `0 0 20px rgba(${hexToRgb(state.accentColor)}, 0.2)`;
+
+      btnSecondary.style.padding = `${state.buttonPadding * 0.85}rem 1rem`;
+      btnSecondary.style.borderRadius = state.buttonRadius + 'px';
+      btnSecondary.style.border = `1px solid rgba(${hexToRgb(state.borderColor)}, 0.5)`;
+      btnSecondary.style.color = `rgba(${hexToRgb(state.textPrimary)}, 0.7)`;
+    }
+
+    // Update output
+    function updateOutput() {
+      const parts = [];
+
+      // Panel sizing
+      if (state.panelWidth !== DEFAULTS.panelWidth) {
+        parts.push(`expanded panel width of <code>${state.panelWidth}px</code>`);
+      }
+      if (state.bannerHeight !== DEFAULTS.bannerHeight) {
+        parts.push(`banner height of <code>${state.bannerHeight}px</code>`);
+      }
+
+      // Colors
+      if (state.accentColor !== DEFAULTS.accentColor) {
+        parts.push(`accent color <code>${state.accentColor}</code>`);
+      }
+      if (state.textPrimary !== DEFAULTS.textPrimary) {
+        parts.push(`primary text color <code>${state.textPrimary}</code>`);
+      }
+
+      // Banner
+      if (state.gradientAngle !== DEFAULTS.gradientAngle) {
+        parts.push(`banner gradient at <code>${state.gradientAngle}°</code>`);
+      }
+      if (!state.showSymbol && DEFAULTS.showSymbol) {
+        parts.push(`hide the placeholder symbol`);
+      }
+      if (state.symbolSize !== DEFAULTS.symbolSize && state.showSymbol) {
+        parts.push(`symbol size of <code>${state.symbolSize}rem</code>`);
+      }
+
+      // Typography
+      if (state.titleSize !== DEFAULTS.titleSize) {
+        parts.push(`title size of <code>${state.titleSize}rem</code>`);
+      }
+      if (state.titleWeight !== DEFAULTS.titleWeight) {
+        parts.push(`title weight <code>${state.titleWeight}</code>`);
+      }
+
+      // Spacing
+      if (state.panelPadding !== DEFAULTS.panelPadding) {
+        parts.push(`panel padding of <code>${state.panelPadding}rem</code>`);
+      }
+      if (state.sectionGap !== DEFAULTS.sectionGap) {
+        parts.push(`section gap of <code>${state.sectionGap}rem</code>`);
+      }
+
+      // Buttons
+      if (state.buttonRadius !== DEFAULTS.buttonRadius) {
+        parts.push(`button radius of <code>${state.buttonRadius}px</code>`);
+      }
+
+      const output = document.getElementById('output');
+
+      if (parts.length === 0) {
+        output.innerHTML = 'Using default styling. Adjust controls to generate changes.';
+      } else {
+        output.innerHTML = `Update the right panel with: ${parts.join(', ')}.`;
+      }
+    }
+
+    // Helper: hex to rgb
+    function hexToRgb(hex) {
+      const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+      return result
+        ? `${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}`
+        : '0, 0, 0';
+    }
+
+    // Helper: darken color
+    function darkenColor(hex, percent) {
+      const num = parseInt(hex.replace('#', ''), 16);
+      const amt = Math.round(2.55 * percent);
+      const R = Math.max(0, (num >> 16) - amt);
+      const G = Math.max(0, ((num >> 8) & 0x00FF) - amt);
+      const B = Math.max(0, (num & 0x0000FF) - amt);
+      return '#' + (0x1000000 + R * 0x10000 + G * 0x100 + B).toString(16).slice(1);
+    }
+
+    // Apply preset
+    function applyPreset(name) {
+      const preset = PRESETS[name];
+      if (!preset) return;
+
+      Object.assign(state, preset);
+      syncControls();
+      updateAll();
+
+      // Update preset buttons
+      document.querySelectorAll('.preset-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.preset === name);
+      });
+    }
+
+    // Update all
+    function updateAll() {
+      updateValueDisplays();
+      renderPreview();
+      updateOutput();
+    }
+
+    // Copy output
+    function copyOutput() {
+      const styleOutput = generateStyleCode();
+      navigator.clipboard.writeText(styleOutput).then(() => {
+        const btn = document.getElementById('copyBtn');
+        btn.textContent = 'Copied!';
+        btn.classList.add('copied');
+        setTimeout(() => {
+          btn.textContent = 'Copy Styles';
+          btn.classList.remove('copied');
+        }, 2000);
+      });
+    }
+
+    // Generate style code for copying
+    function generateStyleCode() {
+      return `// Right Panel Expanded Styles
+const expandedPanelStyles = {
+  width: '${state.panelWidth}px',
+  bannerHeight: '${state.bannerHeight}px',
+  padding: '${state.panelPadding}rem',
+  sectionGap: '${state.sectionGap}rem',
+
+  // Colors
+  accentColor: '${state.accentColor}',
+  textPrimary: '${state.textPrimary}',
+  textSecondary: '${state.textSecondary}',
+  borderColor: '${state.borderColor}',
+
+  // Banner
+  gradientAngle: ${state.gradientAngle},
+  gradientColor1: '${state.gradientColor1}',
+  gradientColor2: '${state.gradientColor2}',
+  showSymbol: ${state.showSymbol},
+  symbolSize: '${state.symbolSize}rem',
+
+  // Typography
+  titleSize: '${state.titleSize}rem',
+  titleWeight: ${state.titleWeight},
+  descSize: '${state.descSize}rem',
+
+  // Buttons
+  buttonRadius: '${state.buttonRadius}px',
+  buttonPadding: '${state.buttonPadding}rem',
+
+  // Badge
+  badgeBgOpacity: ${state.badgeBgOpacity},
+  badgeBorderOpacity: ${state.badgeBorderOpacity}
+};`;
+    }
+
+    // Toggle collapsible section
+    function toggleSection(el) {
+      el.classList.toggle('collapsed');
+      const content = el.nextElementSibling;
+      content.classList.toggle('collapsed');
+    }
+
+    // Event listeners
+    Object.values(controls).forEach(control => {
+      control.addEventListener('input', () => {
+        syncState();
+        updateAll();
+        // Clear preset selection
+        document.querySelectorAll('.preset-btn').forEach(btn => btn.classList.remove('active'));
+      });
+    });
+
+    document.querySelectorAll('.preset-btn').forEach(btn => {
+      btn.addEventListener('click', () => applyPreset(btn.dataset.preset));
+    });
+
+    // Initialize
+    updateAll();
+  </script>
+</body>
+</html>

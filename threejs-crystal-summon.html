@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Arcane Summon - Wisp Edition</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #000;
+      color: #e0e0e0;
+      overflow: hidden;
+    }
+    #info {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      z-index: 100;
+      background: rgba(0,0,0,0.8);
+      padding: 20px;
+      border-radius: 12px;
+      border: 1px solid #7dd3fc;
+      max-width: 280px;
+    }
+    h1 {
+      font-size: 18px;
+      color: #7dd3fc;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+    .subtitle { font-size: 11px; color: #888; margin-bottom: 15px; }
+    .control { margin: 12px 0; }
+    label {
+      display: block;
+      font-size: 11px;
+      color: #aaa;
+      margin-bottom: 4px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    input[type="range"] {
+      width: 100%;
+      height: 4px;
+      background: #333;
+      outline: none;
+      border-radius: 2px;
+      -webkit-appearance: none;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 14px;
+      height: 14px;
+      background: #7dd3fc;
+      cursor: pointer;
+      border-radius: 50%;
+    }
+    .value {
+      display: inline-block;
+      color: #7dd3fc;
+      font-family: monospace;
+      font-size: 11px;
+      margin-left: 6px;
+    }
+    button {
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(135deg, #1a365d 0%, #0f172a 100%);
+      border: 2px solid #7dd3fc;
+      border-radius: 8px;
+      color: #7dd3fc;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      margin-top: 15px;
+      transition: all 0.3s;
+      text-shadow: 0 0 10px #7dd3fc;
+    }
+    button:hover {
+      background: linear-gradient(135deg, #1e40af 0%, #1a365d 100%);
+      box-shadow: 0 0 30px rgba(125, 211, 252, 0.5);
+    }
+    #canvas-container { width: 100vw; height: 100vh; }
+    #glyph-svg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 1;
+    }
+  </style>
+</head>
+<body>
+  <div id="info">
+    <h1>✧ Arcane Summon</h1>
+    <p class="subtitle">Mystical wisp + Arcane glyphs</p>
+
+    <div class="control">
+      <label>Wisp Size <span class="value" id="size-val">1.0</span></label>
+      <input type="range" id="wisp-size" min="0.5" max="2" value="1.0" step="0.1">
+    </div>
+
+    <div class="control">
+      <label>Pulse Speed <span class="value" id="pulse-val">1.0</span></label>
+      <input type="range" id="pulse" min="0.3" max="3" value="1.0" step="0.1">
+    </div>
+
+    <div class="control">
+      <label>Glow Intensity <span class="value" id="glow-val">1.5</span></label>
+      <input type="range" id="glow" min="0.5" max="3" value="1.5" step="0.1">
+    </div>
+
+    <div class="control">
+      <label>Glyph Rings <span class="value" id="rings-val">5</span></label>
+      <input type="range" id="rings" min="3" max="8" value="5" step="1">
+    </div>
+
+    <div class="control">
+      <label>Rune Density <span class="value" id="density-val">24</span></label>
+      <input type="range" id="density" min="8" max="48" value="24" step="4">
+    </div>
+
+    <div class="control">
+      <label>Bloom <span class="value" id="bloom-val">2.0</span></label>
+      <input type="range" id="bloom" min="0" max="5" value="2.0" step="0.1">
+    </div>
+
+    <button onclick="triggerSummon()">⚡ SUMMON ⚡</button>
+  </div>
+
+  <svg id="glyph-svg" viewBox="0 0 1000 1000" preserveAspectRatio="xMidYMid meet"></svg>
+  <div id="canvas-container"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+    }
+  }
+  </script>
+  <script type="module">
+    import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+    import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+    import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+
+    // ==================== STATE ====================
+    const state = {
+      wispSize: 1.0,
+      shimmer: 1.0,
+      glowIntensity: 1.5,
+      rings: 5,
+      density: 24,
+      bloom: 2.0,
+      isAnimating: false
+    };
+
+    // ==================== ARCANE RUNES ====================
+    const ARCANE_RUNES = [
+      // Ancient mystical symbols
+      "ᚠ", "ᚢ", "ᚦ", "ᚨ", "ᚱ", "ᚲ", "ᚷ", "ᚹ", "ᚺ", "ᚾ", "ᛁ", "ᛃ", "ᛇ", "ᛈ", "ᛉ", "ᛊ", "ᛏ", "ᛒ", "ᛖ", "ᛗ", "ᛚ", "ᛜ", "ᛞ", "ᛟ",
+      // Alchemical
+      "☉", "☽", "☿", "♀", "♂", "♃", "♄", "⚶", "⚷", "⚸",
+      // Mystical
+      "✧", "✦", "⬡", "⬢", "◇", "◆", "△", "▽", "☆", "★", "⊕", "⊗", "⊛", "⊜",
+      // Zodiac
+      "♈", "♉", "♊", "♋", "♌", "♍", "♎", "♏", "♐", "♑", "♒", "♓",
+      // Elements
+      "🜁", "🜂", "🜃", "🜄", "🜔", "🜞", "🜍", "🜎", "🜏", "🜐"
+    ];
+
+    function createArcaneGlyph() {
+      const svg = document.getElementById('glyph-svg');
+      svg.innerHTML = '';
+      svg.style.opacity = 0;
+
+      const cx = 500, cy = 500;
+      const baseRadius = 80;
+      const ringSpacing = 50;
+
+      // Create main group for rotation
+      const mainGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
+      mainGroup.setAttribute("id", "glyph-main");
+      mainGroup.setAttribute("transform-origin", `${cx} ${cy}`);
+
+      // Style definitions
+      const defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
+
+      // Glow filter
+      const filter = document.createElementNS("http://www.w3.org/2000/svg", "filter");
+      filter.setAttribute("id", "glow");
+      filter.innerHTML = `
+        <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+        <feMerge>
+          <feMergeNode in="coloredBlur"/>
+          <feMergeNode in="SourceGraphic"/>
+        </feMerge>
+      `;
+      defs.appendChild(filter);
+
+      // Strong glow filter
+      const filterStrong = document.createElementNS("http://www.w3.org/2000/svg", "filter");
+      filterStrong.setAttribute("id", "glow-strong");
+      filterStrong.innerHTML = `
+        <feGaussianBlur stdDeviation="6" result="coloredBlur"/>
+        <feMerge>
+          <feMergeNode in="coloredBlur"/>
+          <feMergeNode in="coloredBlur"/>
+          <feMergeNode in="SourceGraphic"/>
+        </feMerge>
+      `;
+      defs.appendChild(filterStrong);
+
+      svg.appendChild(defs);
+
+      // Create each ring layer with increasing complexity
+      for (let ring = 0; ring < state.rings; ring++) {
+        const radius = baseRadius + ring * ringSpacing;
+        const nextRadius = baseRadius + (ring + 1) * ringSpacing;
+        const ringGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
+        ringGroup.setAttribute("class", `ring-${ring}`);
+
+        // Main circle
+        const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+        circle.setAttribute("cx", cx);
+        circle.setAttribute("cy", cy);
+        circle.setAttribute("r", radius);
+        circle.setAttribute("fill", "none");
+        circle.setAttribute("stroke", "#4fb3d4");
+        circle.setAttribute("stroke-width", ring === state.rings - 1 ? "3" : "1.5");
+        circle.setAttribute("filter", "url(#glow)");
+        circle.setAttribute("opacity", "0.8");
+        ringGroup.appendChild(circle);
+
+        // Inner decorative circle
+        if (ring > 0) {
+          const innerCircle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+          innerCircle.setAttribute("cx", cx);
+          innerCircle.setAttribute("cy", cy);
+          innerCircle.setAttribute("r", radius - 8);
+          innerCircle.setAttribute("fill", "none");
+          innerCircle.setAttribute("stroke", "#7dd3fc");
+          innerCircle.setAttribute("stroke-width", "0.5");
+          innerCircle.setAttribute("stroke-dasharray", "4,4");
+          innerCircle.setAttribute("opacity", "0.5");
+          ringGroup.appendChild(innerCircle);
+        }
+
+        // Runes around each ring
+        const runeCount = state.density + ring * 4;
+        for (let i = 0; i < runeCount; i++) {
+          const angle = (i / runeCount) * Math.PI * 2 - Math.PI / 2;
+          const x = cx + Math.cos(angle) * radius;
+          const y = cy + Math.sin(angle) * radius;
+
+          // Tick marks
+          const tickLength = (i % 4 === 0) ? 12 : 6;
+          const x1 = cx + Math.cos(angle) * (radius - tickLength);
+          const y1 = cy + Math.sin(angle) * (radius - tickLength);
+          const x2 = cx + Math.cos(angle) * (radius + tickLength);
+          const y2 = cy + Math.sin(angle) * (radius + tickLength);
+
+          const tick = document.createElementNS("http://www.w3.org/2000/svg", "line");
+          tick.setAttribute("x1", x1);
+          tick.setAttribute("y1", y1);
+          tick.setAttribute("x2", x2);
+          tick.setAttribute("y2", y2);
+          tick.setAttribute("stroke", "#4fb3d4");
+          tick.setAttribute("stroke-width", i % 4 === 0 ? "2" : "1");
+          tick.setAttribute("opacity", "0.6");
+          ringGroup.appendChild(tick);
+
+          // Runes at major tick marks
+          if (i % 4 === 0) {
+            const runeRadius = radius + 20;
+            const rx = cx + Math.cos(angle) * runeRadius;
+            const ry = cy + Math.sin(angle) * runeRadius;
+
+            const rune = document.createElementNS("http://www.w3.org/2000/svg", "text");
+            rune.setAttribute("x", rx);
+            rune.setAttribute("y", ry);
+            rune.setAttribute("text-anchor", "middle");
+            rune.setAttribute("dominant-baseline", "middle");
+            rune.setAttribute("fill", "#7dd3fc");
+            rune.setAttribute("font-size", "14");
+            rune.setAttribute("filter", "url(#glow)");
+            rune.setAttribute("transform", `rotate(${(angle * 180 / Math.PI) + 90}, ${rx}, ${ry})`);
+            rune.textContent = ARCANE_RUNES[Math.floor(Math.random() * ARCANE_RUNES.length)];
+            ringGroup.appendChild(rune);
+          }
+        }
+
+        // Connecting patterns between rings
+        if (ring < state.rings - 1) {
+          const connectionCount = 6 + ring * 2;
+          for (let i = 0; i < connectionCount; i++) {
+            const angle = (i / connectionCount) * Math.PI * 2;
+            const nextAngle = angle + (Math.PI / connectionCount);
+
+            // Curved connecting lines
+            const x1 = cx + Math.cos(angle) * radius;
+            const y1 = cy + Math.sin(angle) * radius;
+            const x2 = cx + Math.cos(nextAngle) * nextRadius;
+            const y2 = cy + Math.sin(nextAngle) * nextRadius;
+
+            const midX = cx + Math.cos((angle + nextAngle) / 2) * ((radius + nextRadius) / 2 + 15);
+            const midY = cy + Math.sin((angle + nextAngle) / 2) * ((radius + nextRadius) / 2 + 15);
+
+            const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+            path.setAttribute("d", `M ${x1} ${y1} Q ${midX} ${midY} ${x2} ${y2}`);
+            path.setAttribute("fill", "none");
+            path.setAttribute("stroke", "#4fb3d4");
+            path.setAttribute("stroke-width", "1");
+            path.setAttribute("opacity", "0.4");
+            ringGroup.appendChild(path);
+
+            // Diamond/gem shapes at intersections
+            if (i % 2 === 0) {
+              const gemX = cx + Math.cos(angle) * ((radius + nextRadius) / 2);
+              const gemY = cy + Math.sin(angle) * ((radius + nextRadius) / 2);
+              const gem = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
+              const gemSize = 6;
+              gem.setAttribute("points", `
+                ${gemX},${gemY - gemSize}
+                ${gemX + gemSize},${gemY}
+                ${gemX},${gemY + gemSize}
+                ${gemX - gemSize},${gemY}
+              `);
+              gem.setAttribute("fill", "#4fb3d4");
+              gem.setAttribute("filter", "url(#glow)");
+              gem.setAttribute("opacity", "0.8");
+              ringGroup.appendChild(gem);
+            }
+          }
+
+          // Sacred geometry triangles
+          const triCount = 3 + ring;
+          for (let i = 0; i < triCount; i++) {
+            const angle = (i / triCount) * Math.PI * 2;
+            const triRadius = (radius + nextRadius) / 2;
+            const triSize = 15;
+
+            const tx = cx + Math.cos(angle) * triRadius;
+            const ty = cy + Math.sin(angle) * triRadius;
+
+            const tri = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
+            const points = [];
+            for (let j = 0; j < 3; j++) {
+              const a = angle + (j / 3) * Math.PI * 2;
+              points.push(`${tx + Math.cos(a) * triSize},${ty + Math.sin(a) * triSize}`);
+            }
+            tri.setAttribute("points", points.join(" "));
+            tri.setAttribute("fill", "none");
+            tri.setAttribute("stroke", "#a78bfa");
+            tri.setAttribute("stroke-width", "1");
+            tri.setAttribute("opacity", "0.5");
+            ringGroup.appendChild(tri);
+          }
+
+          // Arcane script between rings
+          const scriptCount = 8;
+          for (let i = 0; i < scriptCount; i++) {
+            const angle = (i / scriptCount) * Math.PI * 2 + Math.PI / scriptCount;
+            const scriptRadius = (radius + nextRadius) / 2;
+            const sx = cx + Math.cos(angle) * scriptRadius;
+            const sy = cy + Math.sin(angle) * scriptRadius;
+
+            // Create a string of runes
+            let runeString = '';
+            for (let j = 0; j < 3; j++) {
+              runeString += ARCANE_RUNES[Math.floor(Math.random() * ARCANE_RUNES.length)];
+            }
+
+            const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+            text.setAttribute("x", sx);
+            text.setAttribute("y", sy);
+            text.setAttribute("text-anchor", "middle");
+            text.setAttribute("dominant-baseline", "middle");
+            text.setAttribute("fill", "#a78bfa");
+            text.setAttribute("font-size", "10");
+            text.setAttribute("letter-spacing", "2");
+            text.setAttribute("transform", `rotate(${(angle * 180 / Math.PI) + 90}, ${sx}, ${sy})`);
+            text.setAttribute("opacity", "0.6");
+            text.textContent = runeString;
+            ringGroup.appendChild(text);
+          }
+        }
+
+        mainGroup.appendChild(ringGroup);
+      }
+
+      // Central sacred geometry
+      const centerGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
+
+      // Hexagram (Star of David pattern)
+      const hexSize = 50;
+      for (let i = 0; i < 2; i++) {
+        const hex = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
+        const points = [];
+        for (let j = 0; j < 3; j++) {
+          const angle = (j / 3) * Math.PI * 2 + (i * Math.PI / 3) - Math.PI / 2;
+          points.push(`${cx + Math.cos(angle) * hexSize},${cy + Math.sin(angle) * hexSize}`);
+        }
+        hex.setAttribute("points", points.join(" "));
+        hex.setAttribute("fill", "none");
+        hex.setAttribute("stroke", "#7dd3fc");
+        hex.setAttribute("stroke-width", "2");
+        hex.setAttribute("filter", "url(#glow-strong)");
+        hex.setAttribute("opacity", "0.9");
+        centerGroup.appendChild(hex);
+      }
+
+      // Inner circles
+      for (let i = 1; i <= 3; i++) {
+        const innerC = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+        innerC.setAttribute("cx", cx);
+        innerC.setAttribute("cy", cy);
+        innerC.setAttribute("r", 20 * i);
+        innerC.setAttribute("fill", "none");
+        innerC.setAttribute("stroke", "#4fb3d4");
+        innerC.setAttribute("stroke-width", "1");
+        innerC.setAttribute("opacity", "0.5");
+        centerGroup.appendChild(innerC);
+      }
+
+      // Center dot
+      const centerDot = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+      centerDot.setAttribute("cx", cx);
+      centerDot.setAttribute("cy", cy);
+      centerDot.setAttribute("r", 8);
+      centerDot.setAttribute("fill", "#7dd3fc");
+      centerDot.setAttribute("filter", "url(#glow-strong)");
+      centerGroup.appendChild(centerDot);
+
+      mainGroup.appendChild(centerGroup);
+      svg.appendChild(mainGroup);
+    }
+
+    // ==================== THREE.JS SETUP ====================
+    let scene, camera, renderer, composer, crystal;
+    let time = 0;
+
+    const container = document.getElementById('canvas-container');
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+
+    scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x050510);
+
+    camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 2000);
+    camera.position.z = 300;
+
+    renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    renderer.setSize(width, height);
+    renderer.setPixelRatio(window.devicePixelRatio);
+    container.appendChild(renderer.domElement);
+
+    // ==================== WISP ORB SHADER ====================
+    const wispVertexShader = `
+      varying vec2 vUv;
+      varying vec3 vNormal;
+      varying vec3 vPosition;
+
+      void main() {
+        vUv = uv;
+        vNormal = normalize(normalMatrix * normal);
+        vPosition = position;
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+      }
+    `;
+
+    const wispFragmentShader = `
+      uniform float time;
+      uniform float pulseSpeed;
+      uniform float glowIntensity;
+      uniform vec3 coreColor;
+      uniform vec3 glowColor;
+      uniform vec3 outerColor;
+
+      varying vec2 vUv;
+      varying vec3 vNormal;
+      varying vec3 vPosition;
+
+      void main() {
+        vec3 viewDir = normalize(cameraPosition - vPosition);
+        float fresnel = pow(1.0 - max(dot(viewDir, vNormal), 0.0), 2.0);
+
+        // Heartbeat pulse - two quick beats then pause
+        float heartbeat = 0.0;
+        float t = mod(time * pulseSpeed, 4.0);
+        if (t < 0.3) {
+          heartbeat = sin(t / 0.3 * 3.14159);
+        } else if (t > 0.5 && t < 0.8) {
+          heartbeat = sin((t - 0.5) / 0.3 * 3.14159) * 0.7;
+        }
+
+        // Soft pulsing glow
+        float pulse = 0.7 + heartbeat * 0.3;
+
+        // Core is brightest
+        float core = 1.0 - fresnel;
+        core = pow(core, 1.5);
+
+        // Layer the colors - bright core fading to outer glow
+        vec3 color = mix(outerColor, glowColor, core * 0.7);
+        color = mix(color, coreColor, core * core);
+
+        // Add pulse brightness
+        color *= pulse * glowIntensity;
+
+        // Soft edges
+        float alpha = (0.3 + core * 0.7) * pulse;
+
+        // Inner glow boost
+        color += coreColor * core * core * 0.5;
+
+        gl_FragColor = vec4(color, alpha);
+      }
+    `;
+
+    let wispLayers = [];
+
+    function createCrystal() {
+      // Remove old wisp layers
+      wispLayers.forEach(layer => scene.remove(layer));
+      wispLayers = [];
+      if (crystal) scene.remove(crystal);
+
+      // Create multiple layered spheres for soft orb effect
+      const layers = [
+        { size: 30, opacity: 1.0 },   // Core
+        { size: 45, opacity: 0.6 },   // Inner glow
+        { size: 65, opacity: 0.3 },   // Outer glow
+        { size: 90, opacity: 0.15 }   // Ambient haze
+      ];
+
+      layers.forEach((layer, i) => {
+        const geometry = new THREE.SphereGeometry(layer.size, 32, 32);
+        const material = new THREE.ShaderMaterial({
+          vertexShader: wispVertexShader,
+          fragmentShader: wispFragmentShader,
+          uniforms: {
+            time: { value: 0 },
+            pulseSpeed: { value: state.shimmer },
+            glowIntensity: { value: 1.0 + (1 - i / layers.length) },
+            coreColor: { value: new THREE.Color(0xffffff) },      // White hot center
+            glowColor: { value: new THREE.Color(0x7dd3fc) },      // Cyan glow
+            outerColor: { value: new THREE.Color(0x4c1d95) }      // Deep purple edge
+          },
+          transparent: true,
+          side: THREE.DoubleSide,
+          blending: THREE.AdditiveBlending,
+          depthWrite: false
+        });
+
+        const mesh = new THREE.Mesh(geometry, material);
+        mesh.visible = false;
+        scene.add(mesh);
+        wispLayers.push(mesh);
+      });
+
+      // Main crystal reference points to innermost layer
+      crystal = wispLayers[0];
+    }
+
+    // ==================== POST PROCESSING ====================
+    composer = new EffectComposer(renderer);
+    composer.addPass(new RenderPass(scene, camera));
+
+    const bloomPass = new UnrealBloomPass(
+      new THREE.Vector2(width, height),
+      state.bloom, 0.4, 0.85
+    );
+    composer.addPass(bloomPass);
+
+    // ==================== INIT ====================
+    createCrystal();
+    createArcaneGlyph();
+
+    // ==================== CONTROLS ====================
+    document.getElementById('wisp-size').addEventListener('input', (e) => {
+      state.wispSize = parseFloat(e.target.value);
+      document.getElementById('size-val').textContent = state.wispSize.toFixed(1);
+      wispLayers.forEach((layer, i) => {
+        const baseScale = state.wispSize * (1 - i * 0.1);
+        layer.scale.set(baseScale, baseScale, baseScale);
+      });
+    });
+
+    document.getElementById('pulse').addEventListener('input', (e) => {
+      state.shimmer = parseFloat(e.target.value);
+      document.getElementById('pulse-val').textContent = state.shimmer.toFixed(1);
+      wispLayers.forEach(layer => {
+        layer.material.uniforms.pulseSpeed.value = state.shimmer;
+      });
+    });
+
+    document.getElementById('glow').addEventListener('input', (e) => {
+      state.glowIntensity = parseFloat(e.target.value);
+      document.getElementById('glow-val').textContent = state.glowIntensity.toFixed(1);
+      wispLayers.forEach((layer, i) => {
+        layer.material.uniforms.glowIntensity.value = state.glowIntensity * (1 - i * 0.2);
+      });
+    });
+
+    document.getElementById('rings').addEventListener('input', (e) => {
+      state.rings = parseInt(e.target.value);
+      document.getElementById('rings-val').textContent = state.rings;
+      createArcaneGlyph();
+    });
+
+    document.getElementById('density').addEventListener('input', (e) => {
+      state.density = parseInt(e.target.value);
+      document.getElementById('density-val').textContent = state.density;
+      createArcaneGlyph();
+    });
+
+    document.getElementById('bloom').addEventListener('input', (e) => {
+      state.bloom = parseFloat(e.target.value);
+      document.getElementById('bloom-val').textContent = state.bloom.toFixed(1);
+      bloomPass.strength = state.bloom;
+    });
+
+    // ==================== ANIMATION ====================
+    function animateValue(start, end, duration, onUpdate) {
+      return new Promise(resolve => {
+        const startTime = Date.now();
+        function step() {
+          const elapsed = Date.now() - startTime;
+          const progress = Math.min(elapsed / duration, 1);
+          const eased = 1 - Math.pow(1 - progress, 3); // ease out cubic
+          onUpdate(start + (end - start) * eased, progress);
+          if (progress < 1) requestAnimationFrame(step);
+          else resolve();
+        }
+        step();
+      });
+    }
+
+    window.triggerSummon = async function() {
+      if (state.isAnimating) return;
+      state.isAnimating = true;
+
+      const svg = document.getElementById('glyph-svg');
+      const glyphMain = document.getElementById('glyph-main');
+
+      // Reset
+      svg.style.opacity = 0;
+      wispLayers.forEach(layer => {
+        layer.visible = false;
+        layer.scale.set(0.1, 0.1, 0.1);
+      });
+
+      // 1. Glyph fades in (0-1000ms)
+      await animateValue(0, 1, 1000, (val) => {
+        svg.style.opacity = val;
+      });
+
+      // 2. Wisp appears and grows (1000-2500ms)
+      wispLayers.forEach(layer => layer.visible = true);
+      await animateValue(0.1, 1, 1500, (val) => {
+        wispLayers.forEach((layer, i) => {
+          const stagger = 1 - i * 0.1;
+          layer.scale.set(val * stagger, val * stagger, val * stagger);
+        });
+      });
+
+      // 3. Build up energy - wisp pulses intensely (2500-4000ms)
+      await animateValue(0, 1, 1500, (val) => {
+        bloomPass.strength = state.bloom + val * 3;
+
+        // Wisp breathes bigger
+        const pulse = 1 + Math.sin(val * Math.PI * 6) * 0.15;
+        wispLayers.forEach((layer, i) => {
+          const stagger = 1 - i * 0.05;
+          layer.scale.set(pulse * stagger, pulse * stagger, pulse * stagger);
+          layer.material.uniforms.glowIntensity.value = 1.5 + val;
+        });
+      });
+
+      // 4. FLASH! (4000-4500ms)
+      const flash = document.createElement('div');
+      flash.style.cssText = `
+        position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+        background: radial-gradient(circle, #fff 0%, #7dd3fc 30%, transparent 70%);
+        pointer-events: none; z-index: 1000; opacity: 0;
+      `;
+      document.body.appendChild(flash);
+
+      await animateValue(0, 1, 500, (val) => {
+        if (val < 0.3) {
+          flash.style.opacity = val / 0.3;
+          wispLayers.forEach((layer, i) => {
+            const scale = 1 + val * (5 - i);
+            layer.scale.set(scale, scale, scale);
+          });
+        } else {
+          flash.style.opacity = 1 - (val - 0.3) / 0.7;
+        }
+        bloomPass.strength = state.bloom + (1 - val) * 5;
+
+        // Screen shake
+        camera.position.x = (Math.random() - 0.5) * 15 * (1 - val);
+        camera.position.y = (Math.random() - 0.5) * 15 * (1 - val);
+      });
+
+      flash.remove();
+      camera.position.x = 0;
+      camera.position.y = 0;
+
+      // 5. Fade out (4500-5500ms)
+      await animateValue(1, 0, 1000, (val) => {
+        svg.style.opacity = val * 0.8;
+        wispLayers.forEach((layer, i) => {
+          layer.scale.set(val, val, val);
+          layer.material.uniforms.glowIntensity.value = val * 1.5;
+        });
+        bloomPass.strength = state.bloom * val + 0.5;
+      });
+
+      wispLayers.forEach(layer => layer.visible = false);
+      bloomPass.strength = state.bloom;
+      state.isAnimating = false;
+    };
+
+    // ==================== RENDER LOOP ====================
+    function render() {
+      requestAnimationFrame(render);
+      time += 0.016;
+
+      // Update all wisp layers
+      wispLayers.forEach((layer, i) => {
+        if (layer && layer.visible) {
+          layer.material.uniforms.time.value = time;
+          // Gentle floating motion
+          layer.position.y = Math.sin(time * 0.5 + i * 0.5) * 3;
+        }
+      });
+
+      // Glyph stays stationary (no rotation when idle)
+
+      composer.render();
+    }
+
+    render();
+
+    // Resize
+    window.addEventListener('resize', () => {
+      const w = window.innerWidth;
+      const h = window.innerHeight;
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+      renderer.setSize(w, h);
+      composer.setSize(w, h);
+    });
+  </script>
+</body>
+</html>

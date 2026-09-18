@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dr. Benis Portfolio — Design Explorer</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #0a0a0a;
+      color: #e0e0e0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .container {
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      flex: 1;
+      height: calc(100vh - 200px);
+    }
+
+    .controls {
+      background: #111;
+      padding: 24px;
+      overflow-y: auto;
+      border-right: 1px solid #222;
+    }
+
+    .controls h2 {
+      font-size: 14px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 20px;
+      color: #888;
+    }
+
+    .control-group {
+      margin-bottom: 28px;
+    }
+
+    .control-group label {
+      display: block;
+      font-size: 13px;
+      font-weight: 500;
+      margin-bottom: 8px;
+      color: #aaa;
+    }
+
+    .control-group select,
+    .control-group input[type="number"],
+    .control-group input[type="range"] {
+      width: 100%;
+      padding: 8px 12px;
+      background: #1a1a1a;
+      border: 1px solid #333;
+      border-radius: 4px;
+      color: #e0e0e0;
+      font-size: 13px;
+    }
+
+    .control-group input[type="range"] {
+      padding: 0;
+    }
+
+    .preset-buttons {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 24px;
+    }
+
+    .preset-btn {
+      padding: 10px;
+      background: #1a1a1a;
+      border: 1px solid #333;
+      border-radius: 6px;
+      color: #e0e0e0;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .preset-btn:hover {
+      background: #222;
+      border-color: #444;
+    }
+
+    .preview {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px;
+      overflow: hidden;
+    }
+
+    .card-container {
+      perspective: 1200px;
+      cursor: pointer;
+      transition: transform 0.3s;
+    }
+
+    .card-container:hover {
+      transform: scale(1.02);
+    }
+
+    .card {
+      position: relative;
+      transform-style: preserve-3d;
+      transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .card.flipped {
+      transform: rotateY(180deg);
+    }
+
+    .card-face {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      backface-visibility: hidden;
+      border-radius: 20px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .card-back {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+    }
+
+    .card-front {
+      transform: rotateY(180deg);
+    }
+
+    .card-header {
+      padding: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 72px;
+    }
+
+    .card-body {
+      flex: 1;
+      padding: 32px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .card-title {
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .card-tech {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 12px;
+      opacity: 0.9;
+    }
+
+    .card-description {
+      font-size: 15px;
+      line-height: 1.6;
+      opacity: 0.85;
+    }
+
+    .card-buttons {
+      display: flex;
+      gap: 12px;
+      margin-top: auto;
+    }
+
+    .card-btn {
+      flex: 1;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      border: none;
+    }
+
+    .prompt-output {
+      background: #111;
+      border-top: 1px solid #222;
+      padding: 20px 24px;
+      height: 200px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .prompt-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .prompt-header h3 {
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #888;
+      font-weight: 600;
+    }
+
+    .copy-btn {
+      padding: 6px 16px;
+      background: #1a1a1a;
+      border: 1px solid #333;
+      border-radius: 4px;
+      color: #e0e0e0;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .copy-btn:hover {
+      background: #222;
+      border-color: #444;
+    }
+
+    .copy-btn.copied {
+      background: #0a5;
+      border-color: #0a5;
+      color: white;
+    }
+
+    .prompt-text {
+      flex: 1;
+      padding: 16px;
+      background: #0a0a0a;
+      border: 1px solid #222;
+      border-radius: 6px;
+      font-family: 'SF Mono', Monaco, 'Courier New', monospace;
+      font-size: 13px;
+      line-height: 1.6;
+      overflow-y: auto;
+      color: #aaa;
+    }
+
+    .range-value {
+      display: inline-block;
+      margin-left: 8px;
+      color: #666;
+      font-size: 12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="controls">
+      <h2>Design Explorer</h2>
+
+      <div class="preset-buttons">
+        <button class="preset-btn" onclick="applyPreset('current')">Current</button>
+        <button class="preset-btn" onclick="applyPreset('brutalist')">Brutalist</button>
+        <button class="preset-btn" onclick="applyPreset('retro')">Retro Future</button>
+        <button class="preset-btn" onclick="applyPreset('editorial')">Editorial</button>
+        <button class="preset-btn" onclick="applyPreset('artdeco')">Art Deco</button>
+        <button class="preset-btn" onclick="applyPreset('pastel')">Pastel</button>
+        <button class="preset-btn" onclick="applyPreset('cyberpunk')">Cyberpunk</button>
+        <button class="preset-btn" onclick="applyPreset('minimal')">Minimal</button>
+      </div>
+
+      <div class="control-group">
+        <label>Aesthetic Direction</label>
+        <select id="aesthetic" onchange="updateAll()">
+          <option value="current">Current (Purple Gradients)</option>
+          <option value="brutalist">Brutalist</option>
+          <option value="retro">Retro-Futuristic</option>
+          <option value="editorial">Editorial/Magazine</option>
+          <option value="artdeco">Art Deco</option>
+          <option value="pastel">Pastel/Soft</option>
+          <option value="cyberpunk">Dark Cyberpunk</option>
+          <option value="minimal">Minimal</option>
+        </select>
+      </div>
+
+      <div class="control-group">
+        <label>Display Font</label>
+        <select id="displayFont" onchange="updateAll()">
+          <option value="system">System Default</option>
+          <option value="serif">Serif (Georgia)</option>
+          <option value="mono">Monospace (Courier)</option>
+          <option value="display">Display (Impact)</option>
+        </select>
+      </div>
+
+      <div class="control-group">
+        <label>Body Font</label>
+        <select id="bodyFont" onchange="updateAll()">
+          <option value="system">System Default</option>
+          <option value="serif">Serif (Georgia)</option>
+          <option value="sans">Sans-Serif (Helvetica)</option>
+          <option value="mono">Monospace</option>
+        </select>
+      </div>
+
+      <div class="control-group">
+        <label>Card Size <span class="range-value" id="sizeValue">400px</span></label>
+        <input type="range" id="cardSize" min="300" max="600" value="400" step="50" oninput="updateAll()">
+      </div>
+
+      <div class="control-group">
+        <label>Border Radius <span class="range-value" id="radiusValue">20px</span></label>
+        <input type="range" id="borderRadius" min="0" max="40" value="20" oninput="updateAll()">
+      </div>
+
+      <div class="control-group">
+        <label>Animation Speed <span class="range-value" id="speedValue">0.8s</span></label>
+        <input type="range" id="animSpeed" min="0.3" max="1.5" value="0.8" step="0.1" oninput="updateAll()">
+      </div>
+
+      <div class="control-group">
+        <label>Shadow Intensity <span class="range-value" id="shadowValue">Medium</span></label>
+        <input type="range" id="shadowIntensity" min="0" max="100" value="50" oninput="updateAll()">
+      </div>
+    </div>
+
+    <div class="preview" id="preview">
+      <div class="card-container" onclick="flipCard()">
+        <div class="card" id="card">
+          <div class="card-face card-back" id="cardBack">
+            <div style="font-size: 72px; margin-bottom: 16px;">???</div>
+            <div style="font-size: 18px; opacity: 0.9;">Tap to reveal</div>
+          </div>
+          <div class="card-face card-front" id="cardFront">
+            <div class="card-header" id="cardHeader">🎴</div>
+            <div class="card-body" id="cardBody">
+              <div>
+                <div class="card-title">Doctor Benis Archive</div>
+                <div class="card-tech">React, Chakra UI, Framer Motion</div>
+                <div class="card-description">Card-flip portfolio inspired by gacha games. Built to stand out and prove I can create interactive UIs.</div>
+              </div>
+              <div class="card-buttons">
+                <button class="card-btn" id="primaryBtn">View Live</button>
+                <button class="card-btn" id="secondaryBtn">View Code</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="prompt-output">
+    <div class="prompt-header">
+      <h3>Generated Configuration</h3>
+      <button class="copy-btn" id="copyBtn" onclick="copyPrompt()">Copy</button>
+    </div>
+    <div class="prompt-text" id="promptText"></div>
+  </div>
+
+  <script>
+    const PRESETS = {
+      current: {
+        aesthetic: 'current',
+        displayFont: 'system',
+        bodyFont: 'system',
+        cardSize: 400,
+        borderRadius: 20,
+        animSpeed: 0.8,
+        shadowIntensity: 50
+      },
+      brutalist: {
+        aesthetic: 'brutalist',
+        displayFont: 'mono',
+        bodyFont: 'mono',
+        cardSize: 450,
+        borderRadius: 0,
+        animSpeed: 0.4,
+        shadowIntensity: 80
+      },
+      retro: {
+        aesthetic: 'retro',
+        displayFont: 'display',
+        bodyFont: 'sans',
+        cardSize: 400,
+        borderRadius: 12,
+        animSpeed: 0.6,
+        shadowIntensity: 60
+      },
+      editorial: {
+        aesthetic: 'editorial',
+        displayFont: 'serif',
+        bodyFont: 'serif',
+        cardSize: 500,
+        borderRadius: 8,
+        animSpeed: 1.2,
+        shadowIntensity: 20
+      },
+      artdeco: {
+        aesthetic: 'artdeco',
+        displayFont: 'display',
+        bodyFont: 'serif',
+        cardSize: 420,
+        borderRadius: 4,
+        animSpeed: 0.7,
+        shadowIntensity: 40
+      },
+      pastel: {
+        aesthetic: 'pastel',
+        displayFont: 'system',
+        bodyFont: 'sans',
+        cardSize: 380,
+        borderRadius: 24,
+        animSpeed: 1.0,
+        shadowIntensity: 30
+      },
+      cyberpunk: {
+        aesthetic: 'cyberpunk',
+        displayFont: 'mono',
+        bodyFont: 'mono',
+        cardSize: 400,
+        borderRadius: 2,
+        animSpeed: 0.5,
+        shadowIntensity: 90
+      },
+      minimal: {
+        aesthetic: 'minimal',
+        displayFont: 'serif',
+        bodyFont: 'sans',
+        cardSize: 350,
+        borderRadius: 16,
+        animSpeed: 1.0,
+        shadowIntensity: 10
+      }
+    };
+
+    const AESTHETICS = {
+      current: {
+        previewBg: 'linear-gradient(135deg, #1a0033 0%, #0a1628 100%)',
+        cardBackBg: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        cardFrontBg: '#ffffff',
+        cardFrontColor: '#2d3748',
+        cardHeaderBg: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        techColor: '#9f7aea',
+        primaryBtnBg: '#9f7aea',
+        primaryBtnColor: '#ffffff',
+        secondaryBtnBg: 'transparent',
+        secondaryBtnColor: '#9f7aea',
+        secondaryBtnBorder: '2px solid #9f7aea'
+      },
+      brutalist: {
+        previewBg: '#000000',
+        cardBackBg: '#ff0000',
+        cardFrontBg: '#ffffff',
+        cardFrontColor: '#000000',
+        cardHeaderBg: '#000000',
+        techColor: '#ff0000',
+        primaryBtnBg: '#000000',
+        primaryBtnColor: '#ffffff',
+        secondaryBtnBg: '#ffffff',
+        secondaryBtnColor: '#000000',
+        secondaryBtnBorder: '4px solid #000000'
+      },
+      retro: {
+        previewBg: 'linear-gradient(135deg, #ff006e 0%, #3a0ca3 50%, #4cc9f0 100%)',
+        cardBackBg: 'linear-gradient(135deg, #fb5607 0%, #ff006e 100%)',
+        cardFrontBg: '#0a0a0a',
+        cardFrontColor: '#ffffff',
+        cardHeaderBg: 'linear-gradient(135deg, #7209b7 0%, #f72585 100%)',
+        techColor: '#f72585',
+        primaryBtnBg: 'linear-gradient(90deg, #f72585 0%, #7209b7 100%)',
+        primaryBtnColor: '#ffffff',
+        secondaryBtnBg: 'transparent',
+        secondaryBtnColor: '#f72585',
+        secondaryBtnBorder: '2px solid #f72585'
+      },
+      editorial: {
+        previewBg: '#f8f8f8',
+        cardBackBg: '#1a1a1a',
+        cardFrontBg: '#ffffff',
+        cardFrontColor: '#1a1a1a',
+        cardHeaderBg: '#1a1a1a',
+        techColor: '#666666',
+        primaryBtnBg: '#1a1a1a',
+        primaryBtnColor: '#ffffff',
+        secondaryBtnBg: 'transparent',
+        secondaryBtnColor: '#1a1a1a',
+        secondaryBtnBorder: '1px solid #1a1a1a'
+      },
+      artdeco: {
+        previewBg: 'linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%)',
+        cardBackBg: 'linear-gradient(135deg, #d4af37 0%, #aa8c39 100%)',
+        cardFrontBg: '#1a1a1a',
+        cardFrontColor: '#d4af37',
+        cardHeaderBg: 'linear-gradient(135deg, #d4af37 0%, #aa8c39 100%)',
+        techColor: '#d4af37',
+        primaryBtnBg: '#d4af37',
+        primaryBtnColor: '#000000',
+        secondaryBtnBg: 'transparent',
+        secondaryBtnColor: '#d4af37',
+        secondaryBtnBorder: '2px solid #d4af37'
+      },
+      pastel: {
+        previewBg: 'linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%)',
+        cardBackBg: 'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)',
+        cardFrontBg: '#ffffff',
+        cardFrontColor: '#5a5a5a',
+        cardHeaderBg: 'linear-gradient(135deg, #ff9a9e 0%, #fad0c4 100%)',
+        techColor: '#ff9a9e',
+        primaryBtnBg: '#ff9a9e',
+        primaryBtnColor: '#ffffff',
+        secondaryBtnBg: 'transparent',
+        secondaryBtnColor: '#ff9a9e',
+        secondaryBtnBorder: '2px solid #ff9a9e'
+      },
+      cyberpunk: {
+        previewBg: '#000000',
+        cardBackBg: 'linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%)',
+        cardFrontBg: '#0a0a0a',
+        cardFrontColor: '#00ff41',
+        cardHeaderBg: '#000000',
+        techColor: '#ff0080',
+        primaryBtnBg: '#00ff41',
+        primaryBtnColor: '#000000',
+        secondaryBtnBg: 'transparent',
+        secondaryBtnColor: '#ff0080',
+        secondaryBtnBorder: '2px solid #ff0080'
+      },
+      minimal: {
+        previewBg: '#ffffff',
+        cardBackBg: '#f5f5f5',
+        cardFrontBg: '#ffffff',
+        cardFrontColor: '#1a1a1a',
+        cardHeaderBg: '#fafafa',
+        techColor: '#666666',
+        primaryBtnBg: '#1a1a1a',
+        primaryBtnColor: '#ffffff',
+        secondaryBtnBg: '#f5f5f5',
+        secondaryBtnColor: '#1a1a1a',
+        secondaryBtnBorder: 'none'
+      }
+    };
+
+    function applyPreset(presetName) {
+      const preset = PRESETS[presetName];
+      document.getElementById('aesthetic').value = preset.aesthetic;
+      document.getElementById('displayFont').value = preset.displayFont;
+      document.getElementById('bodyFont').value = preset.bodyFont;
+      document.getElementById('cardSize').value = preset.cardSize;
+      document.getElementById('borderRadius').value = preset.borderRadius;
+      document.getElementById('animSpeed').value = preset.animSpeed;
+      document.getElementById('shadowIntensity').value = preset.shadowIntensity;
+      updateAll();
+    }
+
+    function flipCard() {
+      document.getElementById('card').classList.toggle('flipped');
+    }
+
+    function updateAll() {
+      const aesthetic = document.getElementById('aesthetic').value;
+      const displayFont = document.getElementById('displayFont').value;
+      const bodyFont = document.getElementById('bodyFont').value;
+      const cardSize = parseInt(document.getElementById('cardSize').value);
+      const borderRadius = parseInt(document.getElementById('borderRadius').value);
+      const animSpeed = parseFloat(document.getElementById('animSpeed').value);
+      const shadowIntensity = parseInt(document.getElementById('shadowIntensity').value);
+
+      // Update value displays
+      document.getElementById('sizeValue').textContent = cardSize + 'px';
+      document.getElementById('radiusValue').textContent = borderRadius + 'px';
+      document.getElementById('speedValue').textContent = animSpeed + 's';
+      document.getElementById('shadowValue').textContent =
+        shadowIntensity < 30 ? 'Subtle' :
+        shadowIntensity < 70 ? 'Medium' : 'Strong';
+
+      // Apply aesthetic colors
+      const colors = AESTHETICS[aesthetic];
+      const preview = document.getElementById('preview');
+      const card = document.getElementById('card');
+      const cardBack = document.getElementById('cardBack');
+      const cardFront = document.getElementById('cardFront');
+      const cardHeader = document.getElementById('cardHeader');
+      const cardBody = document.getElementById('cardBody');
+
+      preview.style.background = colors.previewBg;
+      cardBack.style.background = colors.cardBackBg;
+      cardFront.style.background = colors.cardFrontBg;
+      cardFront.style.color = colors.cardFrontColor;
+      cardHeader.style.background = colors.cardHeaderBg;
+
+      // Apply fonts
+      const displayFontMap = {
+        system: '-apple-system, BlinkMacSystemFont, sans-serif',
+        serif: 'Georgia, serif',
+        mono: 'Courier New, monospace',
+        display: 'Impact, sans-serif'
+      };
+      const bodyFontMap = {
+        system: '-apple-system, BlinkMacSystemFont, sans-serif',
+        serif: 'Georgia, serif',
+        sans: 'Helvetica, Arial, sans-serif',
+        mono: 'Monaco, Courier New, monospace'
+      };
+
+      document.querySelectorAll('.card-title').forEach(el => {
+        el.style.fontFamily = displayFontMap[displayFont];
+      });
+      document.querySelectorAll('.card-tech, .card-description').forEach(el => {
+        el.style.fontFamily = bodyFontMap[bodyFont];
+      });
+      document.querySelector('.card-tech').style.color = colors.techColor;
+
+      // Apply size and border radius
+      card.style.width = cardSize + 'px';
+      card.style.height = (cardSize * 1.4) + 'px';
+      document.querySelectorAll('.card-face').forEach(face => {
+        face.style.borderRadius = borderRadius + 'px';
+      });
+
+      // Apply animation speed
+      card.style.transition = `transform ${animSpeed}s cubic-bezier(0.4, 0, 0.2, 1)`;
+
+      // Apply shadow
+      const shadowBlur = shadowIntensity * 0.6;
+      const shadowOpacity = shadowIntensity / 200;
+      document.querySelectorAll('.card-face').forEach(face => {
+        face.style.boxShadow = `0 ${shadowBlur/2}px ${shadowBlur}px rgba(0, 0, 0, ${shadowOpacity})`;
+      });
+
+      // Apply button styles
+      const primaryBtn = document.getElementById('primaryBtn');
+      const secondaryBtn = document.getElementById('secondaryBtn');
+      primaryBtn.style.background = colors.primaryBtnBg;
+      primaryBtn.style.color = colors.primaryBtnColor;
+      secondaryBtn.style.background = colors.secondaryBtnBg;
+      secondaryBtn.style.color = colors.secondaryBtnColor;
+      secondaryBtn.style.border = colors.secondaryBtnBorder;
+
+      updatePrompt();
+    }
+
+    function updatePrompt() {
+      const aesthetic = document.getElementById('aesthetic').value;
+      const displayFont = document.getElementById('displayFont').value;
+      const bodyFont = document.getElementById('bodyFont').value;
+      const cardSize = parseInt(document.getElementById('cardSize').value);
+      const borderRadius = parseInt(document.getElementById('borderRadius').value);
+      const animSpeed = parseFloat(document.getElementById('animSpeed').value);
+      const shadowIntensity = parseInt(document.getElementById('shadowIntensity').value);
+
+      const colors = AESTHETICS[aesthetic];
+
+      let prompt = `Update the Dr. Benis portfolio to use a ${aesthetic} aesthetic.\n\n`;
+      prompt += `Color Palette:\n`;
+      prompt += `- Background: ${colors.previewBg}\n`;
+      prompt += `- Card Back: ${colors.cardBackBg}\n`;
+      prompt += `- Card Front: ${colors.cardFrontBg}\n`;
+      prompt += `- Text Color: ${colors.cardFrontColor}\n`;
+      prompt += `- Accent Color: ${colors.techColor}\n\n`;
+
+      prompt += `Typography:\n`;
+      prompt += `- Display Font: ${displayFont}\n`;
+      prompt += `- Body Font: ${bodyFont}\n\n`;
+
+      prompt += `Layout:\n`;
+      prompt += `- Card Size: ${cardSize}px × ${cardSize * 1.4}px\n`;
+      prompt += `- Border Radius: ${borderRadius}px\n`;
+      prompt += `- Animation Speed: ${animSpeed}s\n`;
+      prompt += `- Shadow: ${shadowIntensity < 30 ? 'subtle' : shadowIntensity < 70 ? 'medium' : 'strong'}\n\n`;
+
+      prompt += `CSS Variables to use:\n`;
+      prompt += `--preview-bg: ${colors.previewBg};\n`;
+      prompt += `--card-back-bg: ${colors.cardBackBg};\n`;
+      prompt += `--card-front-bg: ${colors.cardFrontBg};\n`;
+      prompt += `--card-front-color: ${colors.cardFrontColor};\n`;
+      prompt += `--card-header-bg: ${colors.cardHeaderBg};\n`;
+      prompt += `--accent-color: ${colors.techColor};\n`;
+      prompt += `--primary-btn-bg: ${colors.primaryBtnBg};\n`;
+      prompt += `--primary-btn-color: ${colors.primaryBtnColor};\n`;
+      prompt += `--card-size: ${cardSize}px;\n`;
+      prompt += `--border-radius: ${borderRadius}px;\n`;
+      prompt += `--anim-speed: ${animSpeed}s;\n`;
+
+      document.getElementById('promptText').textContent = prompt;
+    }
+
+    function copyPrompt() {
+      const promptText = document.getElementById('promptText').textContent;
+      navigator.clipboard.writeText(promptText).then(() => {
+        const btn = document.getElementById('copyBtn');
+        btn.textContent = 'Copied!';
+        btn.classList.add('copied');
+        setTimeout(() => {
+          btn.textContent = 'Copy';
+          btn.classList.remove('copied');
+        }, 2000);
+      });
+    }
+
+    // Initialize with current preset
+    applyPreset('current');
+  </script>
+</body>
+</html>

@@ -1,0 +1,917 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS Summon Animation Playground</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background: #0a0a0f;
+      color: #e0e0e0;
+      min-height: 100vh;
+      display: flex;
+    }
+
+    .controls {
+      width: 320px;
+      padding: 16px;
+      background: #12121a;
+      border-right: 1px solid #2a2a3a;
+      overflow-y: auto;
+      max-height: 100vh;
+    }
+
+    .preview-area {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .preview {
+      flex: 1;
+      position: relative;
+      background: #050510;
+      overflow: hidden;
+      min-height: 500px;
+    }
+
+    .output-area {
+      background: #0d0d14;
+      border-top: 1px solid #2a2a3a;
+      padding: 16px;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+
+    h1 {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 16px;
+      color: #a8d4e6;
+    }
+
+    h2 {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #888;
+      margin: 20px 0 10px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid #2a2a3a;
+    }
+
+    .control-group {
+      margin-bottom: 12px;
+    }
+
+    label {
+      display: block;
+      font-size: 12px;
+      color: #aaa;
+      margin-bottom: 4px;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      height: 4px;
+      background: #2a2a3a;
+      border-radius: 2px;
+      -webkit-appearance: none;
+      cursor: pointer;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 14px;
+      height: 14px;
+      background: #a8d4e6;
+      border-radius: 50%;
+      cursor: pointer;
+    }
+
+    input[type="color"] {
+      width: 100%;
+      height: 32px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      background: #2a2a3a;
+    }
+
+    input[type="checkbox"] {
+      margin-right: 8px;
+    }
+
+    select {
+      width: 100%;
+      padding: 8px;
+      background: #1a1a24;
+      border: 1px solid #2a2a3a;
+      border-radius: 4px;
+      color: #e0e0e0;
+      font-size: 13px;
+      cursor: pointer;
+    }
+
+    .value-display {
+      font-size: 11px;
+      color: #666;
+      float: right;
+    }
+
+    .presets {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 16px;
+    }
+
+    .preset-btn {
+      padding: 6px 10px;
+      background: #1a1a24;
+      border: 1px solid #2a2a3a;
+      border-radius: 4px;
+      color: #aaa;
+      font-size: 11px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .preset-btn:hover {
+      background: #252530;
+      border-color: #a8d4e6;
+      color: #e0e0e0;
+    }
+
+    .preset-btn.active {
+      background: #a8d4e6;
+      color: #0a0a0f;
+      border-color: #a8d4e6;
+    }
+
+    .trigger-btn {
+      width: 100%;
+      padding: 12px;
+      background: linear-gradient(135deg, #c9a961 0%, #a8d4e6 100%);
+      border: none;
+      border-radius: 6px;
+      color: #0a0a0f;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 16px;
+      transition: transform 0.1s;
+    }
+
+    .trigger-btn:hover {
+      transform: scale(1.02);
+    }
+
+    .trigger-btn:active {
+      transform: scale(0.98);
+    }
+
+    .output-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .output-tab {
+      padding: 6px 12px;
+      background: transparent;
+      border: 1px solid #2a2a3a;
+      border-radius: 4px;
+      color: #888;
+      font-size: 12px;
+      cursor: pointer;
+    }
+
+    .output-tab.active {
+      background: #1a1a24;
+      border-color: #a8d4e6;
+      color: #a8d4e6;
+    }
+
+    .output-content {
+      background: #0a0a10;
+      border: 1px solid #2a2a3a;
+      border-radius: 4px;
+      padding: 12px;
+      font-family: 'SF Mono', Monaco, monospace;
+      font-size: 11px;
+      line-height: 1.5;
+      white-space: pre-wrap;
+      color: #b0b0b0;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+
+    .copy-btn {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      padding: 4px 10px;
+      background: #2a2a3a;
+      border: none;
+      border-radius: 4px;
+      color: #aaa;
+      font-size: 11px;
+      cursor: pointer;
+    }
+
+    .copy-btn:hover {
+      background: #3a3a4a;
+    }
+
+    .output-wrapper {
+      position: relative;
+    }
+
+    .checkbox-label {
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+      font-size: 13px;
+    }
+  </style>
+</head>
+<body>
+  <div class="controls">
+    <h1>CSS Summon Animation</h1>
+
+    <div class="presets">
+      <button class="preset-btn active" data-preset="mobile">Current Mobile</button>
+      <button class="preset-btn" data-preset="minimal">Minimal</button>
+      <button class="preset-btn" data-preset="dramatic">Dramatic</button>
+      <button class="preset-btn" data-preset="fgo">FGO Style</button>
+    </div>
+
+    <h2>Rings</h2>
+
+    <div class="control-group">
+      <label>Number of Rings <span class="value-display" id="ringCount-val">3</span></label>
+      <input type="range" id="ringCount" min="1" max="5" value="3">
+    </div>
+
+    <div class="control-group">
+      <label>Start Size <span class="value-display" id="ringStartSize-val">120px</span></label>
+      <input type="range" id="ringStartSize" min="60" max="180" value="120">
+    </div>
+
+    <div class="control-group">
+      <label>Ring Spacing <span class="value-display" id="ringSpacing-val">50px</span></label>
+      <input type="range" id="ringSpacing" min="30" max="80" value="50">
+    </div>
+
+    <div class="control-group">
+      <label>Border Width <span class="value-display" id="ringBorderWidth-val">2px</span></label>
+      <input type="range" id="ringBorderWidth" min="1" max="4" value="2">
+    </div>
+
+    <div class="control-group">
+      <label>Cyan Color</label>
+      <input type="color" id="cyanColor" value="#6ba8c2">
+    </div>
+
+    <div class="control-group">
+      <label>Gold Color</label>
+      <input type="color" id="goldColor" value="#c9a961">
+    </div>
+
+    <div class="control-group">
+      <label>Rotation Speed</label>
+      <select id="rotationSpeed">
+        <option value="slow">Slow (12s)</option>
+        <option value="medium" selected>Medium (8s)</option>
+        <option value="fast">Fast (5s)</option>
+      </select>
+    </div>
+
+    <div class="control-group">
+      <label>Ring Opacity <span class="value-display" id="ringOpacity-val">0.6</span></label>
+      <input type="range" id="ringOpacity" min="0.3" max="1" step="0.1" value="0.6">
+    </div>
+
+    <h2>Center Glow</h2>
+
+    <div class="control-group">
+      <label>Glow Size <span class="value-display" id="glowSize-val">80px</span></label>
+      <input type="range" id="glowSize" min="40" max="120" value="80">
+    </div>
+
+    <div class="control-group">
+      <label>Glow Intensity <span class="value-display" id="glowIntensity-val">0.8</span></label>
+      <input type="range" id="glowIntensity" min="0.3" max="1" step="0.1" value="0.8">
+    </div>
+
+    <div class="control-group">
+      <label>Pulse Speed</label>
+      <select id="pulseSpeed">
+        <option value="slow">Slow (3s)</option>
+        <option value="medium" selected>Medium (2s)</option>
+        <option value="fast">Fast (1s)</option>
+      </select>
+    </div>
+
+    <h2>Runes</h2>
+
+    <div class="control-group">
+      <label class="checkbox-label">
+        <input type="checkbox" id="showRunes" checked>
+        Show Runes
+      </label>
+    </div>
+
+    <div class="control-group">
+      <label>Number of Runes <span class="value-display" id="runeCount-val">8</span></label>
+      <input type="range" id="runeCount" min="4" max="12" value="8">
+    </div>
+
+    <div class="control-group">
+      <label>Rune Size <span class="value-display" id="runeSize-val">14px</span></label>
+      <input type="range" id="runeSize" min="10" max="20" value="14">
+    </div>
+
+    <div class="control-group">
+      <label>Orbit Radius <span class="value-display" id="runeOrbit-val">100px</span></label>
+      <input type="range" id="runeOrbit" min="80" max="150" value="100">
+    </div>
+
+    <h2>Summon Animation</h2>
+
+    <div class="control-group">
+      <label>Buildup Duration <span class="value-display" id="buildupDuration-val">3.5s</span></label>
+      <input type="range" id="buildupDuration" min="2" max="5" step="0.5" value="3.5">
+    </div>
+
+    <div class="control-group">
+      <label>Spin Rotations <span class="value-display" id="spinRotations-val">3</span></label>
+      <input type="range" id="spinRotations" min="1" max="5" value="3">
+    </div>
+
+    <div class="control-group">
+      <label>Flash Intensity <span class="value-display" id="flashIntensity-val">1.0</span></label>
+      <input type="range" id="flashIntensity" min="0.5" max="1" step="0.1" value="1">
+    </div>
+
+    <div class="control-group">
+      <label>Pulse Wave Scale <span class="value-display" id="pulseWaveScale-val">3x</span></label>
+      <input type="range" id="pulseWaveScale" min="1" max="4" step="0.5" value="3">
+    </div>
+
+    <button class="trigger-btn" id="triggerSummon">Trigger Summon</button>
+  </div>
+
+  <div class="preview-area">
+    <div class="preview" id="preview">
+      <!-- Animation elements inserted by JS -->
+    </div>
+
+    <div class="output-area">
+      <div class="output-tabs">
+        <button class="output-tab active" data-tab="jsx">React Component</button>
+        <button class="output-tab" data-tab="css">CSS Only</button>
+      </div>
+      <div class="output-wrapper">
+        <div class="output-content" id="output"></div>
+        <button class="copy-btn" id="copyBtn">Copy</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const RUNES = ['ᚠ', 'ᚦ', 'ᚱ', 'ᚺ', 'ᛁ', 'ᛊ', 'ᛗ', 'ᛟ', 'ᚢ', 'ᚨ', 'ᚲ', 'ᚷ'];
+
+    const PRESETS = {
+      mobile: {
+        ringCount: 3, ringStartSize: 120, ringSpacing: 50, ringBorderWidth: 2,
+        cyanColor: '#6ba8c2', goldColor: '#c9a961', rotationSpeed: 'medium', ringOpacity: 0.6,
+        glowSize: 50, glowIntensity: 0.6, pulseSpeed: 'medium',
+        showRunes: true, runeCount: 8, runeSize: 14, runeOrbit: 100,
+        buildupDuration: 3.5, spinRotations: 3, flashIntensity: 1, pulseWaveScale: 3
+      },
+      minimal: {
+        ringCount: 2, ringStartSize: 100, ringSpacing: 60, ringBorderWidth: 1,
+        cyanColor: '#6ba8c2', goldColor: '#c9a961', rotationSpeed: 'slow', ringOpacity: 0.4,
+        glowSize: 60, glowIntensity: 0.6, pulseSpeed: 'slow',
+        showRunes: false, runeCount: 6, runeSize: 12, runeOrbit: 90,
+        buildupDuration: 2, spinRotations: 2, flashIntensity: 0.7, pulseWaveScale: 2
+      },
+      dramatic: {
+        ringCount: 5, ringStartSize: 80, ringSpacing: 45, ringBorderWidth: 2,
+        cyanColor: '#4fb3d4', goldColor: '#fbbf24', rotationSpeed: 'fast', ringOpacity: 0.8,
+        glowSize: 100, glowIntensity: 1, pulseSpeed: 'fast',
+        showRunes: true, runeCount: 12, runeSize: 16, runeOrbit: 120,
+        buildupDuration: 4, spinRotations: 5, flashIntensity: 1, pulseWaveScale: 4
+      },
+      fgo: {
+        ringCount: 4, ringStartSize: 100, ringSpacing: 50, ringBorderWidth: 2,
+        cyanColor: '#5cc0eb', goldColor: '#d4a84b', rotationSpeed: 'medium', ringOpacity: 0.7,
+        glowSize: 90, glowIntensity: 0.9, pulseSpeed: 'medium',
+        showRunes: true, runeCount: 8, runeSize: 14, runeOrbit: 110,
+        buildupDuration: 3.5, spinRotations: 3, flashIntensity: 1, pulseWaveScale: 3
+      }
+    };
+
+    const state = { ...PRESETS.mobile };
+    let currentTab = 'jsx';
+    let isAnimating = false;
+
+    const controls = {
+      ringCount: document.getElementById('ringCount'),
+      ringStartSize: document.getElementById('ringStartSize'),
+      ringSpacing: document.getElementById('ringSpacing'),
+      ringBorderWidth: document.getElementById('ringBorderWidth'),
+      cyanColor: document.getElementById('cyanColor'),
+      goldColor: document.getElementById('goldColor'),
+      rotationSpeed: document.getElementById('rotationSpeed'),
+      ringOpacity: document.getElementById('ringOpacity'),
+      glowSize: document.getElementById('glowSize'),
+      glowIntensity: document.getElementById('glowIntensity'),
+      pulseSpeed: document.getElementById('pulseSpeed'),
+      showRunes: document.getElementById('showRunes'),
+      runeCount: document.getElementById('runeCount'),
+      runeSize: document.getElementById('runeSize'),
+      runeOrbit: document.getElementById('runeOrbit'),
+      buildupDuration: document.getElementById('buildupDuration'),
+      spinRotations: document.getElementById('spinRotations'),
+      flashIntensity: document.getElementById('flashIntensity'),
+      pulseWaveScale: document.getElementById('pulseWaveScale')
+    };
+
+    function getRotationDuration(speed) {
+      return { slow: 12, medium: 8, fast: 5 }[speed] || 8;
+    }
+
+    function getPulseDuration(speed) {
+      return { slow: 3, medium: 2, fast: 1 }[speed] || 2;
+    }
+
+    function hexToRgba(hex, alpha) {
+      const r = parseInt(hex.slice(1, 3), 16);
+      const g = parseInt(hex.slice(3, 5), 16);
+      const b = parseInt(hex.slice(5, 7), 16);
+      return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+    }
+
+    function updateState() {
+      state.ringCount = parseInt(controls.ringCount.value);
+      state.ringStartSize = parseInt(controls.ringStartSize.value);
+      state.ringSpacing = parseInt(controls.ringSpacing.value);
+      state.ringBorderWidth = parseInt(controls.ringBorderWidth.value);
+      state.cyanColor = controls.cyanColor.value;
+      state.goldColor = controls.goldColor.value;
+      state.rotationSpeed = controls.rotationSpeed.value;
+      state.ringOpacity = parseFloat(controls.ringOpacity.value);
+      state.glowSize = parseInt(controls.glowSize.value);
+      state.glowIntensity = parseFloat(controls.glowIntensity.value);
+      state.pulseSpeed = controls.pulseSpeed.value;
+      state.showRunes = controls.showRunes.checked;
+      state.runeCount = parseInt(controls.runeCount.value);
+      state.runeSize = parseInt(controls.runeSize.value);
+      state.runeOrbit = parseInt(controls.runeOrbit.value);
+      state.buildupDuration = parseFloat(controls.buildupDuration.value);
+      state.spinRotations = parseInt(controls.spinRotations.value);
+      state.flashIntensity = parseFloat(controls.flashIntensity.value);
+      state.pulseWaveScale = parseFloat(controls.pulseWaveScale.value);
+
+      document.getElementById('ringCount-val').textContent = state.ringCount;
+      document.getElementById('ringStartSize-val').textContent = state.ringStartSize + 'px';
+      document.getElementById('ringSpacing-val').textContent = state.ringSpacing + 'px';
+      document.getElementById('ringBorderWidth-val').textContent = state.ringBorderWidth + 'px';
+      document.getElementById('ringOpacity-val').textContent = state.ringOpacity.toFixed(1);
+      document.getElementById('glowSize-val').textContent = state.glowSize + 'px';
+      document.getElementById('glowIntensity-val').textContent = state.glowIntensity.toFixed(1);
+      document.getElementById('runeCount-val').textContent = state.runeCount;
+      document.getElementById('runeSize-val').textContent = state.runeSize + 'px';
+      document.getElementById('runeOrbit-val').textContent = state.runeOrbit + 'px';
+      document.getElementById('buildupDuration-val').textContent = state.buildupDuration + 's';
+      document.getElementById('spinRotations-val').textContent = state.spinRotations;
+      document.getElementById('flashIntensity-val').textContent = state.flashIntensity.toFixed(1);
+      document.getElementById('pulseWaveScale-val').textContent = state.pulseWaveScale + 'x';
+    }
+
+    function applyPreset(name) {
+      const preset = PRESETS[name];
+      if (!preset) return;
+
+      Object.assign(state, preset);
+
+      controls.ringCount.value = preset.ringCount;
+      controls.ringStartSize.value = preset.ringStartSize;
+      controls.ringSpacing.value = preset.ringSpacing;
+      controls.ringBorderWidth.value = preset.ringBorderWidth;
+      controls.cyanColor.value = preset.cyanColor;
+      controls.goldColor.value = preset.goldColor;
+      controls.rotationSpeed.value = preset.rotationSpeed;
+      controls.ringOpacity.value = preset.ringOpacity;
+      controls.glowSize.value = preset.glowSize;
+      controls.glowIntensity.value = preset.glowIntensity;
+      controls.pulseSpeed.value = preset.pulseSpeed;
+      controls.showRunes.checked = preset.showRunes;
+      controls.runeCount.value = preset.runeCount;
+      controls.runeSize.value = preset.runeSize;
+      controls.runeOrbit.value = preset.runeOrbit;
+      controls.buildupDuration.value = preset.buildupDuration;
+      controls.spinRotations.value = preset.spinRotations;
+      controls.flashIntensity.value = preset.flashIntensity;
+      controls.pulseWaveScale.value = preset.pulseWaveScale;
+
+      document.querySelectorAll('.preset-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.preset === name);
+      });
+
+      updateState();
+      renderPreview();
+      updateOutput();
+    }
+
+    function renderPreview() {
+      const preview = document.getElementById('preview');
+      const rotDuration = getRotationDuration(state.rotationSpeed);
+      const pulseDuration = getPulseDuration(state.pulseSpeed);
+
+      let html = `
+        <style>
+          @keyframes spin { from { transform: translate(-50%, -50%) rotate(0deg); } to { transform: translate(-50%, -50%) rotate(360deg); } }
+          @keyframes spin-reverse { from { transform: translate(-50%, -50%) rotate(360deg); } to { transform: translate(-50%, -50%) rotate(0deg); } }
+          @keyframes glow-pulse {
+            0%, 100% { opacity: ${state.glowIntensity * 0.7}; transform: translate(-50%, -50%) scale(1); }
+            50% { opacity: ${state.glowIntensity}; transform: translate(-50%, -50%) scale(1.05); }
+          }
+          @keyframes summon-buildup {
+            0% { transform: translate(-50%, -50%) rotate(0deg) scale(1); }
+            70% { transform: translate(-50%, -50%) rotate(${state.spinRotations * 360}deg) scale(1.2); }
+            85% { transform: translate(-50%, -50%) rotate(${state.spinRotations * 360}deg) scale(0.8); }
+            100% { transform: translate(-50%, -50%) rotate(${state.spinRotations * 360 + 90}deg) scale(1); }
+          }
+          @keyframes summon-flash {
+            0% { opacity: 0; }
+            50% { opacity: ${state.flashIntensity}; }
+            100% { opacity: 0; }
+          }
+          @keyframes summon-pulse-wave {
+            0% { transform: translate(-50%, -50%) scale(0); opacity: 1; }
+            100% { transform: translate(-50%, -50%) scale(${state.pulseWaveScale}); opacity: 0; }
+          }
+        </style>
+      `;
+
+      // Center glow
+      html += `
+        <div style="
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          width: ${state.glowSize}px;
+          height: ${state.glowSize}px;
+          border-radius: 50%;
+          background: radial-gradient(circle, rgba(255,255,255,${state.glowIntensity}) 0%, ${hexToRgba(state.cyanColor, state.glowIntensity * 0.6)} 40%, transparent 70%);
+          animation: glow-pulse ${pulseDuration}s ease-in-out infinite;
+          box-shadow: 0 0 ${state.glowSize/2}px ${hexToRgba(state.cyanColor, 0.4)}, 0 0 ${state.glowSize}px ${hexToRgba(state.cyanColor, 0.2)};
+          z-index: 5;
+        "></div>
+      `;
+
+      // Rings
+      for (let i = 0; i < state.ringCount; i++) {
+        const size = state.ringStartSize + i * state.ringSpacing;
+        const color = i % 2 === 0 ? state.cyanColor : state.goldColor;
+        const animName = isAnimating ? 'summon-buildup' : (i % 2 === 0 ? 'spin' : 'spin-reverse');
+        const animDuration = isAnimating ? state.buildupDuration : (rotDuration + i * 2);
+        const delay = isAnimating ? (i * 0.1) : 0;
+        const borderW = i === 0 ? state.ringBorderWidth : Math.max(1, state.ringBorderWidth - 1);
+
+        html += `
+          <div style="
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: ${size}px;
+            height: ${size}px;
+            border-radius: 50%;
+            border: ${borderW}px solid ${hexToRgba(color, state.ringOpacity)};
+            box-shadow: 0 0 10px ${hexToRgba(color, state.ringOpacity * 0.5)};
+            animation: ${animName} ${animDuration}s ${isAnimating ? 'ease-in-out forwards' : 'linear infinite'};
+            animation-delay: ${delay}s;
+            z-index: 3;
+          "></div>
+        `;
+      }
+
+      // Runes
+      if (state.showRunes) {
+        const runeAnimName = isAnimating ? 'summon-buildup' : 'spin';
+        const runeAnimDuration = isAnimating ? state.buildupDuration : 15;
+
+        html += `<div style="position: absolute; top: 50%; left: 50%; width: ${state.runeOrbit * 2}px; height: ${state.runeOrbit * 2}px; transform: translate(-50%, -50%); animation: ${runeAnimName} ${runeAnimDuration}s ${isAnimating ? 'ease-in-out forwards' : 'linear infinite'}; z-index: 2;">`;
+
+        for (let i = 0; i < state.runeCount; i++) {
+          const angle = (i / state.runeCount) * 360;
+          const color = i % 2 === 0 ? state.cyanColor : state.goldColor;
+          const rune = RUNES[i % RUNES.length];
+
+          html += `
+            <span style="
+              position: absolute;
+              top: 50%;
+              left: 50%;
+              transform: rotate(${angle}deg) translateY(-${state.runeOrbit}px);
+              color: ${hexToRgba(color, 0.7)};
+              font-size: ${state.runeSize}px;
+              text-shadow: 0 0 8px ${hexToRgba(color, 0.5)};
+            ">${rune}</span>
+          `;
+        }
+        html += '</div>';
+      }
+
+      // Flash overlay
+      if (isAnimating) {
+        html += `
+          <div style="
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle, rgba(255,255,255,${state.flashIntensity * 0.8}) 0%, ${hexToRgba(state.cyanColor, state.flashIntensity * 0.5)} 30%, transparent 60%);
+            animation: summon-flash 0.8s ease-out ${state.buildupDuration - 0.5}s forwards;
+            z-index: 10;
+            pointer-events: none;
+          "></div>
+          <div style="
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            border: 4px solid ${hexToRgba(state.cyanColor, 0.8)};
+            box-shadow: 0 0 20px ${hexToRgba(state.cyanColor, 0.6)};
+            transform: translate(-50%, -50%) scale(0);
+            animation: summon-pulse-wave 0.6s ease-out ${state.buildupDuration - 0.3}s forwards;
+            z-index: 9;
+            pointer-events: none;
+          "></div>
+        `;
+      }
+
+      preview.innerHTML = html;
+    }
+
+    function generateJSX() {
+      const rotDuration = getRotationDuration(state.rotationSpeed);
+      const pulseDuration = getPulseDuration(state.pulseSpeed);
+
+      return `import { useEffect, useRef, useState } from 'react'
+
+// Pure CSS summon animation - GPU accelerated, smooth performance
+export default function CSSSummonAnimation({ triggerCount = 0, onComplete }) {
+  const [isAnimating, setIsAnimating] = useState(false)
+  const prevTriggerRef = useRef(0)
+
+  useEffect(() => {
+    if (triggerCount > prevTriggerRef.current) {
+      prevTriggerRef.current = triggerCount
+      setIsAnimating(true)
+
+      const timer = setTimeout(() => {
+        setIsAnimating(false)
+        if (onComplete) onComplete()
+      }, ${(state.buildupDuration + 0.5) * 1000})
+
+      return () => clearTimeout(timer)
+    }
+  }, [triggerCount, onComplete])
+
+  return (
+    <div style={{
+      position: 'absolute',
+      inset: 0,
+      background: '#050510',
+      overflow: 'hidden'
+    }}>
+      <style>{\`
+        @keyframes spin { from { transform: translate(-50%, -50%) rotate(0deg); } to { transform: translate(-50%, -50%) rotate(360deg); } }
+        @keyframes spin-reverse { from { transform: translate(-50%, -50%) rotate(360deg); } to { transform: translate(-50%, -50%) rotate(0deg); } }
+        @keyframes glow-pulse {
+          0%, 100% { opacity: ${(state.glowIntensity * 0.7).toFixed(1)}; transform: translate(-50%, -50%) scale(1); }
+          50% { opacity: ${state.glowIntensity}; transform: translate(-50%, -50%) scale(1.05); }
+        }
+        @keyframes summon-buildup {
+          0% { transform: translate(-50%, -50%) rotate(0deg) scale(1); }
+          70% { transform: translate(-50%, -50%) rotate(${state.spinRotations * 360}deg) scale(1.2); }
+          85% { transform: translate(-50%, -50%) rotate(${state.spinRotations * 360}deg) scale(0.8); }
+          100% { transform: translate(-50%, -50%) rotate(${state.spinRotations * 360 + 90}deg) scale(1); }
+        }
+        @keyframes summon-flash { 0% { opacity: 0; } 50% { opacity: ${state.flashIntensity}; } 100% { opacity: 0; } }
+        @keyframes summon-pulse-wave { 0% { transform: translate(-50%, -50%) scale(0); opacity: 1; } 100% { transform: translate(-50%, -50%) scale(${state.pulseWaveScale}); opacity: 0; } }
+      \`}</style>
+
+      {/* Center glow */}
+      <div style={{
+        position: 'absolute',
+        top: '50%',
+        left: '50%',
+        width: '${state.glowSize}px',
+        height: '${state.glowSize}px',
+        borderRadius: '50%',
+        background: 'radial-gradient(circle, rgba(255,255,255,${state.glowIntensity}) 0%, ${hexToRgba(state.cyanColor, state.glowIntensity * 0.6)} 40%, transparent 70%)',
+        animation: 'glow-pulse ${pulseDuration}s ease-in-out infinite',
+        boxShadow: '0 0 ${state.glowSize/2}px ${hexToRgba(state.cyanColor, 0.4)}, 0 0 ${state.glowSize}px ${hexToRgba(state.cyanColor, 0.2)}',
+        zIndex: 5
+      }} />
+
+      {/* Rings */}
+${Array.from({length: state.ringCount}, (_, i) => {
+  const size = state.ringStartSize + i * state.ringSpacing;
+  const color = i % 2 === 0 ? state.cyanColor : state.goldColor;
+  const borderW = i === 0 ? state.ringBorderWidth : Math.max(1, state.ringBorderWidth - 1);
+  return `      <div style={{
+        position: 'absolute',
+        top: '50%',
+        left: '50%',
+        width: '${size}px',
+        height: '${size}px',
+        borderRadius: '50%',
+        border: '${borderW}px solid ${hexToRgba(color, state.ringOpacity)}',
+        boxShadow: '0 0 10px ${hexToRgba(color, state.ringOpacity * 0.5)}',
+        animation: isAnimating
+          ? 'summon-buildup ${state.buildupDuration}s ease-in-out forwards'
+          : '${i % 2 === 0 ? 'spin' : 'spin-reverse'} ${rotDuration + i * 2}s linear infinite',
+        animationDelay: isAnimating ? '${(i * 0.1).toFixed(1)}s' : '0s',
+        zIndex: 3
+      }} />`;
+}).join('\n')}
+${state.showRunes ? `
+      {/* Runes */}
+      <div style={{
+        position: 'absolute',
+        top: '50%',
+        left: '50%',
+        width: '${state.runeOrbit * 2}px',
+        height: '${state.runeOrbit * 2}px',
+        animation: isAnimating ? 'summon-buildup ${state.buildupDuration}s ease-in-out forwards' : 'spin 15s linear infinite',
+        zIndex: 2
+      }}>
+        {[${RUNES.slice(0, state.runeCount).map(r => `'${r}'`).join(', ')}].map((rune, i) => (
+          <span
+            key={i}
+            style={{
+              position: 'absolute',
+              top: '50%',
+              left: '50%',
+              transform: \`rotate(\${i * ${360 / state.runeCount}}deg) translateY(-${state.runeOrbit}px)\`,
+              color: i % 2 === 0 ? '${hexToRgba(state.cyanColor, 0.7)}' : '${hexToRgba(state.goldColor, 0.7)}',
+              fontSize: '${state.runeSize}px',
+              textShadow: i % 2 === 0 ? '0 0 8px ${hexToRgba(state.cyanColor, 0.5)}' : '0 0 8px ${hexToRgba(state.goldColor, 0.5)}'
+            }}
+          >{rune}</span>
+        ))}
+      </div>` : ''}
+
+      {/* Flash overlay */}
+      {isAnimating && (
+        <div style={{
+          position: 'absolute',
+          inset: 0,
+          background: 'radial-gradient(circle, rgba(255,255,255,1) 0%, ${hexToRgba(state.cyanColor, 0.8)} 30%, transparent 60%)',
+          animation: 'summon-flash 0.8s ease-out ${state.buildupDuration - 0.5}s forwards',
+          zIndex: 10,
+          pointerEvents: 'none'
+        }} />
+      )}
+
+      {/* Pulse wave */}
+      {isAnimating && (
+        <div style={{
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          width: '100px',
+          height: '100px',
+          borderRadius: '50%',
+          border: '4px solid ${hexToRgba(state.cyanColor, 0.8)}',
+          boxShadow: '0 0 20px ${hexToRgba(state.cyanColor, 0.6)}',
+          animation: 'summon-pulse-wave 0.6s ease-out ${state.buildupDuration - 0.3}s forwards',
+          zIndex: 9,
+          pointerEvents: 'none'
+        }} />
+      )}
+    </div>
+  )
+}`;
+    }
+
+    function generateCSS() {
+      return `/* CSS Keyframes for Summon Animation */
+
+@keyframes spin {
+  from { transform: translate(-50%, -50%) rotate(0deg); }
+  to { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+@keyframes spin-reverse {
+  from { transform: translate(-50%, -50%) rotate(360deg); }
+  to { transform: translate(-50%, -50%) rotate(0deg); }
+}
+
+@keyframes glow-pulse {
+  0%, 100% {
+    opacity: ${(state.glowIntensity * 0.7).toFixed(1)};
+    transform: translate(-50%, -50%) scale(1);
+  }
+  50% {
+    opacity: ${state.glowIntensity};
+    transform: translate(-50%, -50%) scale(1.05);
+  }
+}
+
+@keyframes summon-buildup {
+  0% { transform: translate(-50%, -50%) rotate(0deg) scale(1); }
+  70% { transform: translate(-50%, -50%) rotate(${state.spinRotations * 360}deg) scale(1.2); }
+  85% { transform: translate(-50%, -50%) rotate(${state.spinRotations * 360}deg) scale(0.8); }
+  100% { transform: translate(-50%, -50%) rotate(${state.spinRotations * 360 + 90}deg) scale(1); }
+}
+
+@keyframes summon-flash {
+  0% { opacity: 0; }
+  50% { opacity: ${state.flashIntensity}; }
+  100% { opacity: 0; }
+}
+
+@keyframes summon-pulse-wave {
+  0% { transform: translate(-50%, -50%) scale(0); opacity: 1; }
+  100% { transform: translate(-50%, -50%) scale(${state.pulseWaveScale}); opacity: 0; }
+}
+
+/* Config Values:
+ * Rings: ${state.ringCount}
+ * Start Size: ${state.ringStartSize}px
+ * Spacing: ${state.ringSpacing}px
+ * Cyan: ${state.cyanColor}
+ * Gold: ${state.goldColor}
+ * Glow Size: ${state.glowSize}px
+ * Buildup: ${state.buildupDuration}s
+ * Rotations: ${state.spinRotations}
+ */`;
+    }
+
+    function updateOutput() {
+      const output = document.getElementById('output');
+      output.textContent = currentTab === 'jsx' ? generateJSX() : generateCSS();
+    }
+
+    function triggerSummon() {
+      if (isAnimating) return;
+      isAnimating = true;
+      renderPreview();
+
+      setTimeout(() => {
+        isAnimating = false;
+        renderPreview();
+      }, (state.buildupDuration + 1) * 1000);
+    }
+
+    Object.values(controls).forEach(control => {
+      control.addEventListener('input', () => {
+        updateState();
+        renderPreview();
+        updateOutput();
+        document.querySelectorAll('.preset-btn').forEach(btn => btn.classList.remove('active'));
+      });
+    });
+
+    document.querySelectorAll('.preset-btn').forEach(btn => {
+      btn.addEventListener('click', () => applyPreset(btn.dataset.preset));
+    });
+
+    document.querySelectorAll('.output-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        currentTab = tab.dataset.tab;
+        document.querySelectorAll('.output-tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        updateOutput();
+      });
+    });
+
+    document.getElementById('triggerSummon').addEventListener('click', triggerSummon);
+
+    document.getElementById('copyBtn').addEventListener('click', () => {
+      const output = document.getElementById('output').textContent;
+      navigator.clipboard.writeText(output).then(() => {
+        const btn = document.getElementById('copyBtn');
+        btn.textContent = 'Copied!';
+        setTimeout(() => btn.textContent = 'Copy', 1500);
+      });
+    });
+
+    updateState();
+    renderPreview();
+    updateOutput();
+  </script>
+</body>
+</html>

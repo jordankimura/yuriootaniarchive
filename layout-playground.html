@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dr. Benis - Full Layout Playground</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: system-ui, sans-serif; background: #0a0a0f; color: #e0e0e0; height: 100vh; display: flex; }
+
+    .controls { width: 300px; min-width: 300px; background: #111118; border-right: 1px solid #2a2a35; padding: 1rem; overflow-y: auto; }
+    .preview-wrap { flex: 1; display: flex; flex-direction: column; }
+    .preview { flex: 1; background: #030308; }
+    .output-area { background: #111118; border-top: 1px solid #2a2a35; padding: 0.75rem 1rem; }
+
+    .section { font-size: 0.65rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: #666; margin: 1rem 0 0.5rem; padding-bottom: 0.4rem; border-bottom: 1px solid #2a2a35; }
+    .row { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; }
+    .row label { font-size: 0.7rem; color: #999; width: 100px; flex-shrink: 0; }
+    .row span { font-size: 0.65rem; color: #555; font-family: monospace; min-width: 50px; text-align: right; }
+    input[type="range"] { flex: 1; height: 3px; background: #2a2a35; border-radius: 2px; -webkit-appearance: none; }
+    input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 12px; height: 12px; background: #e0c080; border-radius: 50%; cursor: pointer; }
+    input[type="color"] { width: 28px; height: 20px; border: 1px solid #2a2a35; border-radius: 3px; background: transparent; cursor: pointer; padding: 0; }
+    input[type="checkbox"] { width: 14px; height: 14px; accent-color: #e0c080; }
+
+    .presets { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 0.5rem; }
+    .preset { padding: 0.3rem 0.6rem; background: transparent; border: 1px solid #3a3a45; border-radius: 3px; color: #777; font-size: 0.65rem; cursor: pointer; }
+    .preset:hover, .preset.active { border-color: #e0c080; color: #e0c080; }
+    .preset.active { background: rgba(224, 192, 128, 0.1); }
+
+    .mode-toggle { display: flex; gap: 0.5rem; margin-bottom: 1rem; }
+    .mode-btn { flex: 1; padding: 0.5rem; background: transparent; border: 1px solid #3a3a45; border-radius: 4px; color: #777; font-size: 0.7rem; cursor: pointer; text-align: center; }
+    .mode-btn.active { background: rgba(107, 168, 194, 0.15); border-color: #6ba8c2; color: #6ba8c2; }
+
+    .copy-btn { padding: 0.3rem 0.6rem; background: rgba(224, 192, 128, 0.15); border: 1px solid rgba(224, 192, 128, 0.4); border-radius: 3px; color: #e0c080; font-size: 0.65rem; cursor: pointer; float: right; }
+    .output-text { font-size: 0.75rem; color: #aaa; clear: both; padding-top: 0.5rem; }
+
+    /* Preview Layout */
+    .layout { display: flex; height: 100%; }
+    .left-panel { background: linear-gradient(180deg, rgba(10,15,25,0.95), rgba(5,8,15,0.98)); border-right: 1px solid var(--border); display: flex; flex-direction: column; transition: width 0.3s; }
+    .center { flex: 1; display: flex; align-items: center; justify-content: center; position: relative; }
+    .center::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse at 30% 30%, rgba(107,168,194,0.08) 0%, transparent 50%); pointer-events: none; }
+    .right-panel { background: linear-gradient(180deg, rgba(10,15,25,0.95), rgba(5,8,15,0.98)); border-left: 1px solid var(--border); display: flex; flex-direction: column; transition: width 0.3s; overflow: hidden; }
+
+    .brand { padding: 1rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 0.6rem; }
+    .brand-icon { width: 32px; height: 32px; border-radius: 6px; background: linear-gradient(135deg, rgba(107,168,194,0.3), rgba(224,192,128,0.25)); border: 1px solid rgba(168,212,230,0.3); display: flex; align-items: center; justify-content: center; font-size: 0.9rem; }
+    .brand-text { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; }
+    .brand-sub { font-size: 0.55rem; color: var(--accent); opacity: 0.7; letter-spacing: 0.1em; text-transform: uppercase; }
+
+    .nav-item { padding: 0.7rem 0.8rem; font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(168,212,230,0.6); border-left: 2px solid transparent; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; }
+    .nav-item:hover { color: #fff; background: rgba(107,168,194,0.08); }
+    .nav-item.active { color: #fff; background: linear-gradient(90deg, rgba(107,168,194,0.15), transparent); border-left-color: var(--accent); }
+    .nav-item span:first-child { font-size: 0.65rem; opacity: 0.5; }
+    .nav-item.active span:first-child { opacity: 1; color: var(--accent); }
+
+    .project-list { margin-left: 0.5rem; border-left: 1px solid rgba(168,212,230,0.15); }
+    .project-item { padding: 0.5rem 1rem; font-size: 0.65rem; color: rgba(168,212,230,0.6); cursor: pointer; border-left: 2px solid transparent; display: flex; align-items: center; gap: 0.4rem; }
+    .project-item:hover { color: #fff; background: rgba(107,168,194,0.08); }
+    .project-item.active { color: #fff; background: rgba(224,192,128,0.12); border-left-color: var(--accent); }
+    .project-item span:first-child { font-size: 0.5rem; opacity: 0.4; }
+    .project-item.active span:first-child { opacity: 1; color: var(--accent); }
+
+    .circle-frame { border: 1px solid var(--border); border-radius: 8px; position: relative; background: #050510; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+    .circle { position: absolute; border-radius: 50%; border: 1px solid rgba(168,212,230,0.3); }
+    .open-btn { position: absolute; bottom: 15px; left: 50%; transform: translateX(-50%); padding: 0.5rem 1.2rem; background: linear-gradient(135deg, var(--accent), rgba(180,140,70,0.95)); border: 1px solid rgba(220,190,120,0.6); border-radius: 5px; color: #0a0f1a; font-size: 0.7rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; }
+
+    /* Card */
+    .card { background: rgba(10,15,30,0.95); border-radius: 12px; border: 1px solid rgba(168,212,230,0.25); box-shadow: 0 15px 50px rgba(0,0,0,0.5), 0 0 30px rgba(168,212,230,0.1); overflow: hidden; }
+    .card-thumb { background: linear-gradient(135deg, rgba(107,168,194,0.2), rgba(140,120,180,0.15)); display: flex; align-items: center; justify-content: center; border-bottom: 1px solid rgba(168,212,230,0.2); }
+    .card-thumb span { font-size: 2rem; opacity: 0.3; }
+    .card-body { padding: 0.8rem; }
+    .card-title { font-size: 0.9rem; font-weight: 700; color: #fff; margin-bottom: 0.25rem; }
+    .card-type { font-size: 0.6rem; color: var(--accent); text-transform: uppercase; letter-spacing: 0.08em; opacity: 0.8; margin-bottom: 0.4rem; }
+    .card-desc { font-size: 0.7rem; color: rgba(255,255,255,0.6); line-height: 1.4; }
+
+    /* Right Panel States */
+    .section-head { font-size: 0.6rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(255,255,255,0.8); padding-bottom: 0.4rem; margin-bottom: 0.6rem; border-bottom: 1px solid var(--border); }
+    .right-content { padding: 1rem; flex: 1; display: flex; flex-direction: column; }
+    .about-text { font-size: 0.7rem; color: rgba(255,255,255,0.6); line-height: 1.5; margin-bottom: 0.75rem; }
+    .contact-row { padding: 0.3rem 0; }
+    .contact-label { font-size: 0.6rem; color: rgba(168,212,230,0.5); text-transform: uppercase; letter-spacing: 0.08em; }
+    .contact-val { font-size: 0.7rem; color: rgba(255,255,255,0.8); }
+
+    /* Expanded right panel */
+    .banner { height: 160px; background: linear-gradient(135deg, rgba(107,168,194,0.2), rgba(140,120,180,0.15), rgba(224,192,128,0.1)); display: flex; align-items: center; justify-content: center; border-bottom: 1px solid var(--border); position: relative; }
+    .banner span { font-size: 3rem; opacity: 0.15; color: rgba(168,212,230,0.5); }
+    .banner-fade { position: absolute; bottom: 0; left: 0; right: 0; height: 50px; background: linear-gradient(to top, rgba(10,15,25,0.9), transparent); }
+    .project-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 0.5rem; margin-bottom: 0.75rem; }
+    .project-title { font-size: 1.1rem; font-weight: 700; color: #fff; line-height: 1.2; }
+    .type-badge { padding: 0.2rem 0.5rem; background: rgba(224,192,128,0.15); border: 1px solid rgba(224,192,128,0.3); border-radius: 3px; color: var(--accent); font-size: 0.55rem; text-transform: uppercase; letter-spacing: 0.06em; white-space: nowrap; }
+    .project-desc { font-size: 0.75rem; color: rgba(255,255,255,0.65); line-height: 1.6; margin-bottom: 0.75rem; }
+    .divider { height: 1px; background: linear-gradient(90deg, transparent, var(--border), transparent); margin: 0.75rem 0; }
+    .btn-primary { display: flex; align-items: center; justify-content: center; gap: 0.4rem; padding: 0.6rem 0.8rem; background: linear-gradient(135deg, var(--accent), rgba(180,140,70,0.95)); border: 1px solid rgba(220,190,120,0.6); border-radius: 5px; color: #0a0f1a; font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; cursor: pointer; margin-bottom: 0.5rem; }
+    .btn-secondary { display: flex; align-items: center; justify-content: center; gap: 0.4rem; padding: 0.5rem 0.8rem; background: transparent; border: 1px solid rgba(168,212,230,0.3); border-radius: 5px; color: rgba(168,212,230,0.8); font-size: 0.65rem; font-weight: 500; text-transform: uppercase; letter-spacing: 0.06em; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <div class="controls">
+    <div class="section" style="margin-top:0">View Mode</div>
+    <div class="mode-toggle">
+      <button class="mode-btn active" data-mode="landing">Landing</button>
+      <button class="mode-btn" data-mode="expanded">Project View</button>
+    </div>
+
+    <div class="section">Presets</div>
+    <div class="presets">
+      <button class="preset active" data-preset="current">Current</button>
+      <button class="preset" data-preset="compact">Compact</button>
+      <button class="preset" data-preset="spacious">Spacious</button>
+      <button class="preset" data-preset="contrast">High Contrast</button>
+    </div>
+
+    <div class="section">Left Panel</div>
+    <div class="row"><label>Default Width</label><input type="range" id="leftWidth" min="160" max="260" value="200"><span id="leftWidthV">200px</span></div>
+    <div class="row"><label>Expanded</label><input type="range" id="leftExpanded" min="240" max="320" value="280"><span id="leftExpandedV">280px</span></div>
+
+    <div class="section">Right Panel</div>
+    <div class="row"><label>Default Width</label><input type="range" id="rightWidth" min="200" max="300" value="260"><span id="rightWidthV">260px</span></div>
+    <div class="row"><label>Expanded</label><input type="range" id="rightExpanded" min="300" max="400" value="340"><span id="rightExpandedV">340px</span></div>
+    <div class="row"><label>Banner Height</label><input type="range" id="bannerHeight" min="120" max="220" value="160"><span id="bannerHeightV">160px</span></div>
+
+    <div class="section">Center Card</div>
+    <div class="row"><label>Card Width</label><input type="range" id="cardWidth" min="180" max="300" value="220"><span id="cardWidthV">220px</span></div>
+    <div class="row"><label>Thumb Height</label><input type="range" id="cardThumb" min="80" max="160" value="110"><span id="cardThumbV">110px</span></div>
+    <div class="row"><label>Show Card</label><input type="checkbox" id="showCard" checked></div>
+
+    <div class="section">Colors</div>
+    <div class="row"><label>Accent</label><input type="color" id="accentColor" value="#e0c080"><span id="accentColorV">#e0c080</span></div>
+    <div class="row"><label>Border</label><input type="color" id="borderColor" value="#1a2a3a"><span id="borderColorV">#1a2a3a</span></div>
+    <div class="row"><label>Glow</label><input type="color" id="glowColor" value="#6ba8c2"><span id="glowColorV">#6ba8c2</span></div>
+
+    <div class="section">Typography</div>
+    <div class="row"><label>Nav Size</label><input type="range" id="navSize" min="0.6" max="0.85" step="0.05" value="0.7"><span id="navSizeV">0.7rem</span></div>
+    <div class="row"><label>Title Size</label><input type="range" id="titleSize" min="0.9" max="1.4" step="0.1" value="1.1"><span id="titleSizeV">1.1rem</span></div>
+
+    <div class="section">Spacing</div>
+    <div class="row"><label>Panel Padding</label><input type="range" id="panelPad" min="0.75" max="1.5" step="0.25" value="1"><span id="panelPadV">1rem</span></div>
+  </div>
+
+  <div class="preview-wrap">
+    <div class="preview" id="preview">
+      <div class="layout" id="layout">
+        <!-- Left Panel -->
+        <div class="left-panel" id="leftPanel">
+          <div class="brand">
+            <div class="brand-icon">✧</div>
+            <div><div class="brand-text">Dr. Benis</div><div class="brand-sub">Archive</div></div>
+          </div>
+          <div class="nav-item" data-nav="home"><span>◇</span><span>Home</span></div>
+          <div class="nav-item active" data-nav="projects"><span>◈</span><span>Projects</span><span style="margin-left:auto;font-size:0.5rem;opacity:0.5">▼</span></div>
+          <div class="project-list" id="projectList">
+            <div class="project-item active" data-idx="0"><span>◆</span><span>The Manifesto</span></div>
+            <div class="project-item" data-idx="1"><span>◇</span><span>QR Code Project</span></div>
+            <div class="project-item" data-idx="2"><span>◇</span><span>PowerPoint</span></div>
+            <div class="project-item" data-idx="3"><span>◇</span><span>Video Work</span></div>
+          </div>
+          <div class="nav-item" data-nav="about"><span>○</span><span>About</span></div>
+          <div class="nav-item" data-nav="contact"><span>△</span><span>Contact</span></div>
+        </div>
+
+        <!-- Center -->
+        <div class="center">
+          <div class="circle-frame" id="frame">
+            <div class="circle" id="c1"></div>
+            <div class="circle" id="c2"></div>
+            <div class="circle" id="c3"></div>
+
+            <!-- Card (shown in expanded mode) -->
+            <div class="card" id="card">
+              <div class="card-thumb" id="cardThumbEl"><span>✧</span></div>
+              <div class="card-body">
+                <div class="card-title" id="cardTitle">The Manifesto</div>
+                <div class="card-type">writing</div>
+                <div class="card-desc">My thoughts and philosophy.</div>
+              </div>
+            </div>
+
+            <div class="open-btn" id="openBtn">✧ Open ✧</div>
+          </div>
+        </div>
+
+        <!-- Right Panel -->
+        <div class="right-panel" id="rightPanel">
+          <!-- Default state -->
+          <div class="right-content" id="rightDefault">
+            <div class="section-head">About</div>
+            <p class="about-text">Welcome to the Archive — a collection of creative experiments and failed projects.</p>
+            <p class="about-text" style="color:rgba(168,212,230,0.5);font-size:0.65rem;">Click Open to reveal a random project.</p>
+            <div style="flex:1"></div>
+            <div class="section-head">Connect</div>
+            <div class="contact-row"><div class="contact-label">Twitter</div><div class="contact-val">@doctorbenis</div></div>
+            <div class="contact-row"><div class="contact-label">Email</div><div class="contact-val">hello@example.com</div></div>
+          </div>
+
+          <!-- Expanded state -->
+          <div id="rightExpanded" style="display:none;height:100%;flex-direction:column;">
+            <div class="banner" id="bannerEl"><span>✧</span><div class="banner-fade"></div></div>
+            <div class="right-content">
+              <div class="project-header">
+                <span class="project-title" id="panelTitle">The Manifesto</span>
+                <span class="type-badge">writing</span>
+              </div>
+              <p class="project-desc">My thoughts and philosophy on creativity, art, and the absurdity of existence.</p>
+              <div class="divider"></div>
+              <div style="font-size:0.65rem;color:rgba(168,212,230,0.5);margin-bottom:0.5rem;">
+                <span style="text-transform:uppercase;letter-spacing:0.06em;">Project ID:</span>
+                <span style="color:rgba(168,212,230,0.8);font-family:monospace;margin-left:0.3rem;">#001</span>
+              </div>
+              <div style="flex:1"></div>
+              <button class="btn-primary"><span>View Project</span><span>→</span></button>
+              <button class="btn-secondary"><span>✧</span><span>Reveal Another</span></button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="output-area">
+      <button class="copy-btn" onclick="copyOutput()">Copy</button>
+      <div class="output-text" id="output">Toggle between Landing and Project View to see both states.</div>
+    </div>
+  </div>
+
+  <script>
+    const D = { leftWidth:200, leftExpanded:280, rightWidth:260, rightExpanded:340, bannerHeight:160, cardWidth:220, cardThumb:110, showCard:true, accentColor:'#e0c080', borderColor:'#1a2a3a', glowColor:'#6ba8c2', navSize:0.7, titleSize:1.1, panelPad:1 };
+    const P = {
+      current: {...D},
+      compact: { ...D, leftWidth:180, leftExpanded:240, rightWidth:220, rightExpanded:300, bannerHeight:130, cardWidth:190, cardThumb:90, navSize:0.65, titleSize:1, panelPad:0.75 },
+      spacious: { ...D, leftWidth:220, leftExpanded:300, rightWidth:280, rightExpanded:380, bannerHeight:200, cardWidth:260, cardThumb:130, navSize:0.75, titleSize:1.3, panelPad:1.25 },
+      contrast: { ...D, accentColor:'#f0d090', borderColor:'#2a4a6a', glowColor:'#8ac8e2' }
+    };
+    const S = {...D};
+    let mode = 'landing';
+
+    const ids = ['leftWidth','leftExpanded','rightWidth','rightExpanded','bannerHeight','cardWidth','cardThumb','showCard','accentColor','borderColor','glowColor','navSize','titleSize','panelPad'];
+    const els = {}; ids.forEach(id => els[id] = document.getElementById(id));
+
+    function sync() {
+      ids.forEach(id => {
+        const el = els[id];
+        if(el.type === 'checkbox') S[id] = el.checked;
+        else if(el.type === 'color') S[id] = el.value;
+        else S[id] = parseFloat(el.value);
+      });
+    }
+    function load() {
+      ids.forEach(id => {
+        if(els[id].type === 'checkbox') els[id].checked = S[id];
+        else els[id].value = S[id];
+      });
+    }
+    function vals() {
+      ids.forEach(id => {
+        const v = S[id], el = document.getElementById(id+'V');
+        if(el) el.textContent = typeof v === 'number' ? (v < 10 ? v+'rem' : v+'px') : v;
+      });
+    }
+    function hex2rgb(h) { const r = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(h); return r ? `${parseInt(r[1],16)},${parseInt(r[2],16)},${parseInt(r[3],16)}` : '0,0,0'; }
+
+    function render() {
+      const root = document.getElementById('layout');
+      root.style.setProperty('--accent', S.accentColor);
+      root.style.setProperty('--border', `rgba(${hex2rgb(S.borderColor)},0.2)`);
+      root.style.setProperty('--glow', S.glowColor);
+
+      const isExpanded = mode === 'expanded';
+
+      // Panels
+      document.getElementById('leftPanel').style.width = (isExpanded ? S.leftExpanded : S.leftWidth) + 'px';
+      document.getElementById('rightPanel').style.width = (isExpanded ? S.rightExpanded : S.rightWidth) + 'px';
+
+      // Right panel state
+      document.getElementById('rightDefault').style.display = isExpanded ? 'none' : 'flex';
+      document.getElementById('rightExpanded').style.display = isExpanded ? 'flex' : 'none';
+      document.getElementById('bannerEl').style.height = S.bannerHeight + 'px';
+
+      // Frame size based on mode
+      const frameSize = isExpanded ? 280 : 280;
+      document.getElementById('frame').style.width = frameSize + 'px';
+      document.getElementById('frame').style.height = frameSize + 'px';
+
+      // Card
+      const card = document.getElementById('card');
+      card.style.display = (isExpanded && S.showCard) ? 'block' : 'none';
+      card.style.width = S.cardWidth + 'px';
+      document.getElementById('cardThumbEl').style.height = S.cardThumb + 'px';
+
+      // Open button - hide in expanded mode
+      document.getElementById('openBtn').style.display = isExpanded ? 'none' : 'block';
+      document.getElementById('openBtn').style.background = `linear-gradient(135deg, ${S.accentColor}, rgba(180,140,70,0.95))`;
+
+      // Circles
+      const c1 = document.getElementById('c1'), c2 = document.getElementById('c2'), c3 = document.getElementById('c3');
+      c1.style.width = c1.style.height = '180px'; c1.style.top = c1.style.left = '50%'; c1.style.transform = 'translate(-50%,-50%)';
+      c2.style.width = c2.style.height = '120px'; c2.style.top = c2.style.left = '50%'; c2.style.transform = 'translate(-50%,-50%)'; c2.style.borderColor = 'rgba(168,212,230,0.4)';
+      c3.style.width = c3.style.height = '60px'; c3.style.top = c3.style.left = '50%'; c3.style.transform = 'translate(-50%,-50%)'; c3.style.borderColor = `rgba(${hex2rgb(S.accentColor)},0.3)`;
+
+      // Typography
+      document.querySelectorAll('.nav-item').forEach(n => n.style.fontSize = S.navSize + 'rem');
+      document.querySelectorAll('.project-title').forEach(t => t.style.fontSize = S.titleSize + 'rem');
+      document.querySelectorAll('.right-content').forEach(c => c.style.padding = S.panelPad + 'rem');
+      document.querySelectorAll('.brand').forEach(c => c.style.padding = S.panelPad + 'rem');
+
+      // Buttons
+      document.querySelectorAll('.btn-primary, .btn-secondary').forEach(b => b.style.borderRadius = '5px');
+    }
+
+    function output() {
+      const diffs = [];
+      if(S.leftWidth !== D.leftWidth) diffs.push(`left panel default ${S.leftWidth}px`);
+      if(S.leftExpanded !== D.leftExpanded) diffs.push(`left expanded ${S.leftExpanded}px`);
+      if(S.rightWidth !== D.rightWidth) diffs.push(`right panel default ${S.rightWidth}px`);
+      if(S.rightExpanded !== D.rightExpanded) diffs.push(`right expanded ${S.rightExpanded}px`);
+      if(S.bannerHeight !== D.bannerHeight) diffs.push(`banner height ${S.bannerHeight}px`);
+      if(S.cardWidth !== D.cardWidth) diffs.push(`card width ${S.cardWidth}px`);
+      if(S.accentColor !== D.accentColor) diffs.push(`accent ${S.accentColor}`);
+      if(S.titleSize !== D.titleSize) diffs.push(`title size ${S.titleSize}rem`);
+      if(S.panelPad !== D.panelPad) diffs.push(`padding ${S.panelPad}rem`);
+      document.getElementById('output').textContent = diffs.length ? `Update: ${diffs.join(', ')}.` : 'Using current settings. Mode: ' + mode;
+    }
+
+    function update() { vals(); render(); output(); }
+    function setMode(m) {
+      mode = m;
+      document.querySelectorAll('.mode-btn').forEach(b => b.classList.toggle('active', b.dataset.mode === m));
+      update();
+    }
+    function preset(n) { Object.assign(S, P[n]); load(); update(); document.querySelectorAll('.preset').forEach(b => b.classList.toggle('active', b.dataset.preset === n)); }
+    function copyOutput() { navigator.clipboard.writeText(document.getElementById('output').textContent); }
+
+    // Events
+    ids.forEach(id => els[id].addEventListener('input', () => { sync(); update(); document.querySelectorAll('.preset').forEach(b => b.classList.remove('active')); }));
+    document.querySelectorAll('.preset').forEach(b => b.addEventListener('click', () => preset(b.dataset.preset)));
+    document.querySelectorAll('.mode-btn').forEach(b => b.addEventListener('click', () => setMode(b.dataset.mode)));
+
+    // Project selection
+    document.querySelectorAll('.project-item').forEach(item => {
+      item.addEventListener('click', () => {
+        document.querySelectorAll('.project-item').forEach(p => { p.classList.remove('active'); p.querySelector('span').textContent = '◇'; });
+        item.classList.add('active');
+        item.querySelector('span').textContent = '◆';
+        const names = ['The Manifesto', 'QR Code Project', 'PowerPoint', 'Video Work'];
+        const idx = parseInt(item.dataset.idx);
+        document.getElementById('cardTitle').textContent = names[idx];
+        document.getElementById('panelTitle').textContent = names[idx];
+        setMode('expanded');
+      });
+    });
+
+    update();
+  </script>
+</body>
+</html>

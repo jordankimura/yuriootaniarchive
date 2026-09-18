@@ -1,0 +1,1190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Three.js Summon Animation Playground</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #0a0a0a;
+      color: #e0e0e0;
+      padding: 20px;
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 1600px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 400px 1fr;
+      gap: 30px;
+    }
+
+    h1 {
+      grid-column: 1 / -1;
+      font-size: 28px;
+      margin-bottom: 10px;
+      color: #7dd3fc;
+    }
+
+    .subtitle {
+      grid-column: 1 / -1;
+      font-size: 14px;
+      color: #888;
+      margin-bottom: 20px;
+    }
+
+    .controls {
+      background: #1a1a1a;
+      padding: 25px;
+      border-radius: 12px;
+      border: 1px solid #333;
+      height: fit-content;
+    }
+
+    .preview-section {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .preview {
+      background: #1a1a1a;
+      border-radius: 12px;
+      border: 1px solid #333;
+      padding: 30px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+    }
+
+    #canvas-container {
+      position: relative;
+      width: 600px;
+      height: 600px;
+      border-radius: 8px;
+      overflow: hidden;
+      background: #050510;
+    }
+
+    canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+
+    .trigger-btn {
+      padding: 12px 40px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border: 2px solid #7dd3fc;
+      border-radius: 8px;
+      color: white;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      transition: all 0.3s;
+    }
+
+    .trigger-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(125, 211, 252, 0.4);
+    }
+
+    .trigger-btn:active {
+      transform: translateY(0);
+    }
+
+    .section {
+      margin-bottom: 25px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid #333;
+    }
+
+    .section:last-child {
+      border-bottom: none;
+    }
+
+    .section-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: #7dd3fc;
+      margin-bottom: 15px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .control-group {
+      margin-bottom: 15px;
+    }
+
+    label {
+      display: block;
+      font-size: 13px;
+      color: #aaa;
+      margin-bottom: 6px;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      height: 4px;
+      background: #333;
+      outline: none;
+      border-radius: 2px;
+      -webkit-appearance: none;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 16px;
+      height: 16px;
+      background: #7dd3fc;
+      cursor: pointer;
+      border-radius: 50%;
+    }
+
+    input[type="range"]::-moz-range-thumb {
+      width: 16px;
+      height: 16px;
+      background: #7dd3fc;
+      cursor: pointer;
+      border-radius: 50%;
+      border: none;
+    }
+
+    .value-display {
+      display: inline-block;
+      font-family: 'Monaco', monospace;
+      font-size: 12px;
+      color: #7dd3fc;
+      margin-left: 8px;
+    }
+
+    select, input[type="color"] {
+      width: 100%;
+      padding: 8px;
+      background: #0a0a0a;
+      border: 1px solid #333;
+      border-radius: 6px;
+      color: #e0e0e0;
+      font-size: 13px;
+    }
+
+    input[type="color"] {
+      height: 40px;
+      cursor: pointer;
+    }
+
+    .checkbox-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+    }
+
+    .presets {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .preset-btn {
+      padding: 10px;
+      background: #0a0a0a;
+      border: 1px solid #333;
+      border-radius: 6px;
+      color: #e0e0e0;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .preset-btn:hover {
+      background: #222;
+      border-color: #7dd3fc;
+    }
+
+    .output {
+      background: #1a1a1a;
+      border-radius: 12px;
+      border: 1px solid #333;
+      padding: 25px;
+    }
+
+    .output-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+
+    .output-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: #7dd3fc;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .copy-btn {
+      padding: 6px 16px;
+      background: #333;
+      border: 1px solid #555;
+      border-radius: 6px;
+      color: #e0e0e0;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .copy-btn:hover {
+      background: #444;
+      border-color: #7dd3fc;
+    }
+
+    .copy-btn.copied {
+      background: #4ade80;
+      border-color: #4ade80;
+      color: #000;
+    }
+
+    pre {
+      background: #0a0a0a;
+      padding: 20px;
+      border-radius: 8px;
+      overflow-x: auto;
+      font-family: 'Monaco', monospace;
+      font-size: 13px;
+      line-height: 1.6;
+      color: #e0e0e0;
+    }
+
+    @media (max-width: 1400px) {
+      .container {
+        grid-template-columns: 1fr;
+      }
+
+      #canvas-container {
+        width: 100%;
+        max-width: 600px;
+        height: 500px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Three.js Summon Animation</h1>
+    <p class="subtitle">Configure the FGO-style card summon effect with orbiting particles and dramatic reveals</p>
+
+    <div class="controls">
+      <div class="presets">
+        <button class="preset-btn" onclick="loadPreset('fgoDefault')">FGO Default</button>
+        <button class="preset-btn" onclick="loadPreset('goldRare')">Gold Rare</button>
+        <button class="preset-btn" onclick="loadPreset('rainbowSSR')">Rainbow SSR</button>
+        <button class="preset-btn" onclick="loadPreset('quickSummon')">Quick Summon</button>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Particles</div>
+        <div class="control-group">
+          <label>Particle Count <span class="value-display" id="particleCount-value">24</span></label>
+          <input type="range" id="particleCount" min="12" max="48" value="24" step="1">
+        </div>
+        <div class="control-group">
+          <label>Orbit Radius <span class="value-display" id="orbitRadius-value">180px</span></label>
+          <input type="range" id="orbitRadius" min="100" max="300" value="180" step="10">
+        </div>
+        <div class="control-group">
+          <label>Orbit Speed <span class="value-display" id="orbitSpeed-value">3</span></label>
+          <input type="range" id="orbitSpeed" min="1" max="10" value="3" step="0.5">
+        </div>
+        <div class="control-group">
+          <label>Particle Size <span class="value-display" id="particleSize-value">4px</span></label>
+          <input type="range" id="particleSize" min="2" max="10" value="4" step="0.5">
+        </div>
+        <div class="control-group">
+          <label>Glow Intensity <span class="value-display" id="glowIntensity-value">60%</span></label>
+          <input type="range" id="glowIntensity" min="0" max="100" value="60" step="5">
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Magical Glyph Circle</div>
+        <div class="control-group checkbox-group">
+          <input type="checkbox" id="showRing" checked>
+          <label for="showRing" style="margin: 0;">Show Glyph Circle</label>
+        </div>
+        <div class="control-group">
+          <label>Glyph Complexity <span class="value-display" id="glyphComplexity-value">3</span></label>
+          <input type="range" id="glyphComplexity" min="1" max="5" value="3" step="1">
+        </div>
+        <div class="control-group">
+          <label>Glyph Rotation Speed <span class="value-display" id="glyphRotationSpeed-value">1</span></label>
+          <input type="range" id="glyphRotationSpeed" min="0" max="5" value="1" step="0.5">
+        </div>
+        <div class="control-group">
+          <label>Ring Radius <span class="value-display" id="ringRadius-value">250px</span></label>
+          <input type="range" id="ringRadius" min="150" max="400" value="250" step="10">
+        </div>
+        <div class="control-group">
+          <label>Glyph Glow <span class="value-display" id="ringGlow-value">50%</span></label>
+          <input type="range" id="ringGlow" min="0" max="100" value="50" step="5">
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Central Wisp</div>
+        <div class="control-group checkbox-group">
+          <input type="checkbox" id="showWisp" checked>
+          <label for="showWisp" style="margin: 0;">Show Wisp</label>
+        </div>
+        <div class="control-group">
+          <label>Wisp Size <span class="value-display" id="wispSize-value">30px</span></label>
+          <input type="range" id="wispSize" min="10" max="80" value="30" step="5">
+        </div>
+        <div class="control-group">
+          <label>Pulse Speed <span class="value-display" id="wispPulseSpeed-value">2</span></label>
+          <input type="range" id="wispPulseSpeed" min="0.5" max="5" value="2" step="0.5">
+        </div>
+        <div class="control-group">
+          <label>Wisp Glow <span class="value-display" id="wispGlow-value">80%</span></label>
+          <input type="range" id="wispGlow" min="0" max="100" value="80" step="5">
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Animation</div>
+        <div class="control-group">
+          <label>Flash Duration <span class="value-display" id="flashDuration-value">0.8s</span></label>
+          <input type="range" id="flashDuration" min="0.3" max="1.5" value="0.8" step="0.1">
+        </div>
+        <div class="control-group">
+          <label>Orbit Duration <span class="value-display" id="orbitDuration-value">2s</span></label>
+          <input type="range" id="orbitDuration" min="1" max="5" value="2" step="0.5">
+        </div>
+        <div class="control-group">
+          <label>Card Entrance Delay <span class="value-display" id="cardDelay-value">1.5s</span></label>
+          <input type="range" id="cardDelay" min="1" max="3" value="1.5" step="0.5">
+        </div>
+        <div class="control-group">
+          <label>Speed Multiplier <span class="value-display" id="speedMultiplier-value">1x</span></label>
+          <input type="range" id="speedMultiplier" min="0.5" max="2" value="1" step="0.1">
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Colors</div>
+        <div class="control-group">
+          <label>Particle Color Preset</label>
+          <select id="particleColorPreset">
+            <option value="fgoBlue">FGO Blue</option>
+            <option value="goldRare">Gold Rare</option>
+            <option value="rainbowSSR">Rainbow SSR</option>
+            <option value="custom">Custom</option>
+          </select>
+        </div>
+        <div class="control-group">
+          <label>Custom Particle Color</label>
+          <input type="color" id="particleColor" value="#7dd3fc">
+        </div>
+        <div class="control-group">
+          <label>Flash Color</label>
+          <input type="color" id="flashColor" value="#ffffff">
+        </div>
+        <div class="control-group">
+          <label>Glyph Color</label>
+          <input type="color" id="ringColor" value="#4fb3d4">
+        </div>
+        <div class="control-group">
+          <label>Wisp Color</label>
+          <input type="color" id="wispColor" value="#ffffff">
+        </div>
+        <div class="control-group">
+          <label>Background Color</label>
+          <input type="color" id="bgColor" value="#050510">
+        </div>
+      </div>
+    </div>
+
+    <div class="preview-section">
+      <div class="preview">
+        <div id="canvas-container"></div>
+        <button class="trigger-btn" onclick="triggerSummon()">Trigger Summon</button>
+      </div>
+
+      <div class="output">
+        <div class="output-header">
+          <div class="output-title">Configuration Object</div>
+          <button class="copy-btn" onclick="copyConfig()">Copy</button>
+        </div>
+        <pre id="config-output"></pre>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+  <script>
+    const DEFAULTS = {
+      particleCount: 24,
+      orbitRadius: 180,
+      orbitSpeed: 3,
+      particleSize: 4,
+      glowIntensity: 60,
+      showRing: true,
+      ringRadius: 250,
+      ringThickness: 3,
+      ringGlow: 50,
+      glyphComplexity: 3,
+      glyphRotationSpeed: 1,
+      showWisp: true,
+      wispSize: 30,
+      wispPulseSpeed: 2,
+      wispGlow: 80,
+      flashDuration: 0.8,
+      orbitDuration: 2,
+      cardDelay: 1.5,
+      speedMultiplier: 1,
+      particleColorPreset: 'fgoBlue',
+      particleColor: '#7dd3fc',
+      flashColor: '#ffffff',
+      ringColor: '#4fb3d4',
+      wispColor: '#ffffff',
+      bgColor: '#050510'
+    };
+
+    const state = { ...DEFAULTS };
+
+    const PRESETS = {
+      fgoDefault: {
+        particleCount: 24,
+        orbitRadius: 180,
+        orbitSpeed: 3,
+        particleSize: 4,
+        glowIntensity: 60,
+        showRing: true,
+        ringRadius: 250,
+        ringGlow: 50,
+        glyphComplexity: 3,
+        glyphRotationSpeed: 1,
+        showWisp: true,
+        wispSize: 30,
+        wispPulseSpeed: 2,
+        wispGlow: 80,
+        flashDuration: 0.8,
+        orbitDuration: 2,
+        cardDelay: 1.5,
+        speedMultiplier: 1,
+        particleColorPreset: 'fgoBlue',
+        particleColor: '#7dd3fc',
+        flashColor: '#ffffff',
+        ringColor: '#4fb3d4',
+        wispColor: '#ffffff',
+        bgColor: '#050510'
+      },
+      goldRare: {
+        particleCount: 36,
+        orbitRadius: 200,
+        orbitSpeed: 2,
+        particleSize: 6,
+        glowIntensity: 80,
+        showRing: true,
+        ringRadius: 280,
+        ringGlow: 70,
+        glyphComplexity: 4,
+        glyphRotationSpeed: 0.5,
+        showWisp: true,
+        wispSize: 40,
+        wispPulseSpeed: 1.5,
+        wispGlow: 90,
+        flashDuration: 1.2,
+        orbitDuration: 3,
+        cardDelay: 2,
+        speedMultiplier: 0.8,
+        particleColorPreset: 'goldRare',
+        particleColor: '#fbbf24',
+        flashColor: '#fef3c7',
+        ringColor: '#fbbf24',
+        wispColor: '#fef3c7',
+        bgColor: '#1a0f00'
+      },
+      rainbowSSR: {
+        particleCount: 48,
+        orbitRadius: 220,
+        orbitSpeed: 1.5,
+        particleSize: 5,
+        glowIntensity: 90,
+        showRing: true,
+        ringRadius: 300,
+        ringGlow: 80,
+        glyphComplexity: 5,
+        glyphRotationSpeed: 0.3,
+        showWisp: true,
+        wispSize: 50,
+        wispPulseSpeed: 1,
+        wispGlow: 95,
+        flashDuration: 1.5,
+        orbitDuration: 4,
+        cardDelay: 2.5,
+        speedMultiplier: 0.6,
+        particleColorPreset: 'rainbowSSR',
+        particleColor: '#a78bfa',
+        flashColor: '#ffffff',
+        ringColor: '#a78bfa',
+        wispColor: '#fce7f3',
+        bgColor: '#0f0520'
+      },
+      quickSummon: {
+        particleCount: 16,
+        orbitRadius: 150,
+        orbitSpeed: 6,
+        particleSize: 3,
+        glowIntensity: 40,
+        showRing: false,
+        ringRadius: 200,
+        ringGlow: 30,
+        glyphComplexity: 2,
+        glyphRotationSpeed: 2,
+        showWisp: true,
+        wispSize: 20,
+        wispPulseSpeed: 4,
+        wispGlow: 60,
+        flashDuration: 0.4,
+        orbitDuration: 1,
+        cardDelay: 1,
+        speedMultiplier: 1.5,
+        particleColorPreset: 'fgoBlue',
+        particleColor: '#7dd3fc',
+        flashColor: '#ffffff',
+        ringColor: '#4fb3d4',
+        wispColor: '#ffffff',
+        bgColor: '#050510'
+      }
+    };
+
+    // Three.js setup
+    let scene, camera, renderer, particles = [], ring, wisp, glyphSVG, animationFrame;
+    let isAnimating = false;
+    let wispPulseTime = 0;
+
+    function initThreeJS() {
+      const container = document.getElementById('canvas-container');
+      const width = container.clientWidth;
+      const height = container.clientHeight;
+
+      scene = new THREE.Scene();
+      scene.background = new THREE.Color(state.bgColor);
+
+      camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000);
+      camera.position.z = 400;
+
+      renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+      renderer.setSize(width, height);
+      container.appendChild(renderer.domElement);
+
+      createGlyphCircle();
+      createWisp();
+      createParticles();
+
+      animate();
+    }
+
+    function createParticles() {
+      particles.forEach(p => scene.remove(p));
+      particles = [];
+
+      const color = getParticleColor();
+
+      for (let i = 0; i < state.particleCount; i++) {
+        const geometry = new THREE.SphereGeometry(state.particleSize, 16, 16);
+        const material = new THREE.MeshBasicMaterial({
+          color: color,
+          transparent: true,
+          opacity: 0
+        });
+        const particle = new THREE.Mesh(geometry, material);
+
+        const angle = (i / state.particleCount) * Math.PI * 2;
+        particle.userData = {
+          angle: angle,
+          baseAngle: angle,
+          radius: state.orbitRadius
+        };
+
+        scene.add(particle);
+        particles.push(particle);
+      }
+    }
+
+    function createGlyphCircle() {
+      if (glyphSVG) glyphSVG.remove();
+
+      const container = document.getElementById('canvas-container');
+      const svgNS = "http://www.w3.org/2000/svg";
+      const svg = document.createElementNS(svgNS, "svg");
+      svg.setAttribute("width", "100%");
+      svg.setAttribute("height", "100%");
+      svg.style.position = "absolute";
+      svg.style.top = "0";
+      svg.style.left = "0";
+      svg.style.pointerEvents = "none";
+      svg.style.opacity = "0";
+      svg.id = "glyph-svg";
+
+      const centerX = container.clientWidth / 2;
+      const centerY = container.clientHeight / 2;
+      const radius = state.ringRadius;
+      const complexity = state.glyphComplexity;
+
+      const g = document.createElementNS(svgNS, "g");
+      g.setAttribute("transform", `translate(${centerX}, ${centerY})`);
+
+      // Create multiple concentric circles with patterns
+      for (let layer = 0; layer <= complexity; layer++) {
+        const r = radius * (0.6 + layer * 0.2);
+
+        // Main circle
+        const circle = document.createElementNS(svgNS, "circle");
+        circle.setAttribute("cx", "0");
+        circle.setAttribute("cy", "0");
+        circle.setAttribute("r", r);
+        circle.setAttribute("fill", "none");
+        circle.setAttribute("stroke", state.ringColor);
+        circle.setAttribute("stroke-width", layer === complexity ? "3" : "2");
+        circle.setAttribute("opacity", state.ringGlow / 100);
+        circle.style.filter = `drop-shadow(0 0 ${state.ringGlow / 10}px ${state.ringColor})`;
+        g.appendChild(circle);
+
+        // Add geometric patterns
+        const segments = 6 + layer * 6;
+        for (let i = 0; i < segments; i++) {
+          const angle = (i / segments) * Math.PI * 2;
+          const x1 = Math.cos(angle) * (r - 10);
+          const y1 = Math.sin(angle) * (r - 10);
+          const x2 = Math.cos(angle) * (r + 10);
+          const y2 = Math.sin(angle) * (r + 10);
+
+          const line = document.createElementNS(svgNS, "line");
+          line.setAttribute("x1", x1);
+          line.setAttribute("y1", y1);
+          line.setAttribute("x2", x2);
+          line.setAttribute("y2", y2);
+          line.setAttribute("stroke", state.ringColor);
+          line.setAttribute("stroke-width", "2");
+          line.setAttribute("opacity", (state.ringGlow / 100) * 0.6);
+          g.appendChild(line);
+
+          // Add small circles at intersections
+          if (layer > 0 && i % 2 === 0) {
+            const smallCircle = document.createElementNS(svgNS, "circle");
+            smallCircle.setAttribute("cx", x2);
+            smallCircle.setAttribute("cy", y2);
+            smallCircle.setAttribute("r", "3");
+            smallCircle.setAttribute("fill", state.ringColor);
+            smallCircle.setAttribute("opacity", state.ringGlow / 100);
+            g.appendChild(smallCircle);
+          }
+        }
+
+        // Add runes/symbols for higher complexity
+        if (complexity >= 3 && layer === complexity) {
+          const runeCount = 8;
+          for (let i = 0; i < runeCount; i++) {
+            const angle = (i / runeCount) * Math.PI * 2;
+            const x = Math.cos(angle) * r;
+            const y = Math.sin(angle) * r;
+
+            const text = document.createElementNS(svgNS, "text");
+            text.setAttribute("x", x);
+            text.setAttribute("y", y);
+            text.setAttribute("text-anchor", "middle");
+            text.setAttribute("dominant-baseline", "middle");
+            text.setAttribute("fill", state.ringColor);
+            text.setAttribute("font-size", "20");
+            text.setAttribute("font-family", "serif");
+            text.setAttribute("opacity", state.ringGlow / 100);
+            text.textContent = ["◇", "◆", "◈", "◉", "○", "●", "◐", "◑"][i];
+            g.appendChild(text);
+          }
+        }
+
+        // Add connecting lines between layers
+        if (layer > 0 && complexity >= 2) {
+          const prevR = radius * (0.6 + (layer - 1) * 0.2);
+          const connections = 12;
+          for (let i = 0; i < connections; i++) {
+            const angle = (i / connections) * Math.PI * 2 + (layer * 0.1);
+            const path = document.createElementNS(svgNS, "path");
+            const x1 = Math.cos(angle) * prevR;
+            const y1 = Math.sin(angle) * prevR;
+            const x2 = Math.cos(angle) * r;
+            const y2 = Math.sin(angle) * r;
+            path.setAttribute("d", `M ${x1} ${y1} L ${x2} ${y2}`);
+            path.setAttribute("stroke", state.ringColor);
+            path.setAttribute("stroke-width", "1");
+            path.setAttribute("opacity", (state.ringGlow / 100) * 0.3);
+            path.setAttribute("stroke-dasharray", "5,5");
+            g.appendChild(path);
+          }
+        }
+      }
+
+      // Add inner geometric pattern
+      if (complexity >= 2) {
+        const innerRadius = radius * 0.3;
+        const points = 6;
+        let pathData = "";
+        for (let i = 0; i <= points; i++) {
+          const angle = (i / points) * Math.PI * 2;
+          const x = Math.cos(angle) * innerRadius;
+          const y = Math.sin(angle) * innerRadius;
+          pathData += (i === 0 ? "M" : "L") + ` ${x} ${y}`;
+        }
+        const polygon = document.createElementNS(svgNS, "path");
+        polygon.setAttribute("d", pathData);
+        polygon.setAttribute("fill", "none");
+        polygon.setAttribute("stroke", state.ringColor);
+        polygon.setAttribute("stroke-width", "2");
+        polygon.setAttribute("opacity", state.ringGlow / 100);
+        g.appendChild(polygon);
+      }
+
+      svg.appendChild(g);
+      container.appendChild(svg);
+      glyphSVG = svg;
+    }
+
+    function createWisp() {
+      if (wisp) scene.remove(wisp);
+
+      const geometry = new THREE.SphereGeometry(state.wispSize, 32, 32);
+      const material = new THREE.MeshBasicMaterial({
+        color: state.wispColor,
+        transparent: true,
+        opacity: 0
+      });
+      wisp = new THREE.Mesh(geometry, material);
+      wisp.position.set(0, 0, 0);
+      scene.add(wisp);
+    }
+
+    function getParticleColor() {
+      const preset = state.particleColorPreset;
+      if (preset === 'custom') return new THREE.Color(state.particleColor);
+      if (preset === 'fgoBlue') return new THREE.Color('#7dd3fc');
+      if (preset === 'goldRare') return new THREE.Color('#fbbf24');
+      if (preset === 'rainbowSSR') return new THREE.Color('#a78bfa');
+      return new THREE.Color('#7dd3fc');
+    }
+
+    function animate() {
+      animationFrame = requestAnimationFrame(animate);
+
+      if (!isAnimating) {
+        // Orbit particles
+        particles.forEach(p => {
+          p.userData.angle += 0.01 * state.orbitSpeed * state.speedMultiplier;
+          p.position.x = Math.cos(p.userData.angle) * p.userData.radius;
+          p.position.y = Math.sin(p.userData.angle) * p.userData.radius;
+        });
+
+        // Pulse wisp
+        if (wisp && state.showWisp) {
+          wispPulseTime += 0.05 * state.wispPulseSpeed;
+          const pulseScale = 1 + Math.sin(wispPulseTime) * 0.3;
+          wisp.scale.set(pulseScale, pulseScale, pulseScale);
+          wisp.material.opacity = (0.4 + Math.sin(wispPulseTime) * 0.2) * (state.wispGlow / 100);
+        }
+
+        // Rotate glyph
+        if (glyphSVG && state.showRing && state.glyphRotationSpeed > 0) {
+          const g = glyphSVG.querySelector('g');
+          if (g) {
+            const currentRotation = parseFloat(g.getAttribute('data-rotation') || 0);
+            const newRotation = currentRotation + (0.5 * state.glyphRotationSpeed);
+            g.setAttribute('data-rotation', newRotation);
+            const centerX = document.getElementById('canvas-container').clientWidth / 2;
+            const centerY = document.getElementById('canvas-container').clientHeight / 2;
+            g.setAttribute('transform', `translate(${centerX}, ${centerY}) rotate(${newRotation})`);
+          }
+        }
+      }
+
+      renderer.render(scene, camera);
+    }
+
+    function triggerSummon() {
+      if (isAnimating) return;
+      isAnimating = true;
+
+      // Reset particles
+      particles.forEach((p, i) => {
+        const angle = (i / particles.length) * Math.PI * 2;
+        p.userData.angle = angle;
+        p.userData.baseAngle = angle;
+        p.material.opacity = 0;
+        p.scale.set(1, 1, 1);
+      });
+
+      // Reset wisp
+      if (wisp) {
+        wisp.material.opacity = 0;
+        wisp.scale.set(1, 1, 1);
+      }
+
+      // Reset glyph
+      if (glyphSVG) {
+        glyphSVG.style.opacity = "0";
+      }
+
+      // Update colors
+      scene.background = new THREE.Color(state.bgColor);
+      const particleColor = getParticleColor();
+      particles.forEach(p => p.material.color = particleColor);
+      if (wisp) wisp.material.color = new THREE.Color(state.wispColor);
+
+      // Animation sequence
+      const speed = state.speedMultiplier;
+      const flashDur = state.flashDuration * 1000 / speed;
+      const orbitDur = state.orbitDuration * 1000 / speed;
+      const cardDelay = state.cardDelay * 1000 / speed;
+
+      // 1. Glyph circle appears
+      if (state.showRing && glyphSVG) {
+        setTimeout(() => {
+          const duration = 600 / speed;
+          const startTime = Date.now();
+
+          function fadeInGlyph() {
+            const elapsed = Date.now() - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            glyphSVG.style.opacity = progress * (state.ringGlow / 100);
+
+            if (progress < 1) requestAnimationFrame(fadeInGlyph);
+          }
+          fadeInGlyph();
+        }, 100);
+      }
+
+      // 2. Wisp appears in center and starts pulsing
+      if (state.showWisp && wisp) {
+        setTimeout(() => {
+          const duration = 400 / speed;
+          const startTime = Date.now();
+          let localWispTime = 0;
+
+          function fadeInWisp() {
+            const elapsed = Date.now() - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+
+            localWispTime += 0.1 * state.wispPulseSpeed;
+            const pulseScale = 1 + Math.sin(localWispTime) * 0.4;
+            const pulseOpacity = 0.6 + Math.sin(localWispTime) * 0.3;
+
+            wisp.scale.set(pulseScale, pulseScale, pulseScale);
+            wisp.material.opacity = progress * pulseOpacity * (state.wispGlow / 100);
+
+            if (elapsed < orbitDur) requestAnimationFrame(fadeInWisp);
+          }
+          fadeInWisp();
+        }, 300 / speed);
+      }
+
+      // 3. Particles orbit around wisp
+      setTimeout(() => {
+        const duration = orbitDur;
+        const startTime = Date.now();
+
+        function orbitParticles() {
+          const elapsed = Date.now() - startTime;
+          const progress = Math.min(elapsed / duration, 1);
+
+          particles.forEach((p, i) => {
+            p.material.opacity = Math.min(progress * 2, 1) * (state.glowIntensity / 100);
+            p.userData.angle += 0.02 * state.orbitSpeed * speed;
+            p.position.x = Math.cos(p.userData.angle) * state.orbitRadius;
+            p.position.y = Math.sin(p.userData.angle) * state.orbitRadius;
+          });
+
+          if (progress < 1) requestAnimationFrame(orbitParticles);
+        }
+        orbitParticles();
+      }, 400 / speed);
+
+      // 4. Big flash when card appears
+      setTimeout(() => {
+        // Flash overlay
+        const flashOverlay = document.createElement('div');
+        flashOverlay.style.cssText = `
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: radial-gradient(circle, ${state.flashColor} 0%, ${state.wispColor}80 30%, transparent 70%);
+          pointer-events: none;
+          z-index: 1000;
+        `;
+        document.getElementById('canvas-container').appendChild(flashOverlay);
+
+        // Animate flash
+        let flashProgress = 0;
+        const flashInterval = setInterval(() => {
+          flashProgress += 0.05;
+          if (flashProgress <= 0.3) {
+            flashOverlay.style.opacity = flashProgress / 0.3;
+            flashOverlay.style.transform = `scale(${0.5 + flashProgress * 2})`;
+          } else {
+            flashOverlay.style.opacity = 1 - ((flashProgress - 0.3) / 0.7);
+            flashOverlay.style.transform = `scale(${0.5 + flashProgress * 3})`;
+          }
+
+          if (flashProgress >= 1) {
+            clearInterval(flashInterval);
+            flashOverlay.remove();
+          }
+        }, flashDur / 20);
+
+        // Fade out everything
+        const cardDuration = 800 / speed;
+        const startTime = Date.now();
+
+        function fadeOut() {
+          const elapsed = Date.now() - startTime;
+          const progress = Math.min(elapsed / cardDuration, 1);
+
+          particles.forEach(p => {
+            p.material.opacity = (1 - progress) * (state.glowIntensity / 100);
+          });
+
+          if (wisp) {
+            wisp.material.opacity = (1 - progress) * (state.wispGlow / 100);
+          }
+
+          if (glyphSVG) {
+            glyphSVG.style.opacity = (1 - progress * 0.7) * (state.ringGlow / 100);
+          }
+
+          if (progress < 1) requestAnimationFrame(fadeOut);
+          else {
+            isAnimating = false;
+          }
+        }
+        fadeOut();
+      }, cardDelay);
+    }
+
+    // Control handlers
+    function setupControls() {
+      const inputs = ['particleCount', 'orbitRadius', 'orbitSpeed', 'particleSize', 'glowIntensity',
+                      'ringRadius', 'ringGlow', 'glyphComplexity', 'glyphRotationSpeed',
+                      'wispSize', 'wispPulseSpeed', 'wispGlow',
+                      'flashDuration', 'orbitDuration', 'cardDelay', 'speedMultiplier'];
+
+      inputs.forEach(id => {
+        const input = document.getElementById(id);
+        const valueDisplay = document.getElementById(id + '-value');
+
+        input.addEventListener('input', (e) => {
+          let value = parseFloat(e.target.value);
+          state[id] = value;
+
+          let displayValue = value;
+          if (id.includes('Radius') || id.includes('Size') || id.includes('Thickness')) {
+            displayValue = value + 'px';
+          } else if (id.includes('Duration') || id === 'cardDelay') {
+            displayValue = value + 's';
+          } else if (id === 'speedMultiplier') {
+            displayValue = value + 'x';
+          } else if (id.includes('Intensity') || id.includes('Glow')) {
+            displayValue = value + '%';
+          }
+
+          valueDisplay.textContent = displayValue;
+
+          if (id.startsWith('particle') || id === 'orbitRadius' || id === 'orbitSpeed') {
+            createParticles();
+          } else if (id.startsWith('ring') || id.startsWith('glyph')) {
+            createGlyphCircle();
+          } else if (id.startsWith('wisp')) {
+            createWisp();
+          }
+
+          updatePrompt();
+        });
+      });
+
+      document.getElementById('showRing').addEventListener('change', (e) => {
+        state.showRing = e.target.checked;
+        if (glyphSVG) {
+          glyphSVG.style.display = e.target.checked ? 'block' : 'none';
+        }
+        updatePrompt();
+      });
+
+      document.getElementById('showWisp').addEventListener('change', (e) => {
+        state.showWisp = e.target.checked;
+        if (wisp) {
+          wisp.visible = e.target.checked;
+        }
+        updatePrompt();
+      });
+
+      document.getElementById('particleColorPreset').addEventListener('change', (e) => {
+        state.particleColorPreset = e.target.value;
+        createParticles();
+        updatePrompt();
+      });
+
+      const colors = ['particleColor', 'flashColor', 'ringColor', 'wispColor', 'bgColor'];
+      colors.forEach(id => {
+        document.getElementById(id).addEventListener('input', (e) => {
+          state[id] = e.target.value;
+          if (id === 'bgColor') {
+            scene.background = new THREE.Color(state.bgColor);
+          } else if (id === 'particleColor') {
+            createParticles();
+          } else if (id === 'ringColor') {
+            createGlyphCircle();
+          } else if (id === 'wispColor' && wisp) {
+            wisp.material.color = new THREE.Color(state.wispColor);
+          }
+          updatePrompt();
+        });
+      });
+    }
+
+    function loadPreset(presetName) {
+      const preset = PRESETS[presetName];
+      Object.assign(state, preset);
+
+      // Update all inputs
+      Object.keys(preset).forEach(key => {
+        const input = document.getElementById(key);
+        if (input) {
+          if (input.type === 'checkbox') {
+            input.checked = preset[key];
+          } else {
+            input.value = preset[key];
+          }
+
+          const valueDisplay = document.getElementById(key + '-value');
+          if (valueDisplay) {
+            let value = preset[key];
+            if (key.includes('Radius') || key.includes('Size') || key.includes('Thickness')) {
+              valueDisplay.textContent = value + 'px';
+            } else if (key.includes('Duration') || key === 'cardDelay') {
+              valueDisplay.textContent = value + 's';
+            } else if (key === 'speedMultiplier') {
+              valueDisplay.textContent = value + 'x';
+            } else if (key.includes('Intensity') || key.includes('Glow')) {
+              valueDisplay.textContent = value + '%';
+            }
+          }
+        }
+      });
+
+      createParticles();
+      createGlyphCircle();
+      createWisp();
+      scene.background = new THREE.Color(state.bgColor);
+
+      if (glyphSVG) {
+        glyphSVG.style.display = state.showRing ? 'block' : 'none';
+      }
+      if (wisp) {
+        wisp.visible = state.showWisp;
+      }
+
+      updatePrompt();
+    }
+
+    function updatePrompt() {
+      const config = {
+        particles: {
+          count: state.particleCount,
+          orbitRadius: state.orbitRadius,
+          orbitSpeed: state.orbitSpeed,
+          size: state.particleSize,
+          color: state.particleColorPreset !== 'custom' ? state.particleColorPreset : state.particleColor,
+          glowIntensity: state.glowIntensity / 100
+        },
+        glyphCircle: {
+          show: state.showRing,
+          radius: state.ringRadius,
+          complexity: state.glyphComplexity,
+          rotationSpeed: state.glyphRotationSpeed,
+          color: state.ringColor,
+          glowIntensity: state.ringGlow / 100
+        },
+        wisp: {
+          show: state.showWisp,
+          size: state.wispSize,
+          pulseSpeed: state.wispPulseSpeed,
+          color: state.wispColor,
+          glowIntensity: state.wispGlow / 100
+        },
+        animation: {
+          flashDuration: state.flashDuration,
+          flashColor: state.flashColor,
+          orbitDuration: state.orbitDuration,
+          cardEntranceDelay: state.cardDelay,
+          speedMultiplier: state.speedMultiplier
+        },
+        background: state.bgColor
+      };
+
+      document.getElementById('config-output').textContent =
+        'const summonConfig = ' + JSON.stringify(config, null, 2) + ';';
+    }
+
+    function copyConfig() {
+      const text = document.getElementById('config-output').textContent;
+      navigator.clipboard.writeText(text);
+
+      const btn = document.querySelector('.copy-btn');
+      btn.textContent = 'Copied!';
+      btn.classList.add('copied');
+
+      setTimeout(() => {
+        btn.textContent = 'Copy';
+        btn.classList.remove('copied');
+      }, 2000);
+    }
+
+    // Initialize
+    window.addEventListener('DOMContentLoaded', () => {
+      initThreeJS();
+      setupControls();
+      updatePrompt();
+    });
+
+    // Handle resize
+    window.addEventListener('resize', () => {
+      const container = document.getElementById('canvas-container');
+      const width = container.clientWidth;
+      const height = container.clientHeight;
+
+      camera.aspect = width / height;
+      camera.updateProjectionMatrix();
+      renderer.setSize(width, height);
+    });
+  </script>
+</body>
+</html>

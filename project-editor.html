@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Project Editor</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      background: #0a0a0f;
+      color: #e0e0e0;
+      min-height: 100vh;
+      padding: 2rem;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 350px 1fr 400px;
+      gap: 2rem;
+      height: calc(100vh - 4rem);
+    }
+
+    /* Left: Project List */
+    .project-list {
+      background: rgba(20, 25, 35, 0.95);
+      border: 1px solid rgba(168, 212, 230, 0.15);
+      border-radius: 12px;
+      padding: 1.5rem;
+      overflow-y: auto;
+    }
+
+    .project-list h2 {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: rgba(168, 212, 230, 0.6);
+      margin-bottom: 1rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 1px solid rgba(168, 212, 230, 0.1);
+    }
+
+    .project-item {
+      padding: 0.75rem 1rem;
+      margin-bottom: 0.5rem;
+      background: rgba(0,0,0,0.2);
+      border: 1px solid transparent;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .project-item:hover {
+      background: rgba(107, 168, 194, 0.1);
+      border-color: rgba(168, 212, 230, 0.2);
+    }
+
+    .project-item.active {
+      background: rgba(224, 192, 128, 0.15);
+      border-color: rgba(224, 192, 128, 0.4);
+    }
+
+    .project-item .name {
+      font-weight: 600;
+      margin-bottom: 0.25rem;
+    }
+
+    .project-item .type {
+      font-size: 0.7rem;
+      color: rgba(224, 192, 128, 0.7);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .add-project {
+      width: 100%;
+      padding: 0.75rem;
+      margin-top: 1rem;
+      background: rgba(107, 168, 194, 0.2);
+      border: 1px dashed rgba(168, 212, 230, 0.3);
+      border-radius: 8px;
+      color: rgba(168, 212, 230, 0.8);
+      cursor: pointer;
+      font-size: 0.85rem;
+      transition: all 0.2s;
+    }
+
+    .add-project:hover {
+      background: rgba(107, 168, 194, 0.3);
+      border-color: rgba(168, 212, 230, 0.5);
+    }
+
+    /* Center: Editor */
+    .editor {
+      background: rgba(20, 25, 35, 0.95);
+      border: 1px solid rgba(168, 212, 230, 0.15);
+      border-radius: 12px;
+      padding: 1.5rem;
+      overflow-y: auto;
+    }
+
+    .editor h2 {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: rgba(168, 212, 230, 0.6);
+      margin-bottom: 1.5rem;
+    }
+
+    .field {
+      margin-bottom: 1.5rem;
+    }
+
+    .field label {
+      display: block;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: rgba(224, 192, 128, 0.8);
+      margin-bottom: 0.5rem;
+    }
+
+    .field input,
+    .field textarea,
+    .field select {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(168, 212, 230, 0.2);
+      border-radius: 6px;
+      color: #fff;
+      font-family: inherit;
+      font-size: 0.9rem;
+      transition: border-color 0.2s;
+    }
+
+    .field input:focus,
+    .field textarea:focus,
+    .field select:focus {
+      outline: none;
+      border-color: rgba(224, 192, 128, 0.5);
+    }
+
+    .field textarea {
+      min-height: 200px;
+      resize: vertical;
+      line-height: 1.6;
+    }
+
+    .field select {
+      cursor: pointer;
+    }
+
+    .field-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    .delete-btn {
+      padding: 0.6rem 1.2rem;
+      background: rgba(200, 80, 80, 0.2);
+      border: 1px solid rgba(200, 80, 80, 0.4);
+      border-radius: 6px;
+      color: rgba(255, 150, 150, 0.9);
+      cursor: pointer;
+      font-size: 0.8rem;
+      transition: all 0.2s;
+    }
+
+    .delete-btn:hover {
+      background: rgba(200, 80, 80, 0.3);
+    }
+
+    /* Right: Preview & Output */
+    .output-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .preview {
+      background: rgba(20, 25, 35, 0.95);
+      border: 1px solid rgba(168, 212, 230, 0.15);
+      border-radius: 12px;
+      padding: 1.5rem;
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    .preview h2 {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: rgba(168, 212, 230, 0.6);
+      margin-bottom: 1rem;
+    }
+
+    .preview-content {
+      background: linear-gradient(180deg, rgba(10, 15, 25, 0.95) 0%, rgba(5, 8, 15, 0.98) 100%);
+      border: 1px solid rgba(168, 212, 230, 0.1);
+      border-radius: 8px;
+      padding: 1.25rem;
+    }
+
+    .preview-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 0.5rem;
+    }
+
+    .preview-type {
+      display: inline-block;
+      padding: 0.2rem 0.5rem;
+      background: rgba(224, 192, 128, 0.15);
+      border: 1px solid rgba(224, 192, 128, 0.3);
+      border-radius: 4px;
+      color: rgba(224, 192, 128, 0.9);
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 1rem;
+    }
+
+    .preview-desc {
+      font-size: 0.85rem;
+      color: rgba(255,255,255,0.7);
+      line-height: 1.7;
+      white-space: pre-line;
+    }
+
+    .code-output {
+      background: rgba(20, 25, 35, 0.95);
+      border: 1px solid rgba(168, 212, 230, 0.15);
+      border-radius: 12px;
+      padding: 1.5rem;
+    }
+
+    .code-output h2 {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: rgba(168, 212, 230, 0.6);
+      margin-bottom: 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .copy-btn {
+      padding: 0.4rem 0.8rem;
+      background: linear-gradient(135deg, rgba(224, 192, 128, 0.9) 0%, rgba(180, 140, 70, 0.95) 100%);
+      border: none;
+      border-radius: 4px;
+      color: #0a0f1a;
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .copy-btn:hover {
+      transform: scale(1.02);
+      box-shadow: 0 0 15px rgba(224, 192, 128, 0.3);
+    }
+
+    .copy-btn.copied {
+      background: rgba(100, 200, 100, 0.8);
+    }
+
+    .code-box {
+      background: #000;
+      border-radius: 6px;
+      padding: 1rem;
+      font-family: 'JetBrains Mono', 'Fira Code', monospace;
+      font-size: 0.7rem;
+      line-height: 1.5;
+      color: #a0ffa0;
+      overflow-x: auto;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+
+    .hint {
+      font-size: 0.7rem;
+      color: rgba(168, 212, 230, 0.5);
+      margin-top: 0.75rem;
+    }
+
+    .reset-btn {
+      margin-top: 0.75rem;
+      padding: 0.4rem 0.8rem;
+      background: rgba(100, 80, 80, 0.3);
+      border: 1px solid rgba(200, 150, 150, 0.3);
+      border-radius: 4px;
+      color: rgba(200, 150, 150, 0.8);
+      font-size: 0.65rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .reset-btn:hover {
+      background: rgba(150, 80, 80, 0.4);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Project List -->
+    <div class="project-list">
+      <h2>Projects</h2>
+      <div id="projectList"></div>
+      <button class="add-project" onclick="addProject()">+ Add New Project</button>
+    </div>
+
+    <!-- Editor -->
+    <div class="editor">
+      <h2>Edit Project</h2>
+
+      <div class="field">
+        <label>Name</label>
+        <input type="text" id="name" oninput="updateProject()">
+      </div>
+
+      <div class="field-row">
+        <div class="field">
+          <label>Type</label>
+          <select id="type" onchange="updateProject()">
+            <option value="writing">Writing ✎</option>
+            <option value="visual">Visual ◈</option>
+            <option value="video">Video ◎</option>
+            <option value="slides">Slides ▣</option>
+            <option value="code">Code ⟨⟩</option>
+            <option value="audio">Audio ♫</option>
+            <option value="other">Other ✧</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Thumbnail (banner in right panel)</label>
+          <input type="text" id="thumbnail" placeholder="/images/banner.png" oninput="updateProject()">
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Short Description (shows on card)</label>
+        <input type="text" id="description" oninput="updateProject()">
+      </div>
+
+      <div class="field">
+        <label>Long Description (shows in right panel)</label>
+        <textarea id="longDescription" oninput="updateProject()" placeholder="Use line breaks for structure..."></textarea>
+      </div>
+
+      <div class="field">
+        <label>Link (optional)</label>
+        <input type="text" id="link" placeholder="https://..." oninput="updateProject()">
+      </div>
+
+      <button class="delete-btn" onclick="deleteProject()">Delete Project</button>
+    </div>
+
+    <!-- Preview & Output -->
+    <div class="output-panel">
+      <div class="preview">
+        <h2>Preview</h2>
+        <div class="preview-content">
+          <div class="preview-title" id="previewTitle">Project Name</div>
+          <div class="preview-type" id="previewType">type</div>
+          <div class="preview-desc" id="previewDesc">Description will appear here...</div>
+        </div>
+      </div>
+
+      <div class="code-output">
+        <h2>
+          <span>Output → projects.js</span>
+          <button class="copy-btn" onclick="copyCode()">Copy All</button>
+        </h2>
+        <pre class="code-box" id="codeOutput"></pre>
+        <p class="hint">Copy and paste into src/data/projects.js</p>
+        <button class="reset-btn" onclick="resetToDefaults()">Reset to Defaults</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Initial projects data - edit this or it will load from localStorage
+    // To reset to these defaults, run: localStorage.removeItem('drbenisProjects') in console
+    const DEFAULT_PROJECTS = [
+      {
+        id: 1,
+        name: "The Manifesto",
+        thumbnail: null,
+        description: "My thoughts and philosophy.",
+        longDescription: "A collection of thoughts, rants, and half-baked philosophies about life, the internet, and everything in between. Written during various states of consciousness.",
+        type: "writing",
+        link: null
+      },
+      {
+        id: 2,
+        name: "QR Code Art",
+        thumbnail: "/images/thumbnail_tarot_400x280.png",
+        description: "Visual QR code experiments.",
+        longDescription: "i ultimately went to a printer service, put it on nice business card card stock, and gave this to the cute clinic concierge girl i met in korea. it contains the code to my kakaotalk (which i never use) and i wanted to hang out with her since i was no longer a patient, but it didnt lead to anything. kind sad.\n\nPRODUCTION: \nStable Diffusion 1.5 for image generation\nComfyUI Control Net Modules for fine-tuned control",
+        type: "visual",
+        link: null
+      },
+      {
+        id: 3,
+        name: "PowerPoint",
+        thumbnail: null,
+        description: "Presentation work.",
+        longDescription: "A series of presentations that were never meant to be presented. Topics range from the absurd to the profound, often within the same slide deck.",
+        type: "slides",
+        link: null
+      },
+      {
+        id: 4,
+        name: "Video Work",
+        thumbnail: null,
+        description: "Video experiments and edits.",
+        longDescription: "Short-form video experiments, edits, and visual loops. Most of these started as 'what if I tried this' and ended up here. Quality varies wildly.",
+        type: "video",
+        link: null
+      },
+      {
+        id: 5,
+        name: "AI Sigil Generator",
+        thumbnail: "/images/thumbnail_face_400x280.png",
+        description: "30-second looping video for TikTok/Reels/Shorts.",
+        longDescription: "Part of an AI influencer experiment that I chose not to pursue further. This was my first attempt at creating short-form educational content with a fully AI-generated character.\n\nThe video teaches Phil Hine's chaos magic sigil technique — write your intention, scramble the letters until meaning dissolves, feed it to an AI image generator. The result is a personalized sigil only your subconscious understands.\n\nPRODUCTION\n› Character — Custom LoRA trained on ComfyUI, hosted on RunPod\n› Video — Remotion (React-based programmatic video)\n› Voice — ElevenLabs\n› Music — Suno\n› Edit — DaVinci Resolve\n\nNOTES\n› 7-shot structure with bookend loop for infinite rewatches\n› No lipsync — character as presence, not talking head\n› Text animations built in Remotion (typing, letter scramble)\n› ChatGPT interface mockup for the \"feed to AI\" sequence",
+        type: "video",
+        link: "https://www.instagram.com/p/DUFWRwrk-EP/"
+      }
+    ];
+
+    let projects = JSON.parse(localStorage.getItem('drbenisProjects')) || DEFAULT_PROJECTS;
+    let currentIndex = 0;
+
+    function renderProjectList() {
+      const list = document.getElementById('projectList');
+      list.innerHTML = projects.map((p, i) => `
+        <div class="project-item ${i === currentIndex ? 'active' : ''}" onclick="selectProject(${i})">
+          <div class="name">${p.name || 'Untitled'}</div>
+          <div class="type">${p.type}</div>
+        </div>
+      `).join('');
+    }
+
+    function selectProject(index) {
+      currentIndex = index;
+      const p = projects[index];
+
+      document.getElementById('name').value = p.name || '';
+      document.getElementById('type').value = p.type || 'other';
+      document.getElementById('thumbnail').value = p.thumbnail || '';
+      document.getElementById('description').value = p.description || '';
+      document.getElementById('longDescription').value = p.longDescription || '';
+      document.getElementById('link').value = p.link || '';
+
+      renderProjectList();
+      updatePreview();
+      updateCodeOutput();
+    }
+
+    function updateProject() {
+      const p = projects[currentIndex];
+      p.name = document.getElementById('name').value;
+      p.type = document.getElementById('type').value;
+      p.thumbnail = document.getElementById('thumbnail').value || null;
+      p.description = document.getElementById('description').value;
+      p.longDescription = document.getElementById('longDescription').value;
+      p.link = document.getElementById('link').value || null;
+
+      saveProjects();
+      renderProjectList();
+      updatePreview();
+      updateCodeOutput();
+    }
+
+    function updatePreview() {
+      const p = projects[currentIndex];
+      document.getElementById('previewTitle').textContent = p.name || 'Untitled';
+      document.getElementById('previewType').textContent = p.type;
+      document.getElementById('previewDesc').textContent = p.longDescription || p.description || '';
+    }
+
+    function updateCodeOutput() {
+      const code = `export const projects = ${JSON.stringify(projects, null, 2).replace(/"(\w+)":/g, '$1:').replace(/\\n/g, '\\n')}`;
+      document.getElementById('codeOutput').textContent = code;
+    }
+
+    function addProject() {
+      const newId = Math.max(...projects.map(p => p.id)) + 1;
+      projects.push({
+        id: newId,
+        name: "New Project",
+        thumbnail: null,
+        description: "",
+        longDescription: "",
+        type: "other",
+        link: null,
+      });
+      saveProjects();
+      selectProject(projects.length - 1);
+    }
+
+    function deleteProject() {
+      if (projects.length <= 1) {
+        alert("Can't delete the last project!");
+        return;
+      }
+      if (confirm(`Delete "${projects[currentIndex].name}"?`)) {
+        projects.splice(currentIndex, 1);
+        saveProjects();
+        selectProject(Math.max(0, currentIndex - 1));
+      }
+    }
+
+    function saveProjects() {
+      localStorage.setItem('drbenisProjects', JSON.stringify(projects));
+    }
+
+    function copyCode() {
+      const code = document.getElementById('codeOutput').textContent;
+      navigator.clipboard.writeText(code);
+      const btn = document.querySelector('.copy-btn');
+      btn.textContent = 'Copied!';
+      btn.classList.add('copied');
+      setTimeout(() => {
+        btn.textContent = 'Copy All';
+        btn.classList.remove('copied');
+      }, 2000);
+    }
+
+    function resetToDefaults() {
+      if (confirm('Reset all projects to defaults? Your edits will be lost.')) {
+        localStorage.removeItem('drbenisProjects');
+        projects = JSON.parse(JSON.stringify(DEFAULT_PROJECTS));
+        selectProject(0);
+      }
+    }
+
+    // Initialize
+    selectProject(0);
+  </script>
+</body>
+</html>

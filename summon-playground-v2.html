@@ -1,0 +1,925 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Summon Animation Playground v2</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #0a0a0a;
+      color: #e0e0e0;
+      display: flex;
+      min-height: 100vh;
+    }
+
+    .controls {
+      width: 320px;
+      background: #111;
+      padding: 20px;
+      overflow-y: auto;
+      border-right: 1px solid #333;
+      height: 100vh;
+      position: fixed;
+      left: 0;
+      top: 0;
+    }
+
+    .preview-area {
+      flex: 1;
+      margin-left: 320px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    h1 {
+      font-size: 16px;
+      color: #7dd3fc;
+      margin-bottom: 5px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+
+    .subtitle {
+      font-size: 11px;
+      color: #666;
+      margin-bottom: 20px;
+    }
+
+    .section {
+      margin-bottom: 25px;
+      padding-bottom: 15px;
+      border-bottom: 1px solid #222;
+    }
+
+    .section-title {
+      font-size: 11px;
+      color: #4fb3d4;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 12px;
+      font-weight: 600;
+    }
+
+    .control {
+      margin-bottom: 12px;
+    }
+
+    label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      color: #888;
+      margin-bottom: 4px;
+    }
+
+    .value {
+      color: #7dd3fc;
+      font-family: monospace;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      height: 4px;
+      background: #333;
+      outline: none;
+      border-radius: 2px;
+      -webkit-appearance: none;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 14px;
+      height: 14px;
+      background: #7dd3fc;
+      cursor: pointer;
+      border-radius: 50%;
+    }
+
+    input[type="color"] {
+      width: 100%;
+      height: 30px;
+      border: 1px solid #333;
+      border-radius: 4px;
+      background: #1a1a1a;
+      cursor: pointer;
+    }
+
+    .checkbox-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .checkbox-row input {
+      width: 16px;
+      height: 16px;
+    }
+
+    .checkbox-row label {
+      margin: 0;
+      font-size: 12px;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      background: linear-gradient(135deg, #1a365d 0%, #0f172a 100%);
+      border: 2px solid #7dd3fc;
+      border-radius: 8px;
+      color: #7dd3fc;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-top: 10px;
+      transition: all 0.3s;
+    }
+
+    button:hover {
+      background: linear-gradient(135deg, #1e40af 0%, #1a365d 100%);
+      box-shadow: 0 0 20px rgba(125, 211, 252, 0.4);
+    }
+
+    #canvas-container {
+      width: 700px;
+      height: 700px;
+      position: relative;
+      background: #050510;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid #333;
+    }
+
+    #glyph-svg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+
+    .output {
+      margin-top: 20px;
+      background: #111;
+      border: 1px solid #333;
+      border-radius: 8px;
+      padding: 15px;
+      width: 700px;
+    }
+
+    .output-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .output-title {
+      font-size: 11px;
+      color: #4fb3d4;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .copy-btn {
+      padding: 4px 12px;
+      font-size: 10px;
+      background: #222;
+      border: 1px solid #444;
+    }
+
+    .copy-btn:hover {
+      background: #333;
+    }
+
+    pre {
+      background: #0a0a0a;
+      padding: 12px;
+      border-radius: 6px;
+      font-size: 11px;
+      overflow-x: auto;
+      color: #888;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+  </style>
+</head>
+<body>
+  <div class="controls">
+    <h1>✧ Summon Playground</h1>
+    <p class="subtitle">FGO-style energy burst + arcane glyphs</p>
+
+    <div class="section">
+      <div class="section-title">Energy Wisp</div>
+
+      <div class="checkbox-row">
+        <input type="checkbox" id="showWisp" checked>
+        <label for="showWisp">Show Wisp</label>
+      </div>
+
+      <div class="control">
+        <label>Core Size <span class="value" id="coreSize-val">40</span></label>
+        <input type="range" id="coreSize" min="10" max="100" value="40">
+      </div>
+
+      <div class="control">
+        <label>Core Brightness <span class="value" id="coreBrightness-val">1.0</span></label>
+        <input type="range" id="coreBrightness" min="0.2" max="2" value="1.0" step="0.1">
+      </div>
+
+      <div class="control">
+        <label>Glow Radius <span class="value" id="glowRadius-val">150</span></label>
+        <input type="range" id="glowRadius" min="50" max="300" value="150">
+      </div>
+
+      <div class="control">
+        <label>Pulse Speed <span class="value" id="pulseSpeed-val">1.0</span></label>
+        <input type="range" id="pulseSpeed" min="0.2" max="3" value="1.0" step="0.1">
+      </div>
+
+      <div class="control">
+        <label>Pulse Intensity <span class="value" id="pulseIntensity-val">0.3</span></label>
+        <input type="range" id="pulseIntensity" min="0" max="1" value="0.3" step="0.05">
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Energy Streaks</div>
+
+      <div class="checkbox-row">
+        <input type="checkbox" id="showStreaks" checked>
+        <label for="showStreaks">Show Streaks</label>
+      </div>
+
+      <div class="control">
+        <label>Streak Count <span class="value" id="streakCount-val">12</span></label>
+        <input type="range" id="streakCount" min="4" max="36" value="12" step="2">
+      </div>
+
+      <div class="control">
+        <label>Streak Length <span class="value" id="streakLength-val">200</span></label>
+        <input type="range" id="streakLength" min="50" max="400" value="200">
+      </div>
+
+      <div class="control">
+        <label>Streak Width <span class="value" id="streakWidth-val">3</span></label>
+        <input type="range" id="streakWidth" min="1" max="10" value="3">
+      </div>
+
+      <div class="control">
+        <label>Streak Flicker <span class="value" id="streakFlicker-val">0.5</span></label>
+        <input type="range" id="streakFlicker" min="0" max="1" value="0.5" step="0.1">
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Glyph Circles</div>
+
+      <div class="checkbox-row">
+        <input type="checkbox" id="showGlyph" checked>
+        <label for="showGlyph">Show Glyph</label>
+      </div>
+
+      <div class="control">
+        <label>Ring Count <span class="value" id="ringCount-val">5</span></label>
+        <input type="range" id="ringCount" min="2" max="8" value="5">
+      </div>
+
+      <div class="control">
+        <label>Inner Radius <span class="value" id="innerRadius-val">80</span></label>
+        <input type="range" id="innerRadius" min="40" max="150" value="80">
+      </div>
+
+      <div class="control">
+        <label>Ring Spacing <span class="value" id="ringSpacing-val">45</span></label>
+        <input type="range" id="ringSpacing" min="20" max="80" value="45">
+      </div>
+
+      <div class="control">
+        <label>Rotation Speed <span class="value" id="rotationSpeed-val">1.0</span></label>
+        <input type="range" id="rotationSpeed" min="0" max="5" value="1.0" step="0.1">
+      </div>
+
+      <div class="control">
+        <label>Rune Density <span class="value" id="runeDensity-val">16</span></label>
+        <input type="range" id="runeDensity" min="4" max="32" value="16" step="2">
+      </div>
+
+      <div class="control">
+        <label>Detail Level <span class="value" id="detailLevel-val">3</span></label>
+        <input type="range" id="detailLevel" min="1" max="5" value="3">
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Colors</div>
+
+      <div class="control">
+        <label>Core Color</label>
+        <input type="color" id="coreColor" value="#ffffff">
+      </div>
+
+      <div class="control">
+        <label>Glow Color</label>
+        <input type="color" id="glowColor" value="#7dd3fc">
+      </div>
+
+      <div class="control">
+        <label>Streak Color</label>
+        <input type="color" id="streakColor" value="#4fb3d4">
+      </div>
+
+      <div class="control">
+        <label>Glyph Color</label>
+        <input type="color" id="glyphColor" value="#4fb3d4">
+      </div>
+
+      <div class="control">
+        <label>Background</label>
+        <input type="color" id="bgColor" value="#050510">
+      </div>
+    </div>
+
+    <button onclick="triggerSummon()">⚡ SUMMON ⚡</button>
+    <button onclick="resetToDefaults()" style="background: #222; border-color: #444; margin-top: 8px;">Reset</button>
+  </div>
+
+  <div class="preview-area">
+    <div id="canvas-container">
+      <svg id="glyph-svg" viewBox="0 0 700 700"></svg>
+      <canvas id="canvas"></canvas>
+    </div>
+
+    <div class="output">
+      <div class="output-header">
+        <span class="output-title">Configuration</span>
+        <button class="copy-btn" onclick="copyConfig()">Copy</button>
+      </div>
+      <pre id="config-output"></pre>
+    </div>
+  </div>
+
+  <script>
+    // ==================== STATE ====================
+    const DEFAULTS = {
+      showWisp: true,
+      coreSize: 40,
+      coreBrightness: 1.0,
+      glowRadius: 150,
+      pulseSpeed: 1.0,
+      pulseIntensity: 0.3,
+
+      showStreaks: true,
+      streakCount: 12,
+      streakLength: 200,
+      streakWidth: 3,
+      streakFlicker: 0.5,
+
+      showGlyph: true,
+      ringCount: 5,
+      innerRadius: 80,
+      ringSpacing: 45,
+      rotationSpeed: 1.0,
+      runeDensity: 16,
+      detailLevel: 3,
+
+      coreColor: '#ffffff',
+      glowColor: '#7dd3fc',
+      streakColor: '#4fb3d4',
+      glyphColor: '#4fb3d4',
+      bgColor: '#050510'
+    };
+
+    const state = { ...DEFAULTS };
+
+    // ==================== ARCANE RUNES ====================
+    const RUNES = [
+      "ᚠ", "ᚢ", "ᚦ", "ᚨ", "ᚱ", "ᚲ", "ᚷ", "ᚹ", "ᚺ", "ᚾ", "ᛁ", "ᛃ", "ᛇ", "ᛈ", "ᛉ", "ᛊ", "ᛏ", "ᛒ", "ᛖ", "ᛗ", "ᛚ", "ᛜ", "ᛞ", "ᛟ",
+      "☉", "☽", "☿", "♀", "♂", "♃", "♄",
+      "✧", "✦", "⬡", "⬢", "◇", "◆", "△", "▽", "☆", "★", "⊕", "⊗",
+      "♈", "♉", "♊", "♋", "♌", "♍", "♎", "♏", "♐", "♑", "♒", "♓"
+    ];
+
+    // ==================== CANVAS SETUP ====================
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = 700;
+    canvas.height = 700;
+    canvas.style.width = '700px';
+    canvas.style.height = '700px';
+
+    let time = 0;
+    let ringRotations = [];
+    let isAnimating = false;
+
+    // ==================== GLYPH SVG ====================
+    function createGlyph() {
+      const svg = document.getElementById('glyph-svg');
+      svg.innerHTML = '';
+
+      if (!state.showGlyph) return;
+
+      const cx = 350, cy = 350;
+
+      // Defs for filters
+      const defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
+      defs.innerHTML = `
+        <filter id="glow">
+          <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+          <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+        <filter id="glow-strong">
+          <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+          <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+      `;
+      svg.appendChild(defs);
+
+      // Initialize ring rotations
+      ringRotations = [];
+
+      // Create each ring
+      for (let ring = 0; ring < state.ringCount; ring++) {
+        const radius = state.innerRadius + ring * state.ringSpacing;
+        const direction = ring % 2 === 0 ? 1 : -1; // Alternate directions
+        ringRotations.push({ angle: 0, direction, speed: 1 + ring * 0.2 });
+
+        const ringGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
+        ringGroup.setAttribute("id", `ring-${ring}`);
+        ringGroup.setAttribute("data-cx", cx);
+        ringGroup.setAttribute("data-cy", cy);
+
+        // Main circle
+        const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+        circle.setAttribute("cx", cx);
+        circle.setAttribute("cy", cy);
+        circle.setAttribute("r", radius);
+        circle.setAttribute("fill", "none");
+        circle.setAttribute("stroke", state.glyphColor);
+        circle.setAttribute("stroke-width", ring === state.ringCount - 1 ? "2.5" : "1.5");
+        circle.setAttribute("filter", "url(#glow)");
+        circle.setAttribute("opacity", "0.8");
+        ringGroup.appendChild(circle);
+
+        // Inner decorative circle
+        const innerCircle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+        innerCircle.setAttribute("cx", cx);
+        innerCircle.setAttribute("cy", cy);
+        innerCircle.setAttribute("r", radius - 6);
+        innerCircle.setAttribute("fill", "none");
+        innerCircle.setAttribute("stroke", state.glyphColor);
+        innerCircle.setAttribute("stroke-width", "0.5");
+        innerCircle.setAttribute("stroke-dasharray", "3,6");
+        innerCircle.setAttribute("opacity", "0.4");
+        ringGroup.appendChild(innerCircle);
+
+        // Tick marks and runes
+        const tickCount = state.runeDensity + ring * 4;
+        for (let i = 0; i < tickCount; i++) {
+          const angle = (i / tickCount) * Math.PI * 2;
+          const isMajor = i % 4 === 0;
+          const tickLen = isMajor ? 10 : 5;
+
+          const x1 = cx + Math.cos(angle) * (radius - tickLen);
+          const y1 = cy + Math.sin(angle) * (radius - tickLen);
+          const x2 = cx + Math.cos(angle) * (radius + tickLen);
+          const y2 = cy + Math.sin(angle) * (radius + tickLen);
+
+          const tick = document.createElementNS("http://www.w3.org/2000/svg", "line");
+          tick.setAttribute("x1", x1);
+          tick.setAttribute("y1", y1);
+          tick.setAttribute("x2", x2);
+          tick.setAttribute("y2", y2);
+          tick.setAttribute("stroke", state.glyphColor);
+          tick.setAttribute("stroke-width", isMajor ? "2" : "1");
+          tick.setAttribute("opacity", isMajor ? "0.7" : "0.4");
+          ringGroup.appendChild(tick);
+
+          // Runes at major ticks
+          if (isMajor && state.detailLevel >= 2) {
+            const runeR = radius + 18;
+            const rx = cx + Math.cos(angle) * runeR;
+            const ry = cy + Math.sin(angle) * runeR;
+
+            const rune = document.createElementNS("http://www.w3.org/2000/svg", "text");
+            rune.setAttribute("x", rx);
+            rune.setAttribute("y", ry);
+            rune.setAttribute("text-anchor", "middle");
+            rune.setAttribute("dominant-baseline", "middle");
+            rune.setAttribute("fill", state.glyphColor);
+            rune.setAttribute("font-size", "12");
+            rune.setAttribute("filter", "url(#glow)");
+            rune.setAttribute("opacity", "0.8");
+            rune.textContent = RUNES[Math.floor(Math.random() * RUNES.length)];
+            ringGroup.appendChild(rune);
+          }
+        }
+
+        // Connecting patterns between rings (detail level 3+)
+        if (ring < state.ringCount - 1 && state.detailLevel >= 3) {
+          const nextRadius = state.innerRadius + (ring + 1) * state.ringSpacing;
+          const connCount = 6 + ring * 2;
+
+          for (let i = 0; i < connCount; i++) {
+            const angle = (i / connCount) * Math.PI * 2;
+
+            // Curved connector
+            const x1 = cx + Math.cos(angle) * radius;
+            const y1 = cy + Math.sin(angle) * radius;
+            const x2 = cx + Math.cos(angle + 0.1) * nextRadius;
+            const y2 = cy + Math.sin(angle + 0.1) * nextRadius;
+            const midR = (radius + nextRadius) / 2 + 10;
+            const mx = cx + Math.cos(angle + 0.05) * midR;
+            const my = cy + Math.sin(angle + 0.05) * midR;
+
+            const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+            path.setAttribute("d", `M ${x1} ${y1} Q ${mx} ${my} ${x2} ${y2}`);
+            path.setAttribute("fill", "none");
+            path.setAttribute("stroke", state.glyphColor);
+            path.setAttribute("stroke-width", "1");
+            path.setAttribute("opacity", "0.3");
+            ringGroup.appendChild(path);
+
+            // Diamond at midpoint
+            if (i % 2 === 0 && state.detailLevel >= 4) {
+              const dx = cx + Math.cos(angle) * ((radius + nextRadius) / 2);
+              const dy = cy + Math.sin(angle) * ((radius + nextRadius) / 2);
+              const diamond = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
+              diamond.setAttribute("points", `${dx},${dy-5} ${dx+5},${dy} ${dx},${dy+5} ${dx-5},${dy}`);
+              diamond.setAttribute("fill", state.glyphColor);
+              diamond.setAttribute("opacity", "0.6");
+              ringGroup.appendChild(diamond);
+            }
+          }
+        }
+
+        // Sacred geometry (detail level 4+)
+        if (state.detailLevel >= 4 && ring < state.ringCount - 1) {
+          const triCount = 3 + ring;
+          const nextRadius = state.innerRadius + (ring + 1) * state.ringSpacing;
+          const triR = (radius + nextRadius) / 2;
+
+          for (let i = 0; i < triCount; i++) {
+            const angle = (i / triCount) * Math.PI * 2;
+            const tx = cx + Math.cos(angle) * triR;
+            const ty = cy + Math.sin(angle) * triR;
+            const triSize = 8;
+
+            const tri = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
+            const pts = [];
+            for (let j = 0; j < 3; j++) {
+              const a = angle + (j / 3) * Math.PI * 2;
+              pts.push(`${tx + Math.cos(a) * triSize},${ty + Math.sin(a) * triSize}`);
+            }
+            tri.setAttribute("points", pts.join(" "));
+            tri.setAttribute("fill", "none");
+            tri.setAttribute("stroke", state.glyphColor);
+            tri.setAttribute("stroke-width", "1");
+            tri.setAttribute("opacity", "0.4");
+            ringGroup.appendChild(tri);
+          }
+        }
+
+        // Arcane script (detail level 5)
+        if (state.detailLevel >= 5 && ring < state.ringCount - 1) {
+          const nextRadius = state.innerRadius + (ring + 1) * state.ringSpacing;
+          const scriptR = (radius + nextRadius) / 2;
+          const scriptCount = 4;
+
+          for (let i = 0; i < scriptCount; i++) {
+            const angle = (i / scriptCount) * Math.PI * 2 + Math.PI / scriptCount;
+            const sx = cx + Math.cos(angle) * scriptR;
+            const sy = cy + Math.sin(angle) * scriptR;
+
+            let runeStr = '';
+            for (let j = 0; j < 3; j++) {
+              runeStr += RUNES[Math.floor(Math.random() * RUNES.length)];
+            }
+
+            const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+            text.setAttribute("x", sx);
+            text.setAttribute("y", sy);
+            text.setAttribute("text-anchor", "middle");
+            text.setAttribute("dominant-baseline", "middle");
+            text.setAttribute("fill", state.glyphColor);
+            text.setAttribute("font-size", "9");
+            text.setAttribute("letter-spacing", "2");
+            text.setAttribute("opacity", "0.5");
+            text.textContent = runeStr;
+            ringGroup.appendChild(text);
+          }
+        }
+
+        svg.appendChild(ringGroup);
+      }
+
+      // Center hexagram
+      const centerG = document.createElementNS("http://www.w3.org/2000/svg", "g");
+      centerG.setAttribute("id", "center-glyph");
+
+      for (let i = 0; i < 2; i++) {
+        const hex = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
+        const pts = [];
+        for (let j = 0; j < 3; j++) {
+          const a = (j / 3) * Math.PI * 2 + (i * Math.PI / 3) - Math.PI / 2;
+          pts.push(`${cx + Math.cos(a) * 40},${cy + Math.sin(a) * 40}`);
+        }
+        hex.setAttribute("points", pts.join(" "));
+        hex.setAttribute("fill", "none");
+        hex.setAttribute("stroke", state.glyphColor);
+        hex.setAttribute("stroke-width", "2");
+        hex.setAttribute("filter", "url(#glow-strong)");
+        hex.setAttribute("opacity", "0.9");
+        centerG.appendChild(hex);
+      }
+
+      svg.appendChild(centerG);
+    }
+
+    // ==================== CANVAS RENDERING ====================
+    function render() {
+      time += 0.016;
+
+      // Clear with background
+      ctx.fillStyle = state.bgColor;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      const cx = canvas.width / 2;
+      const cy = canvas.height / 2;
+
+      // Pulse calculation
+      const pulse = 1 + Math.sin(time * state.pulseSpeed * 2) * state.pulseIntensity;
+
+      // Draw energy streaks
+      if (state.showStreaks) {
+        for (let i = 0; i < state.streakCount; i++) {
+          const baseAngle = (i / state.streakCount) * Math.PI * 2;
+          const flicker = 1 - Math.random() * state.streakFlicker;
+          const length = state.streakLength * pulse * flicker;
+
+          // Streak gradient
+          const gradient = ctx.createLinearGradient(
+            cx, cy,
+            cx + Math.cos(baseAngle) * length,
+            cy + Math.sin(baseAngle) * length
+          );
+          gradient.addColorStop(0, state.streakColor);
+          gradient.addColorStop(0.3, state.streakColor + 'cc');
+          gradient.addColorStop(1, state.streakColor + '00');
+
+          ctx.beginPath();
+          ctx.moveTo(cx, cy);
+          ctx.lineTo(
+            cx + Math.cos(baseAngle) * length,
+            cy + Math.sin(baseAngle) * length
+          );
+          ctx.strokeStyle = gradient;
+          ctx.lineWidth = state.streakWidth * flicker;
+          ctx.lineCap = 'round';
+          ctx.stroke();
+        }
+      }
+
+      // Draw wisp glow layers
+      if (state.showWisp) {
+        // Outer glow
+        const glowGradient = ctx.createRadialGradient(cx, cy, 0, cx, cy, state.glowRadius * pulse);
+        glowGradient.addColorStop(0, state.glowColor + '60');
+        glowGradient.addColorStop(0.3, state.glowColor + '30');
+        glowGradient.addColorStop(0.7, state.glowColor + '10');
+        glowGradient.addColorStop(1, state.glowColor + '00');
+
+        ctx.beginPath();
+        ctx.arc(cx, cy, state.glowRadius * pulse, 0, Math.PI * 2);
+        ctx.fillStyle = glowGradient;
+        ctx.fill();
+
+        // Middle glow
+        const midGradient = ctx.createRadialGradient(cx, cy, 0, cx, cy, state.coreSize * 2 * pulse);
+        midGradient.addColorStop(0, state.coreColor);
+        midGradient.addColorStop(0.3, state.glowColor + 'cc');
+        midGradient.addColorStop(0.7, state.glowColor + '40');
+        midGradient.addColorStop(1, state.glowColor + '00');
+
+        ctx.beginPath();
+        ctx.arc(cx, cy, state.coreSize * 2 * pulse, 0, Math.PI * 2);
+        ctx.fillStyle = midGradient;
+        ctx.fill();
+
+        // Bright core
+        const coreGradient = ctx.createRadialGradient(cx, cy, 0, cx, cy, state.coreSize * pulse);
+        const brightness = Math.min(state.coreBrightness, 1);
+        coreGradient.addColorStop(0, state.coreColor);
+        coreGradient.addColorStop(0.5, state.coreColor + 'ee');
+        coreGradient.addColorStop(1, state.glowColor + '80');
+
+        ctx.beginPath();
+        ctx.arc(cx, cy, state.coreSize * pulse, 0, Math.PI * 2);
+        ctx.fillStyle = coreGradient;
+        ctx.globalAlpha = brightness;
+        ctx.fill();
+        ctx.globalAlpha = 1;
+      }
+
+      // Rotate glyph rings
+      if (state.showGlyph && state.rotationSpeed > 0) {
+        ringRotations.forEach((rot, i) => {
+          rot.angle += rot.direction * state.rotationSpeed * rot.speed * 0.5;
+          const ring = document.getElementById(`ring-${i}`);
+          if (ring) {
+            const cx = ring.getAttribute('data-cx');
+            const cy = ring.getAttribute('data-cy');
+            ring.setAttribute('transform', `rotate(${rot.angle}, ${cx}, ${cy})`);
+          }
+        });
+      }
+
+      requestAnimationFrame(render);
+    }
+
+    // ==================== SUMMON ANIMATION ====================
+    async function triggerSummon() {
+      if (isAnimating) return;
+      isAnimating = true;
+
+      const originalPulse = state.pulseIntensity;
+      const originalCore = state.coreSize;
+      const originalGlow = state.glowRadius;
+
+      // Build up
+      for (let i = 0; i <= 30; i++) {
+        await sleep(50);
+        state.pulseIntensity = originalPulse + (i / 30) * 0.5;
+        state.coreSize = originalCore * (1 + (i / 30) * 0.5);
+      }
+
+      // Flash
+      const flash = document.createElement('div');
+      flash.style.cssText = `
+        position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+        background: radial-gradient(circle, ${state.coreColor} 0%, ${state.glowColor} 30%, transparent 70%);
+        pointer-events: none; z-index: 1000;
+      `;
+      document.body.appendChild(flash);
+
+      state.coreSize = originalCore * 3;
+      state.glowRadius = originalGlow * 2;
+
+      await sleep(100);
+      flash.style.opacity = '0.7';
+      await sleep(100);
+      flash.style.opacity = '0.3';
+      await sleep(100);
+      flash.remove();
+
+      // Settle
+      for (let i = 0; i <= 20; i++) {
+        await sleep(30);
+        state.coreSize = originalCore * 3 - (originalCore * 2) * (i / 20);
+        state.glowRadius = originalGlow * 2 - (originalGlow) * (i / 20);
+        state.pulseIntensity = originalPulse + 0.5 - 0.5 * (i / 20);
+      }
+
+      state.pulseIntensity = originalPulse;
+      state.coreSize = originalCore;
+      state.glowRadius = originalGlow;
+      isAnimating = false;
+    }
+
+    function sleep(ms) {
+      return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    // ==================== CONTROLS ====================
+    function setupControls() {
+      const controls = [
+        'coreSize', 'coreBrightness', 'glowRadius', 'pulseSpeed', 'pulseIntensity',
+        'streakCount', 'streakLength', 'streakWidth', 'streakFlicker',
+        'ringCount', 'innerRadius', 'ringSpacing', 'rotationSpeed', 'runeDensity', 'detailLevel'
+      ];
+
+      controls.forEach(id => {
+        const input = document.getElementById(id);
+        if (input) {
+          input.addEventListener('input', (e) => {
+            const val = parseFloat(e.target.value);
+            state[id] = val;
+            document.getElementById(id + '-val').textContent =
+              Number.isInteger(val) ? val : val.toFixed(1);
+
+            if (['ringCount', 'innerRadius', 'ringSpacing', 'runeDensity', 'detailLevel'].includes(id)) {
+              createGlyph();
+            }
+            updateConfig();
+          });
+        }
+      });
+
+      // Checkboxes
+      ['showWisp', 'showStreaks', 'showGlyph'].forEach(id => {
+        document.getElementById(id).addEventListener('change', (e) => {
+          state[id] = e.target.checked;
+          if (id === 'showGlyph') createGlyph();
+          updateConfig();
+        });
+      });
+
+      // Colors
+      ['coreColor', 'glowColor', 'streakColor', 'glyphColor', 'bgColor'].forEach(id => {
+        document.getElementById(id).addEventListener('input', (e) => {
+          state[id] = e.target.value;
+          if (id === 'glyphColor') createGlyph();
+          updateConfig();
+        });
+      });
+    }
+
+    function resetToDefaults() {
+      Object.assign(state, DEFAULTS);
+
+      // Update all inputs
+      Object.keys(DEFAULTS).forEach(key => {
+        const input = document.getElementById(key);
+        if (input) {
+          if (input.type === 'checkbox') {
+            input.checked = DEFAULTS[key];
+          } else {
+            input.value = DEFAULTS[key];
+          }
+          const valSpan = document.getElementById(key + '-val');
+          if (valSpan) {
+            const val = DEFAULTS[key];
+            valSpan.textContent = typeof val === 'number' ?
+              (Number.isInteger(val) ? val : val.toFixed(1)) : val;
+          }
+        }
+      });
+
+      createGlyph();
+      updateConfig();
+    }
+
+    function updateConfig() {
+      const config = {
+        wisp: {
+          show: state.showWisp,
+          coreSize: state.coreSize,
+          coreBrightness: state.coreBrightness,
+          glowRadius: state.glowRadius,
+          pulseSpeed: state.pulseSpeed,
+          pulseIntensity: state.pulseIntensity
+        },
+        streaks: {
+          show: state.showStreaks,
+          count: state.streakCount,
+          length: state.streakLength,
+          width: state.streakWidth,
+          flicker: state.streakFlicker
+        },
+        glyph: {
+          show: state.showGlyph,
+          ringCount: state.ringCount,
+          innerRadius: state.innerRadius,
+          ringSpacing: state.ringSpacing,
+          rotationSpeed: state.rotationSpeed,
+          runeDensity: state.runeDensity,
+          detailLevel: state.detailLevel
+        },
+        colors: {
+          core: state.coreColor,
+          glow: state.glowColor,
+          streak: state.streakColor,
+          glyph: state.glyphColor,
+          background: state.bgColor
+        }
+      };
+
+      document.getElementById('config-output').textContent =
+        JSON.stringify(config, null, 2);
+    }
+
+    function copyConfig() {
+      const text = document.getElementById('config-output').textContent;
+      navigator.clipboard.writeText(text);
+      const btn = document.querySelector('.copy-btn');
+      btn.textContent = 'Copied!';
+      setTimeout(() => btn.textContent = 'Copy', 1500);
+    }
+
+    // ==================== INIT ====================
+    setupControls();
+    createGlyph();
+    updateConfig();
+    render();
+  </script>
+</body>
+</html>

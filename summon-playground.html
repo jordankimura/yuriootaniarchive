@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Summon Animation Playground</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #0a0a0f;
+      color: #e0e0e0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .layout {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    .controls {
+      width: 340px;
+      background: #111118;
+      border-right: 1px solid #2a2a35;
+      overflow-y: auto;
+      padding: 16px;
+    }
+
+    .preview-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      background: #050510;
+    }
+
+    .preview {
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .output-section {
+      background: #111118;
+      border-top: 1px solid #2a2a35;
+      padding: 16px;
+    }
+
+    h1 {
+      font-size: 14px;
+      font-weight: 600;
+      color: #7dd3fc;
+      margin-bottom: 16px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    .presets {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+
+    .preset-btn {
+      background: #1a1a24;
+      border: 1px solid #3a3a48;
+      color: #a0a0b0;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .preset-btn:hover {
+      background: #252532;
+      border-color: #7dd3fc;
+      color: #7dd3fc;
+    }
+
+    .preset-btn.active {
+      background: rgba(125, 211, 252, 0.15);
+      border-color: #7dd3fc;
+      color: #7dd3fc;
+    }
+
+    .section {
+      margin-bottom: 20px;
+    }
+
+    .section-title {
+      font-size: 11px;
+      font-weight: 600;
+      color: #7dd3fc;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 12px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid #2a2a35;
+    }
+
+    .control {
+      margin-bottom: 14px;
+    }
+
+    .control-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+
+    .control-label {
+      font-size: 12px;
+      color: #a0a0b0;
+    }
+
+    .control-value {
+      font-size: 11px;
+      font-family: 'SF Mono', Monaco, monospace;
+      color: #7dd3fc;
+      background: #1a1a24;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      height: 6px;
+      border-radius: 3px;
+      background: #1a1a24;
+      appearance: none;
+      cursor: pointer;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      appearance: none;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: #7dd3fc;
+      cursor: pointer;
+      box-shadow: 0 0 10px rgba(125, 211, 252, 0.5);
+    }
+
+    .play-btn {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(125, 211, 252, 0.2);
+      border: 2px solid rgba(125, 211, 252, 0.5);
+      color: #7dd3fc;
+      padding: 12px 32px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      transition: all 0.2s;
+      z-index: 100;
+    }
+
+    .play-btn:hover {
+      background: rgba(125, 211, 252, 0.3);
+      box-shadow: 0 0 30px rgba(125, 211, 252, 0.4);
+    }
+
+    .play-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    /* Summon Preview Elements */
+    .summon-container {
+      position: relative;
+      width: 500px;
+      height: 500px;
+    }
+
+    .wisp {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      border-radius: 50%;
+      pointer-events: none;
+    }
+
+    .ring {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      border-radius: 50%;
+      border: 1.5px solid var(--glyph-color, #4fb3d4);
+      box-shadow: 0 0 10px var(--glyph-color, #4fb3d4);
+      pointer-events: none;
+    }
+
+    .ring-runes {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      pointer-events: none;
+    }
+
+    .rune {
+      position: absolute;
+      color: var(--glyph-color, #4fb3d4);
+      font-size: 12px;
+      text-shadow: 0 0 8px var(--glyph-color, #4fb3d4);
+      transform: translate(-50%, -50%);
+    }
+
+    .electric-ring {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0);
+      width: 300px;
+      height: 300px;
+      border-radius: 50%;
+      border: 4px solid rgba(125, 211, 252, 0.9);
+      box-shadow: 0 0 20px rgba(125, 211, 252, 0.8), 0 0 40px rgba(125, 211, 252, 0.6), inset 0 0 30px rgba(125, 211, 252, 0.3);
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .flash-overlay {
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle, rgba(255,255,255,1) 0%, rgba(125,211,252,0.9) 30%, transparent 70%);
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .pulse-ring {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0);
+      width: 800px;
+      height: 800px;
+      border-radius: 50%;
+      border: 6px solid rgba(125, 211, 252, 0.7);
+      box-shadow: 0 0 30px rgba(125, 211, 252, 0.5);
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    /* Output */
+    .output-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .output-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: #7dd3fc;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    .copy-btn {
+      background: #1a1a24;
+      border: 1px solid #3a3a48;
+      color: #a0a0b0;
+      padding: 6px 14px;
+      border-radius: 6px;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .copy-btn:hover {
+      background: #252532;
+      border-color: #7dd3fc;
+      color: #7dd3fc;
+    }
+
+    .copy-btn.copied {
+      background: rgba(125, 211, 252, 0.2);
+      border-color: #7dd3fc;
+      color: #7dd3fc;
+    }
+
+    .output-code {
+      background: #0a0a0f;
+      border: 1px solid #2a2a35;
+      border-radius: 8px;
+      padding: 12px;
+      font-family: 'SF Mono', Monaco, monospace;
+      font-size: 11px;
+      color: #a0a0b0;
+      max-height: 200px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      line-height: 1.5;
+    }
+
+    @keyframes idle-rotate {
+      from { transform: translate(-50%, -50%) rotate(var(--start-angle, 0deg)); }
+      to { transform: translate(-50%, -50%) rotate(calc(var(--start-angle, 0deg) + var(--direction, 1) * 360deg)); }
+    }
+
+    @keyframes pulse-glow {
+      0%, 100% { opacity: 0.6; transform: translate(-50%, -50%) scale(1); }
+      50% { opacity: 1; transform: translate(-50%, -50%) scale(1.1); }
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <div class="controls">
+      <h1>Summon Animation</h1>
+
+      <div class="presets">
+        <button class="preset-btn active" data-preset="current">Current</button>
+        <button class="preset-btn" data-preset="quick">Quick</button>
+        <button class="preset-btn" data-preset="epic">Epic</button>
+        <button class="preset-btn" data-preset="subtle">Subtle</button>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Glyph / Circles</div>
+
+        <div class="control">
+          <div class="control-header">
+            <span class="control-label">Ring Count</span>
+            <span class="control-value" id="ringCount-value">5</span>
+          </div>
+          <input type="range" id="ringCount" min="3" max="8" step="1" value="5">
+        </div>
+
+        <div class="control">
+          <div class="control-header">
+            <span class="control-label">Inner Radius</span>
+            <span class="control-value" id="innerRadius-value">60px</span>
+          </div>
+          <input type="range" id="innerRadius" min="40" max="120" step="5" value="60">
+        </div>
+
+        <div class="control">
+          <div class="control-header">
+            <span class="control-label">Ring Spacing</span>
+            <span class="control-value" id="ringSpacing-value">40px</span>
+          </div>
+          <input type="range" id="ringSpacing" min="30" max="60" step="5" value="40">
+        </div>
+
+        <div class="control">
+          <div class="control-header">
+            <span class="control-label">Rotation Speed</span>
+            <span class="control-value" id="rotationSpeed-value">0.8</span>
+          </div>
+          <input type="range" id="rotationSpeed" min="0.2" max="2" step="0.1" value="0.8">
+        </div>
+
+        <div class="control">
+          <div class="control-header">
+            <span class="control-label">Rune Density</span>
+            <span class="control-value" id="runeDensity-value">16</span>
+          </div>
+          <input type="range" id="runeDensity" min="8" max="20" step="1" value="16">
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Wisp / Core</div>
+
+        <div class="control">
+          <div class="control-header">
+            <span class="control-label">Core Size</span>
+            <span class="control-value" id="coreSize-value">40px</span>
+          </div>
+          <input type="range" id="coreSize" min="20" max="80" step="5" value="40">
+        </div>
+
+        <div class="control">
+          <div class="control-header">
+            <span class="control-label">Wisp Energy</span>
+            <span class="control-value" id="wispEnergy-value">0.5</span>
+          </div>
+          <input type="range" id="wispEnergy" min="0.1" max="1" step="0.05" value="0.5">
+        </div>
+
+        <div class="control">
+          <div class="control-header">
+            <span class="control-label">Glow Radius</span>
+            <span class="control-value" id="glowRadius-value">120px</span>
+          </div>
+          <input type="range" id="glowRadius" min="60" max="200" step="10" value="120">
+        </div>
+
+        <div class="control">
+          <div class="control-header">
+            <span class="control-label">Pulse Speed</span>
+            <span class="control-value" id="pulseSpeed-value">1.0</span>
+          </div>
+          <input type="range" id="pulseSpeed" min="0.5" max="2" step="0.1" value="1">
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Spin Animation</div>
+
+        <div class="control">
+          <div class="control-header">
+            <span class="control-label">Spin Rotations</span>
+            <span class="control-value" id="spinRotations-value">8</span>
+          </div>
+          <input type="range" id="spinRotations" min="2" max="12" step="1" value="8">
+        </div>
+
+        <div class="control">
+          <div class="control-header">
+            <span class="control-label">Spin Duration</span>
+            <span class="control-value" id="spinDuration-value">2.0s</span>
+          </div>
+          <input type="range" id="spinDuration" min="1" max="4" step="0.25" value="2">
+        </div>
+
+        <div class="control">
+          <div class="control-header">
+            <span class="control-label">Counter-Rotation</span>
+            <span class="control-value" id="counterRotation-value">0.125</span>
+          </div>
+          <input type="range" id="counterRotation" min="0" max="0.5" step="0.025" value="0.125">
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Flash / Effects</div>
+
+        <div class="control">
+          <div class="control-header">
+            <span class="control-label">Ring Expansion</span>
+            <span class="control-value" id="ringExpansion-value">1.6x</span>
+          </div>
+          <input type="range" id="ringExpansion" min="1" max="3" step="0.1" value="1.6">
+        </div>
+
+        <div class="control">
+          <div class="control-header">
+            <span class="control-label">Flash Intensity</span>
+            <span class="control-value" id="flashIntensity-value">1.0</span>
+          </div>
+          <input type="range" id="flashIntensity" min="0.5" max="1" step="0.05" value="1">
+        </div>
+
+        <div class="control">
+          <div class="control-header">
+            <span class="control-label">Pulse Wave Speed</span>
+            <span class="control-value" id="pulseWaveSpeed-value">0.5</span>
+          </div>
+          <input type="range" id="pulseWaveSpeed" min="0.3" max="1" step="0.05" value="0.5">
+        </div>
+
+        <div class="control">
+          <div class="control-header">
+            <span class="control-label">Bloom Intensity</span>
+            <span class="control-value" id="bloom-value">0.5</span>
+          </div>
+          <input type="range" id="bloom" min="0.2" max="1" step="0.05" value="0.5">
+        </div>
+
+        <div class="control">
+          <div class="control-header">
+            <span class="control-label">Chromatic Aberration</span>
+            <span class="control-value" id="chromatic-value">0.003</span>
+          </div>
+          <input type="range" id="chromatic" min="0" max="0.02" step="0.001" value="0.003">
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Timing</div>
+
+        <div class="control">
+          <div class="control-header">
+            <span class="control-label">Build-up Duration</span>
+            <span class="control-value" id="buildUpDuration-value">1.8s</span>
+          </div>
+          <input type="range" id="buildUpDuration" min="1" max="3" step="0.1" value="1.8">
+        </div>
+
+        <div class="control">
+          <div class="control-header">
+            <span class="control-label">Flash Duration</span>
+            <span class="control-value" id="flashDuration-value">0.1s</span>
+          </div>
+          <input type="range" id="flashDuration" min="0.05" max="0.3" step="0.01" value="0.1">
+        </div>
+
+        <div class="control">
+          <div class="control-header">
+            <span class="control-label">Settle Duration</span>
+            <span class="control-value" id="settleDuration-value">0.5s</span>
+          </div>
+          <input type="range" id="settleDuration" min="0.3" max="1" step="0.05" value="0.5">
+        </div>
+      </div>
+    </div>
+
+    <div class="preview-container">
+      <div class="preview" id="preview">
+        <div class="summon-container" id="summon-container">
+          <div class="wisp" id="wisp"></div>
+          <div id="rings-container"></div>
+          <div class="electric-ring" id="electric-ring"></div>
+          <div class="flash-overlay" id="flash-overlay"></div>
+          <div class="pulse-ring" id="pulse-ring"></div>
+        </div>
+        <button class="play-btn" id="play-btn">Play Summon</button>
+      </div>
+
+      <div class="output-section">
+        <div class="output-header">
+          <span class="output-title">Config Output</span>
+          <button class="copy-btn" id="copy-btn">Copy Config</button>
+        </div>
+        <div class="output-code" id="output-code"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const RUNES = ["ᚠ", "ᚢ", "ᚦ", "ᚨ", "ᚱ", "ᚲ", "ᚷ", "ᚹ", "◇", "◆", "△", "▽", "○", "●", "⊕", "⊗", "∆", "∇"];
+
+    const PRESETS = {
+      current: {
+        ringCount: 5, innerRadius: 60, ringSpacing: 40, rotationSpeed: 0.8, runeDensity: 16,
+        coreSize: 40, wispEnergy: 0.5, glowRadius: 120, pulseSpeed: 1,
+        spinRotations: 8, spinDuration: 2, counterRotation: 0.125,
+        ringExpansion: 1.6, flashIntensity: 1, pulseWaveSpeed: 0.5, bloom: 0.5, chromatic: 0.003,
+        buildUpDuration: 1.8, flashDuration: 0.1, settleDuration: 0.5
+      },
+      quick: {
+        ringCount: 4, innerRadius: 50, ringSpacing: 35, rotationSpeed: 1.2, runeDensity: 12,
+        coreSize: 35, wispEnergy: 0.4, glowRadius: 100, pulseSpeed: 1.5,
+        spinRotations: 4, spinDuration: 1, counterRotation: 0.1,
+        ringExpansion: 1.3, flashIntensity: 0.8, pulseWaveSpeed: 0.8, bloom: 0.4, chromatic: 0.002,
+        buildUpDuration: 1, flashDuration: 0.08, settleDuration: 0.3
+      },
+      epic: {
+        ringCount: 7, innerRadius: 70, ringSpacing: 45, rotationSpeed: 0.6, runeDensity: 18,
+        coreSize: 50, wispEnergy: 0.7, glowRadius: 150, pulseSpeed: 0.8,
+        spinRotations: 12, spinDuration: 3.5, counterRotation: 0.2,
+        ringExpansion: 2.5, flashIntensity: 1, pulseWaveSpeed: 0.4, bloom: 0.8, chromatic: 0.005,
+        buildUpDuration: 2.5, flashDuration: 0.15, settleDuration: 0.8
+      },
+      subtle: {
+        ringCount: 4, innerRadius: 55, ringSpacing: 38, rotationSpeed: 0.5, runeDensity: 10,
+        coreSize: 30, wispEnergy: 0.3, glowRadius: 80, pulseSpeed: 0.7,
+        spinRotations: 3, spinDuration: 2, counterRotation: 0.05,
+        ringExpansion: 1.2, flashIntensity: 0.6, pulseWaveSpeed: 0.6, bloom: 0.3, chromatic: 0.001,
+        buildUpDuration: 1.5, flashDuration: 0.1, settleDuration: 0.6
+      }
+    };
+
+    const state = { ...PRESETS.current };
+    let isPlaying = false;
+    let animationFrameId = null;
+    let ringAngles = [];
+
+    // DOM elements
+    const ringsContainer = document.getElementById('rings-container');
+    const wisp = document.getElementById('wisp');
+    const electricRing = document.getElementById('electric-ring');
+    const flashOverlay = document.getElementById('flash-overlay');
+    const pulseRing = document.getElementById('pulse-ring');
+    const playBtn = document.getElementById('play-btn');
+    const copyBtn = document.getElementById('copy-btn');
+    const outputCode = document.getElementById('output-code');
+
+    // Initialize controls
+    document.querySelectorAll('input[type="range"]').forEach(input => {
+      input.addEventListener('input', () => {
+        const key = input.id;
+        state[key] = parseFloat(input.value);
+        updateValueDisplay(key);
+        updatePreview();
+        updateOutput();
+        clearActivePreset();
+      });
+    });
+
+    // Preset buttons
+    document.querySelectorAll('.preset-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const preset = btn.dataset.preset;
+        Object.assign(state, PRESETS[preset]);
+        syncControlsToState();
+        updatePreview();
+        updateOutput();
+        document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+      });
+    });
+
+    // Play button
+    playBtn.addEventListener('click', playSummonAnimation);
+
+    // Copy button
+    copyBtn.addEventListener('click', () => {
+      navigator.clipboard.writeText(outputCode.textContent);
+      copyBtn.textContent = 'Copied!';
+      copyBtn.classList.add('copied');
+      setTimeout(() => {
+        copyBtn.textContent = 'Copy Config';
+        copyBtn.classList.remove('copied');
+      }, 1500);
+    });
+
+    function updateValueDisplay(key) {
+      const el = document.getElementById(`${key}-value`);
+      if (!el) return;
+
+      let val = state[key];
+      if (['innerRadius', 'ringSpacing', 'coreSize', 'glowRadius'].includes(key)) {
+        el.textContent = `${val}px`;
+      } else if (['spinDuration', 'buildUpDuration', 'flashDuration', 'settleDuration'].includes(key)) {
+        el.textContent = `${val}s`;
+      } else if (key === 'ringExpansion') {
+        el.textContent = `${val}x`;
+      } else {
+        el.textContent = val;
+      }
+    }
+
+    function syncControlsToState() {
+      Object.keys(state).forEach(key => {
+        const input = document.getElementById(key);
+        if (input) {
+          input.value = state[key];
+          updateValueDisplay(key);
+        }
+      });
+    }
+
+    function clearActivePreset() {
+      document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+    }
+
+    function updatePreview() {
+      // Update wisp
+      const wispSize = state.glowRadius * 2;
+      wisp.style.width = `${wispSize}px`;
+      wisp.style.height = `${wispSize}px`;
+      wisp.style.background = `radial-gradient(circle,
+        rgba(255,255,255,${state.wispEnergy}) 0%,
+        rgba(125,211,252,${state.wispEnergy * 0.6}) ${state.coreSize / state.glowRadius * 50}%,
+        transparent 70%)`;
+      wisp.style.boxShadow = `0 0 ${state.glowRadius * 0.5}px rgba(125,211,252,${state.wispEnergy * 0.5})`;
+      wisp.style.animation = `pulse-glow ${2 / state.pulseSpeed}s ease-in-out infinite`;
+
+      // Update rings
+      ringsContainer.innerHTML = '';
+      ringAngles = [];
+
+      for (let i = 0; i < state.ringCount; i++) {
+        const radius = state.innerRadius + i * state.ringSpacing;
+        const direction = i % 2 === 0 ? 1 : -1;
+        const speed = (10 / state.rotationSpeed) * (1 + i * 0.2);
+
+        ringAngles.push({ angle: 0, direction, speed: state.rotationSpeed * (1 + i * 0.15) });
+
+        // Ring circle
+        const ring = document.createElement('div');
+        ring.className = 'ring';
+        ring.style.width = `${radius * 2}px`;
+        ring.style.height = `${radius * 2}px`;
+        ring.style.marginLeft = `-${radius}px`;
+        ring.style.marginTop = `-${radius}px`;
+        ring.style.setProperty('--direction', direction);
+        ring.style.animation = `idle-rotate ${speed}s linear infinite`;
+        ringsContainer.appendChild(ring);
+
+        // Runes
+        const runeContainer = document.createElement('div');
+        runeContainer.className = 'ring-runes';
+        runeContainer.style.setProperty('--direction', direction);
+        runeContainer.style.animation = `idle-rotate ${speed}s linear infinite`;
+
+        const runeCount = Math.floor(state.runeDensity * (1 + i * 0.2));
+        for (let j = 0; j < runeCount; j++) {
+          if (j % 4 !== 0) continue; // Only show every 4th rune
+          const angle = (j / runeCount) * Math.PI * 2;
+          const x = Math.cos(angle) * (radius + 12);
+          const y = Math.sin(angle) * (radius + 12);
+
+          const rune = document.createElement('span');
+          rune.className = 'rune';
+          rune.style.left = `${x}px`;
+          rune.style.top = `${y}px`;
+          rune.textContent = RUNES[Math.floor(Math.random() * RUNES.length)];
+          runeContainer.appendChild(rune);
+        }
+        ringsContainer.appendChild(runeContainer);
+      }
+    }
+
+    function updateOutput() {
+      const config = `const CONFIG = {
+  // Idle state values
+  idleWispEnergy: ${(state.wispEnergy * 0.16).toFixed(2)},
+  idleBloom: ${(state.bloom * 0.4).toFixed(2)},
+  idleRotationSpeed: ${(state.rotationSpeed * 0.375).toFixed(2)},
+  idleStreakOpacity: 0.15,
+
+  // Active state values
+  coreSize: ${state.coreSize},
+  wispEnergy: ${state.wispEnergy},
+  glowRadius: ${state.glowRadius},
+  pulseSpeed: ${state.pulseSpeed},
+  streakCount: 20,
+  streakLength: 200,
+  streakFlicker: 0.4,
+  ringCount: ${state.ringCount},
+  innerRadius: ${state.innerRadius},
+  ringSpacing: ${state.ringSpacing},
+  rotationSpeed: ${state.rotationSpeed},
+  runeDensity: ${state.runeDensity},
+  detailLevel: 5,
+  bloom: ${state.bloom},
+  chromatic: ${state.chromatic},
+  coreColor: '#ffffff',
+  glowColor: '#7dd3fc',
+  glyphColor: '#4fb3d4',
+
+  // Animation timing
+  spinRotations: ${state.spinRotations},
+  spinDuration: ${state.spinDuration},
+  counterRotation: ${state.counterRotation},
+  ringExpansion: ${state.ringExpansion},
+  flashIntensity: ${state.flashIntensity},
+  pulseWaveSpeed: ${state.pulseWaveSpeed},
+  buildUpDuration: ${state.buildUpDuration},
+  flashDuration: ${state.flashDuration},
+  settleDuration: ${state.settleDuration},
+}`;
+      outputCode.textContent = config;
+    }
+
+    async function playSummonAnimation() {
+      if (isPlaying) return;
+      isPlaying = true;
+      playBtn.disabled = true;
+      playBtn.textContent = 'Playing...';
+
+      const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+      // Stop idle animations
+      document.querySelectorAll('.ring, .ring-runes').forEach(el => {
+        el.style.animation = 'none';
+      });
+
+      // Build up - fast spin
+      const buildUpFrames = Math.floor(state.buildUpDuration * 30);
+      let totalRotation = 0;
+
+      for (let i = 0; i <= buildUpFrames; i++) {
+        await sleep(state.buildUpDuration * 1000 / buildUpFrames);
+        const t = i / buildUpFrames;
+        const speedMult = 2 + Math.pow(t, 2) * 25;
+
+        // Update ring rotations
+        document.querySelectorAll('.ring, .ring-runes').forEach((el, idx) => {
+          const ringIdx = Math.floor(idx / 2);
+          if (ringAngles[ringIdx]) {
+            ringAngles[ringIdx].angle += ringAngles[ringIdx].direction * speedMult * 2;
+            el.style.transform = `translate(-50%, -50%) rotate(${ringAngles[ringIdx].angle}deg)`;
+          }
+        });
+
+        // Intensify wisp
+        const energy = state.wispEnergy * (1 + t * 1.5);
+        wisp.style.background = `radial-gradient(circle,
+          rgba(255,255,255,${energy}) 0%,
+          rgba(125,211,252,${energy * 0.8}) 30%,
+          transparent 70%)`;
+        wisp.style.boxShadow = `0 0 ${state.glowRadius * (0.5 + t)}px rgba(125,211,252,${energy * 0.6})`;
+      }
+
+      // Counter rotation lock
+      const counterFrames = 8;
+      for (let i = 0; i <= counterFrames; i++) {
+        await sleep(15);
+        document.querySelectorAll('.ring, .ring-runes').forEach((el, idx) => {
+          const ringIdx = Math.floor(idx / 2);
+          if (ringAngles[ringIdx]) {
+            ringAngles[ringIdx].angle -= ringAngles[ringIdx].direction * (state.counterRotation * 360 / counterFrames);
+            el.style.transform = `translate(-50%, -50%) rotate(${ringAngles[ringIdx].angle}deg)`;
+          }
+        });
+      }
+
+      // Electric ring expand
+      electricRing.style.opacity = '1';
+      electricRing.style.transition = 'transform 0.5s ease-out';
+      electricRing.style.transform = `translate(-50%, -50%) scale(${state.ringExpansion})`;
+
+      await sleep(500);
+
+      // Electric ring shrink
+      electricRing.style.transition = 'transform 0.2s ease-in, opacity 0.2s';
+      electricRing.style.transform = 'translate(-50%, -50%) scale(0.1)';
+
+      await sleep(200);
+      electricRing.style.opacity = '0';
+
+      // Flash
+      flashOverlay.style.opacity = state.flashIntensity;
+      wisp.style.background = `radial-gradient(circle,
+        rgba(255,255,255,1) 0%,
+        rgba(125,211,252,1) 30%,
+        rgba(79,179,212,0.8) 50%,
+        transparent 70%)`;
+      wisp.style.boxShadow = `0 0 ${state.glowRadius * 2}px rgba(255,255,255,0.9)`;
+
+      await sleep(state.flashDuration * 1000);
+
+      // Pulse wave
+      pulseRing.style.opacity = '1';
+      pulseRing.style.transition = `transform ${state.pulseWaveSpeed}s ease-out, opacity ${state.pulseWaveSpeed}s`;
+      pulseRing.style.transform = 'translate(-50%, -50%) scale(3)';
+      pulseRing.style.opacity = '0';
+
+      // Fade flash
+      flashOverlay.style.transition = 'opacity 0.3s';
+      flashOverlay.style.opacity = '0';
+
+      await sleep(state.pulseWaveSpeed * 1000);
+
+      // Settle
+      await sleep(state.settleDuration * 1000);
+
+      // Reset
+      pulseRing.style.transition = 'none';
+      pulseRing.style.transform = 'translate(-50%, -50%) scale(0)';
+      electricRing.style.transition = 'none';
+      electricRing.style.transform = 'translate(-50%, -50%) scale(0)';
+
+      // Restore idle animation
+      updatePreview();
+
+      isPlaying = false;
+      playBtn.disabled = false;
+      playBtn.textContent = 'Play Summon';
+    }
+
+    // Initial setup
+    syncControlsToState();
+    updatePreview();
+    updateOutput();
+  </script>
+</body>
+</html>
