@@ -9,6 +9,7 @@ export default function SummonStudy() {
   const [phase,setPhase] = useState('idle')
   const [index,setIndex] = useState(-1)
   const [browse,setBrowse] = useState(false)
+  const [animate,setAnimate] = useState(() => !window.matchMedia('(prefers-reduced-motion: reduce)').matches)
   const project = projects[index]
   const summon = () => {
     const choices = projects.map((_,i)=>i).filter(i=>i!==index)
@@ -23,9 +24,10 @@ export default function SummonStudy() {
     <header><a href="/" className="brand">YURI OOTANI <span>THE ARCHIVE</span></a><button className="quiet" onClick={()=>setBrowse(!browse)}>Browse {projects.length} projects</button></header>
     <div className={`stage-layout ${phase === 'revealed' ? 'has-dossier' : ''}`}>
       <section className="stage" aria-label="Project summoning chamber">
-        <Chamber controller={controller} onReady={()=>setStatus('ready')} onError={()=>setStatus('error')} onComplete={()=>setPhase('revealed')} />
+        <Chamber controller={controller} animate={animate} onReady={()=>setStatus('ready')} onError={()=>setStatus('error')} onComplete={()=>setPhase('revealed')} />
         <div className="stage-caption"><span>PERSONAL WORK / EXPERIMENTS / UNFINISHED IDEAS</span><h1>Something worth<br/>bringing to light.</h1></div>
         <div className="summon-controls">
+          <label className="motion-toggle"><input type="checkbox" checked={animate} onChange={e=>setAnimate(e.target.checked)} /> Play summon animation</label>
           <p role="status">{status==='loading' ? 'Preparing the chamber…' : status==='error' ? 'The 3D chamber is unavailable. You can still explore every project.' : phase==='summoning' ? 'Retrieving a fragment of the archive…' : 'One project. A little ceremony.'}</p>
           {phase==='summoning' ? <button className="summon" onClick={()=>controller.current?.skip()}>Skip to project →</button> : <button className="summon" disabled={status==='loading'} onClick={summon}>{phase==='revealed' ? 'Summon another project' : 'Summon a project'} <span>✧</span></button>}
         </div>

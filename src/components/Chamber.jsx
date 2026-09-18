@@ -2,15 +2,15 @@ import { useEffect, useRef } from 'react'
 import * as THREE from 'three'
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js'
 
-export default function Chamber({ controller, onReady, onError, onComplete }) {
+export default function Chamber({ controller, animate, onReady, onError, onComplete }) {
   const host = useRef(null)
-  const callbacks = useRef({ onReady, onError, onComplete })
-  useEffect(() => { callbacks.current = { onReady, onError, onComplete } })
+  const callbacks = useRef({ onReady, onError, onComplete, animate })
+  useEffect(() => { callbacks.current = { onReady, onError, onComplete, animate } })
   useEffect(() => {
     const container = host.current
     let renderer, model, mixer, observer, raf, paper, disposed = false, active = false
     let elapsed = 0, previous = 0
-    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)')
+    const actions = []
     const scene = new THREE.Scene()
     scene.background = new THREE.Color('#090f19')
     scene.fog = new THREE.Fog('#090f19', 15, 35)
@@ -68,11 +68,12 @@ export default function Chamber({ controller, onReady, onError, onComplete }) {
           action.setLoop(THREE.LoopOnce,1)
           action.clampWhenFinished = true
           action.play()
+          actions.push(action)
         })
         mixer.setTime(0)
         controller.current = {
-          summon() { elapsed = 0; active = true; if (paper) paper.visible = true; mixer.setTime(0) },
-          reset() { active = false; elapsed = 0; mixer.setTime(0); pulse.intensity = 0 },
+          summon() { elapsed = 0; active = true; actions.forEach(a=>a.reset().play()); if (paper) paper.visible = true; mixer.setTime(0) },
+          reset() { active = false; elapsed = 0; actions.forEach(a=>a.reset().play()); mixer.setTime(0); pulse.intensity = 0 },
           skip() { active = false; mixer.setTime(3.2); if (paper) paper.visible = false; pulse.intensity = 0; callbacks.current.onComplete() },
         }
         callbacks.current.onReady()
@@ -83,9 +84,9 @@ export default function Chamber({ controller, onReady, onError, onComplete }) {
         previous = now
         if (active && mixer) {
           elapsed += dt
-          mixer.setTime(reduced.matches ? 3.2 : elapsed)
-          pulse.intensity = reduced.matches ? 0 : Math.max(0,1-Math.abs(elapsed-2.15)/.3)*70
-          if (elapsed >= 3.2 || reduced.matches) {
+          mixer.setTime(callbacks.current.animate ? elapsed : 3.2)
+          pulse.intensity = callbacks.current.animate ? Math.max(0,1-Math.abs(elapsed-2.15)/.3)*70 : 0
+          if (elapsed >= 3.2 || !callbacks.current.animate) {
             active = false
             if (paper) paper.visible = false
             pulse.intensity = 0
