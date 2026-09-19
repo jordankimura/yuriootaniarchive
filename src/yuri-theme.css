@@ -1,0 +1,247 @@
+/* Yuri and Borg: ivory paper, lavender wings, dusty rose shell, dark ink. */
+:root { --ivory:#f7f4f1; --lavender:#c9c5d5; --rose:#b66e82; --blush:#ebcad2; --deep-rose:#754454; --ink:#292832; }
+body { background:var(--ivory); color:var(--ink); }
+.archive { background:radial-gradient(ellipse at 50% 45%,#f7f4f1 8%,#ebe4eb 47%,#d8d3e2 100%); }
+.masthead,.archive>footer { background:var(--ivory); border-color:#75445426; }
+.wordmark,.corner-note,.text-button,.index-panel button { color:var(--ink); }
+.text-button span,.edition,.eyebrow,.signature-hint { color:#756474; }
+.full-effects .orbit-one { border-color:#b66e828c; box-shadow:0 0 28px #ebcad270,inset 0 0 22px #ebcad250; }
+.full-effects .orbit-two { border-color:#aaa2c199; }
+.orbit-one,.orbit-two { border-color:#b66e8266; }
+.full-effects .ambient:before { background:radial-gradient(ellipse at 24% 43%,#ebcad2bb,transparent 49%),radial-gradient(ellipse at 76% 56%,#b6accfa6,transparent 48%); }
+.full-effects .ambient:after,.ambient:after { background:radial-gradient(ellipse at 50% 44%,#fffaf7b3 9%,#ebcad270 40%,transparent 72%); }
+.crosshair { background:linear-gradient(#75445420,#75445420) center/1px 100% no-repeat,linear-gradient(90deg,#75445420,#75445420) center/100% 1px no-repeat; }
+.full-effects .ambient i,.full-effects .ambient i:nth-of-type(4n+1) { background:#b66e8299; }
+.full-effects .ambient i:nth-of-type(3n){background:linear-gradient(transparent,#a599bd);}
+.full-effects .ambient i:nth-of-type(4n+2){background:#c9c5d5;}
+.full-effects .foreground-glints i { background:#fffafa; filter:drop-shadow(0 0 4px #ebcad2); }
+.full-effects .foreground-glints i:nth-child(2n) { background:#b66e82; }
+.full-effects .foreground-glints i:nth-child(3n) { background:#aaa0c3; }
+.envelope-front { background:linear-gradient(115deg,#f7f4f1,#eee5e8 65%,#dfd4df); border-color:#b8a3b0; }
+.envelope-back { background:linear-gradient(120deg,#eee5e8,#d9cbd8); border-color:#b8a3b0; }
+.envelope-front:after { opacity:.45; }
+.paper-grain { opacity:.12; }
+.flap { background:linear-gradient(#e2c4cd,#c98f9f); }
+.flap span,.file-no,.bottom-label { color:#754454; }
+.envelope-title { color:var(--ink); }
+.postmark,.back-seal { color:var(--deep-rose); border-color:#b66e82; }
+.signature-pad { color:var(--deep-rose); }
+.signature-pad svg { border-color:#b66e82; background-image:linear-gradient(135deg,#fff9fb99 25%,#ebcad280 25%,#ebcad280 50%,#fff9fb99 50%,#fff9fb99 75%,#ebcad280 75%); box-shadow:0 0 10px #ebcad288; }
+.signature-pad text { fill:var(--deep-rose); }
+.signature-pad polyline,.dossier-signature polyline { stroke:var(--deep-rose); }
+.signature-pad.is-drawing svg { border-color:var(--deep-rose); box-shadow:0 0 0 2px #75445422; }
+.signature-pad svg:focus-visible,button:focus-visible,a:focus-visible,summary:focus-visible,.project-sheet:focus-visible { outline-color:var(--deep-rose); }
+.authorization-stamp { border-color:var(--deep-rose); color:var(--deep-rose); background:#f7f4f1db; }
+@keyframes signature-invitation { 0%,100%{box-shadow:0 0 8px #b66e8244,inset 0 0 8px #ebcad222}50%{box-shadow:0 0 20px #b66e8288,inset 0 0 12px #ebcad288} }
+@keyframes ink-glow {45%{stroke:#b66e82;filter:drop-shadow(0 0 3px #ebcad2)}100%{stroke:#754454;filter:none}}
+.sealed .envelope-space:before { border-color:#b66e82; }
+.motion.sealed .envelope-space:after { border-color:#aaa0c3; }
+.arrival-flare { background:radial-gradient(ellipse at 50% var(--arrival-center),#fffaf7 10%,#ebcad2bb 40%,transparent 76%); }
+.arrival-beam { background:linear-gradient(90deg,transparent,#c9c5d5,#fffaf7,#ebcad2,transparent); box-shadow:0 0 20px 5px #ebcad29c; }
+.arrival-effects i { background:linear-gradient(90deg,transparent,#fffaf7); }
+.star-a { background:#fff6f9; }.star-b { background:#c9c5d5; }
+.flap-light { background:radial-gradient(ellipse at 50% 100%,#fffaf7f0 0%,#fffaf7a6 12%,#ebcad288 33%,transparent 69%); }
+.reveal-wash { background:var(--ivory); }
+.reveal-confetti i { background:var(--rose); }.reveal-confetti i:nth-child(3n){background:var(--lavender)}.reveal-confetti i:nth-child(3n+1){background:var(--blush)}
+.project-sheet { background:linear-gradient(115deg,#fffdfb,var(--ivory)); border-color:#c9c5d5; box-shadow:0 2px 2px #29283210,0 24px 65px #75445422; }
+.dossier-actions,.index-panel { background:var(--ivory); }
+.dossier-figure .project-image { background:#e8e3ec; border-color:#c9c5d5; }
+.sheet-meta,.dossier-actions,.dossier-figure figcaption,.field-notes { border-color:#c9c5d5; }
+.sheet-copy .dossier-intro,.sheet-copy details,.dossier-figure figcaption,.sheet-meta b,.provenance-label { color:#655766; }
+.archive-credit,.dossier-seal,.dossier-actions .another { color:var(--deep-rose); }.dossier-seal { border-color:#b66e8288; }
+.visit { background:var(--deep-rose); color:var(--ivory); }.visit:hover{background:#603545}.visit small{color:#ebcad2}
+input { accent-color:var(--deep-rose); }
+/* Radial streaks travel from the envelope center out to the screen edges. */
+.speed-lines { position:absolute; inset:0; overflow:hidden; pointer-events:none; z-index:0; }
+.speed-lines i { position:absolute; width:var(--line-length); height:3px; left:50%; top:var(--arrival-center); opacity:0; background:linear-gradient(90deg,transparent 0%,#b66e8280 15%,#b66e82 60%,#ebcad2 85%,#fffaf7); transform-origin:0 50%; }
+.speed-lines i:nth-child(3n){height:2px;background:linear-gradient(90deg,transparent,#a69abf 20%,#a69abf 75%,#fffaf7);}
+.motion.sealed .speed-lines i { animation:speed-stream 2.8s var(--line-delay) linear infinite; }
+.motion.opening .speed-lines i { animation:speed-stream .95s var(--line-delay) linear infinite; }
+.opening .speed-lines { animation:speed-decay 4.8s both; }
+.quiet-effects .speed-lines,.still .speed-lines,.revealed .speed-lines { display:none; }
+@keyframes speed-stream {0%{opacity:0;transform:rotate(var(--ray-angle)) translateX(0) scaleX(.2)}18%{opacity:.8}72%{opacity:.65}100%{opacity:0;transform:rotate(var(--ray-angle)) translateX(80vmax) scaleX(1.3)}}
+@keyframes speed-decay {0%,48%{opacity:1}76%,100%{opacity:0}}
+@media(max-width:700px){.speed-lines i{width:calc(var(--line-length)*.7)}}
+@media(min-width:701px) and (max-width:1100px){.corner-note p{font-size:18px;max-width:125px}.corner-note p br{display:none}.edition{font-size:7px}}
+
+/* A visible border of atmosphere around the mobile envelope and result. */
+@media(max-width:700px){
+ .ceremony,.opening .ceremony,.revealed .ceremony { --envelope-width:min(310px,calc(100vw - 80px)); --envelope-height:min(540px,calc(var(--viewport-height, 100svh) - var(--header-height) - var(--footer-height) - 104px)); }
+ .project-sheet,.opening .project-sheet { width:var(--envelope-width); }
+ .dossier-body { padding:14px 16px 0; }
+ .dossier-actions { padding:10px 16px 12px; }
+ .dossier-figure .project-image { height:clamp(80px,13svh,110px); }
+ .sheet-copy h1 { font-size:21px; }
+ .envelope-title { font-size:30px; }
+ .signature-pad svg { height:84px; }
+}
+
+/* A sender label and a small printed emblem, like personal stationery. */
+.envelope-title { top:calc(29% + 20px); font:26px/1.2 'Space Grotesk',sans-serif; letter-spacing:-1px; }
+.envelope-title>span { display:block; margin-top:8px; font:8px 'DM Sans',sans-serif; letter-spacing:1px; color:#756474; }
+.borg-emblem { position:absolute; right:22px; top:27%; width:82px; height:64px; fill:#292832; }
+.borg-wing { fill:#c9c5d5; stroke:#93859f; stroke-width:1.3; }
+.borg-shell { fill:#b66e82; stroke:#754454; stroke-width:1.3; }
+.borg-rim { fill:#f7f4f1; stroke:#754454; stroke-width:1.3; }
+.borg-shine { fill:#f7f4f1; }
+.signature-countdown { display:block; position:absolute; left:0; right:0; bottom:14px; height:3px; background:#b66e82; box-shadow:0 0 8px #b66e8288; transform-origin:left; animation:signature-wait 1s linear both; pointer-events:none; }
+@keyframes signature-wait { from{transform:scaleX(0)} to{transform:scaleX(1)} }
+.still .signature-countdown { animation:none; opacity:.7; }
+.signature-pad.is-pending svg { border-color:#754454; }
+@media(max-width:700px){.envelope-title{font-size:23px;left:20px}.borg-emblem{width:66px;height:52px;right:18px}.signature-hint{font-size:7px}}
+
+/* A casual ink sketch on an archive envelope, without postal decoration. */
+.borg-doodle { position:absolute; top:44%; left:calc(50% - 80px); width:160px; height:115px; color:#754454; opacity:.8; transform:rotate(-7deg); }
+@media(max-width:700px){.borg-doodle{width:120px;height:86px;left:calc(50% - 60px);top:44%}}
+@media(max-width:700px) and (max-height:740px){.borg-doodle{height:75px;top:44%}}
+/* A personal note, without repeating the site wordmark. */
+.personal-sender { font:italic 30px/1.2 'Segoe Print','Bradley Hand','Comic Sans MS',cursive; transform:rotate(-3deg); }
+.borg-doodle { top:27%; left:auto; right:24px; width:105px; height:80px; }
+.recipient-label { position:absolute; top:49%; left:14%; right:10%; transform:rotate(-3deg); color:#754454; }
+.recipient-label>span { font:7px 'DM Sans',sans-serif; letter-spacing:2px; }
+.recipient-label p { margin:6px 0 4px; font:italic 28px/1.2 'Segoe Print','Bradley Hand','Comic Sans MS',cursive; letter-spacing:-1px; }
+.recipient-label i { display:block; width:90%; height:1px; background:#b66e8255; }
+.signature-countdown { bottom:0; }
+@media(max-width:700px){.personal-sender{font-size:26px}.borg-doodle{top:27%;right:18px;left:auto;width:85px;height:65px}.recipient-label{top:48%;left:12%;right:10%}.recipient-label p{font-size:23px;margin-top:4px}}
+@media(max-width:700px) and (max-height:740px){.recipient-label{top:47%}.recipient-label p{font-size:20px}.borg-doodle{top:29%;height:60px}}
+
+/* Aligned handwritten addresses and a little character sketch. */
+.file-no,.personal-sender,.recipient-label { left:26px; color:#292832; transform:none; }
+.recipient-label { top:55%; right:22px; }
+.recipient-label p,.signature-pad text { color:#292832;fill:#292832; }
+.recipient-label i { background:#29283233; }
+.front-doodle { position:absolute; top:35%; left:calc(50% - 45px); width:155px;height:104px;color:#292832; transform:rotate(-4deg); }
+.character-pin { position:absolute; top:38%; left:calc(50% - 75px); width:150px;height:150px;border-radius:50%;background:radial-gradient(circle at 35% 25%,#fffdfb,#ebcad2 65%,#c9c5d5);border:4px solid #c9c5d5;box-shadow:inset 0 0 0 2px #fffdfb,inset -4px -6px 10px #75445433,3px 7px 6px #29283233;overflow:hidden; }
+.character-pin>svg { position:absolute;left:5%;top:13%;width:90%;height:78%;color:#292832; }
+.pin-gloss { position:absolute;inset:5px;border-radius:50%;background:linear-gradient(130deg,#fff9 0%,#fff0 38%,#fff0 73%,#fff5 100%);pointer-events:none; }
+@media(max-width:700px){
+ .file-no,.personal-sender,.recipient-label{left:20px;}
+ .recipient-label{top:54%;}
+ .front-doodle{top:35%;left:calc(50% - 22px);width:125px;height:84px;}
+ .character-pin{width:120px;height:120px;left:calc(50% - 60px);}
+}
+@media(max-width:700px) and (max-height:740px){.front-doodle{top:35%;height:70px;width:105px}.recipient-label{top:53%;}.recipient-label p{margin-top:2px;font-size:19px}}
+
+/* Scattered notebook sketches leave the signing field unobstructed. */
+.envelope-doodles { position:absolute;inset:0;color:#292832;pointer-events:none; }
+.doodle-yuri { position:absolute;left:13%;top:29%;width:34%;height:27%;transform:rotate(-7deg); }
+.doodle-borg-flying { position:absolute;right:10%;top:25%;width:28%;height:22%;transform:rotate(12deg); }
+.doodle-borg-sleeping { position:absolute;right:13%;top:52%;width:30%;height:15%;transform:rotate(-5deg); }
+.doodle-spark { position:absolute;left:23%;top:59%;width:7%;height:6%;opacity:.65; }
+.character-pin.metal-pin { border:0;background:none;overflow:visible;box-shadow:3px 8px 6px #29283240; }
+.character-pin.metal-pin>svg { inset:0;width:100%;height:100%; }
+.metal-pin .pin-gloss { inset:8px;background:linear-gradient(125deg,#fff8 0%,#fff0 30%,#fff0 45%,#fff5 47%,#fff0 52%,#fff0 80%,#fff5); }
+
+.doodle-original { position:absolute;left:8%;top:52%;width:38%;height:16%;transform:rotate(-6deg); }
+.footer-contact { background:none;border:0;padding:8px 0;color:inherit;font:inherit;letter-spacing:inherit; }
+.archive-dialog { padding:24px;border:1px solid #c9c5d5;border-radius:12px;background:#f7f4f1;color:#292832;width:min(860px,calc(100vw - 32px));max-height:calc(var(--viewport-height, 100svh) - 48px);overflow:auto;box-shadow:0 20px 100px #29283244; }
+.archive-dialog::backdrop { background:#29283288;backdrop-filter:blur(5px); }
+.dialog-heading { display:flex;align-items:center;justify-content:space-between;gap:20px; }
+.dialog-heading h2 { font:28px 'Space Grotesk',sans-serif;margin:0;letter-spacing:-1px; }
+.dialog-heading button { border:1px solid #c9c5d5;border-radius:50%;background:#fffaf7;color:#754454;width:40px;height:40px;flex-shrink:0;font-size:25px; }
+.dialog-intro { font-size:13px;line-height:1.6;color:#655766;margin:12px 0 24px; }
+.postcard-grid { display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px; }
+.gallery-postcard { display:flex;flex-direction:column;gap:10px;text-align:left;padding:12px;border:1px solid #d7cbd4;background:#fffdfa;color:#292832;box-shadow:0 3px 8px #75445412; }
+.gallery-postcard img { width:100%;height:125px;object-fit:contain;background:#e8e3ec; }
+.postcard-number { font-size:8px;letter-spacing:1px;text-transform:uppercase;color:#756474; }
+.gallery-postcard strong { font-size:14px;line-height:1.35;font-weight:500; }
+.postcard-open { margin-top:auto;padding-top:9px;font-size:11px;color:#754454; }
+.gallery-postcard:hover { border-color:#b66e82;background:#fff7fa; }
+.contact-dialog { width:min(430px,calc(100vw - 32px)); }
+.contact-link { display:flex;align-items:center;justify-content:space-between;border-top:1px solid #c9c5d5;padding:20px 0 10px;color:#754454;font-size:15px; }
+.contact-link small { display:block;margin-top:7px;color:#655766;font-size:13px; }
+@media(max-width:700px){.archive-dialog{padding:20px;max-height:calc(var(--viewport-height, 100svh) - 32px)}.postcard-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.gallery-postcard{padding:9px}.gallery-postcard img{height:92px}.gallery-postcard strong{font-size:12px}.dialog-heading h2{font-size:24px}}
+
+/* Arrange the sketches as two little scenes, with sleepy Borg on the flap. */
+.doodle-yuri { left:7%;top:28%;width:33%;height:27%; }
+.doodle-borg-flying { left:36%;right:auto;top:27%;width:26%;height:22%; }
+.doodle-original { left:auto;right:7%;top:auto;bottom:34%;width:46%;height:19%;transform:rotate(3deg); }
+.flap .doodle-borg-sleeping { left:calc(50% - 57px);right:auto;top:8px;width:114px;height:70px;color:#292832;transform:rotate(-5deg) translateZ(.1px);backface-visibility:hidden; }
+.motion.opening .flap .doodle-borg-sleeping { animation:flap-label-out .5s both; }
+@media(max-width:700px){.flap .doodle-borg-sleeping{left:calc(50% - 48px);top:10px;width:96px;height:60px}}
+
+/* Little absent-minded marks in the margins, away from the signing surface. */
+.margin-scribbles { position:absolute;inset:0;width:100%;height:100%;color:#754454;opacity:.58;pointer-events:none; }
+.header-seal { position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:50px;height:50px;border:1px solid #75445488;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#754454;box-shadow:inset 0 0 0 3px #f7f4f1,inset 0 0 0 4px #75445426; }
+.header-seal>span{font:15px Georgia,serif;letter-spacing:1px}.header-seal small{font-size:5px;letter-spacing:1.5px;margin-top:4px}
+/* Explicit footer tracks prevent labels from being squeezed or cropped. */
+.archive { --footer-height:calc(72px + env(safe-area-inset-bottom,0px)); }
+.archive>footer { display:grid;grid-template-columns:minmax(0,1fr) auto auto auto;align-content:center;gap:8px 28px;padding:12px var(--page-gutter) calc(12px + env(safe-area-inset-bottom,0px));font-size:10px;line-height:1.5; }
+.archive>footer>span { min-width:0;width:auto;white-space:normal;overflow-wrap:break-word;letter-spacing:.6px; }
+.archive>footer label { min-height:28px;white-space:nowrap;font-size:11px; }
+.footer-contact { min-height:32px;white-space:nowrap;font-size:11px; }
+@media(max-width:900px){
+ .archive { --footer-height:calc(90px + env(safe-area-inset-bottom,0px)); }
+ .archive>footer { grid-template-columns:1fr 1fr auto;gap:5px 14px;padding-block:10px calc(10px + env(safe-area-inset-bottom,0px)); }
+ .archive>footer>span { grid-column:1 / -1;font-size:9px; }
+}
+@media(max-width:700px){.header-seal{width:42px;height:42px}.header-seal>span{font-size:13px}.header-seal small{font-size:4px}.wordmark span{letter-spacing:1.1px}}
+@media(max-width:700px){.margin-scribbles path:nth-child(4){transform:translateY(-18px)}}
+
+/* Two quiet footer destinations and a single centered archive seal. */
+.archive { --header-height:100px; --footer-height:calc(64px + env(safe-area-inset-bottom,0px)); }
+.header-seal { width:76px;height:76px;box-shadow:inset 0 0 0 5px #f7f4f1,inset 0 0 0 6px #75445426; }
+.header-seal>span { font-size:24px;letter-spacing:2px; }
+.header-seal small { font-size:7px;letter-spacing:2px;margin-top:6px; }
+.archive>footer { display:flex;align-items:center;justify-content:space-between;gap:24px;padding:10px var(--page-gutter) calc(10px + env(safe-area-inset-bottom,0px)); }
+.footer-gallery,.footer-contact { border:0;background:none;color:#292832;font:13px 'DM Sans',sans-serif;letter-spacing:.2px;min-height:44px;padding:10px 0; }
+.footer-gallery span { margin-left:12px;color:#756474;font-size:11px; }
+@media(max-width:700px){.archive{--header-height:88px;--footer-height:calc(60px + env(safe-area-inset-bottom,0px))}.header-seal{width:66px;height:66px}.header-seal>span{font-size:21px}.header-seal small{font-size:6px}}
+
+/* All navigation lives above the full-height ceremony. */
+.archive { --footer-height:0px;padding-bottom:0; }
+.header-gallery,.header-contact { border:0;background:none;color:#292832;font:13px 'DM Sans',sans-serif;letter-spacing:.2px;min-height:44px;padding:10px 0; }
+.header-gallery span { margin-left:12px;color:#756474;font-size:11px; }
+.header-contact { margin-left:auto; }
+@media(max-width:700px){.archive{--footer-height:0px}.header-gallery span{margin-left:6px}}
+
+/* The seal opens a personal note without interrupting the archive. */
+button.header-seal { background:transparent;padding:0;cursor:pointer; }
+.header-seal:hover { background:#ebcad233;border-color:#b66e82; }
+.about-dialog { width:min(530px,calc(100vw - 32px)); }
+.about-art { height:90px;position:relative;margin:12px 0; }
+.about-art .doodle-borg-sleeping { position:static;display:block;width:130px;height:90px;margin:auto;color:#292832;transform:rotate(-5deg); }
+.about-copy { font-size:14px;line-height:1.8;color:#51464f; }
+.about-copy p { margin:0 0 18px; }
+.about-copy h3 { font:italic 21px Georgia,serif;color:#754454;margin:28px 0 12px; }
+.about-copy a { text-decoration:underline;text-underline-offset:3px;color:#754454; }
+.header-gallery span { margin-left:3px; }
+.about-dialog { width:min(570px,calc(100vw - 32px)); }
+.about-art { height:60px;margin:6px 0 12px; }
+.about-art .doodle-borg-sleeping { width:95px;height:60px; }
+.about-copy { line-height:1.65; }
+.about-copy p { margin-bottom:12px; }
+.about-copy h3 { margin:18px 0 10px; }
+.about-copy .about-signoff { font:italic 20px Georgia,serif;color:#754454;margin:18px 0 0;text-align:right; }
+@media(max-width:700px){
+ .about-dialog { padding:16px; }
+ .about-art { height:42px;margin:0 0 8px; }
+ .about-art .doodle-borg-sleeping { width:76px;height:42px; }
+ .about-copy { font-size:13px;line-height:1.5; }
+ .about-copy p { margin-bottom:10px; }
+ .about-copy h3 { font-size:19px;margin:14px 0 8px; }
+ .about-copy .about-signoff { margin-top:12px;font-size:19px; }
+}
+.about-copy .about-signoff { font:inherit;color:inherit;text-align:left;margin:0 0 10px; }
+.about-copy p:last-child { margin-bottom:0; }
+
+.project-source { font-size:12px;margin:16px 0; }
+.project-source a { color:var(--deep-rose);text-decoration:underline;text-underline-offset:3px; }
+.project-image-link{display:block;position:relative}.image-enlarge{position:absolute;right:8px;bottom:8px;background:var(--ivory);color:var(--deep-rose);border-radius:50%;width:24px;height:24px;text-align:center;line-height:24px}.image-selectors{display:flex;align-items:center;gap:8px;padding:8px 0}.image-selectors button{width:44px;height:44px;padding:2px;border:1px solid #c9c5d5;background:#e8e3ec;border-radius:3px}.image-selectors button[aria-pressed=true]{border:2px solid var(--deep-rose)}.image-selectors button img{width:100%;height:100%;object-fit:contain}.image-selectors>span{margin-left:auto;font-size:10px;color:var(--deep-rose)}
+.about-portrait{width:58px;height:58px;object-fit:cover;border-radius:14px;border:1px solid #b66e8266;box-shadow:0 3px 10px #75445418;flex-shrink:0}.about-dialog .dialog-heading{gap:12px}.about-dialog .dialog-heading h2{flex:1}@media(max-width:700px){.about-portrait{width:44px;height:44px;border-radius:11px}.about-dialog .dialog-heading{gap:9px}.about-dialog .dialog-heading h2{font-size:20px;letter-spacing:-.6px}}
+
+
+/* Keep mobile signing on a stationary viewport; scroll only within content. */
+@media (max-width:700px), (hover:none) and (pointer:coarse) {
+ :root { --viewport-height:100svh; }
+ @supports(height:100dvh) { :root { --viewport-height:100dvh; } }
+ html,body { width:100%;height:100%;overflow:hidden;overscroll-behavior:none; }
+ body { position:fixed;inset:0; }
+ #root { height:var(--viewport-height);overflow:hidden; }
+ .archive { height:var(--viewport-height);min-height:0;overflow:hidden; }
+ .sealed .ceremony,.opening .ceremony { touch-action:none; }
+ .signature-pad,.signature-pad svg { touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none; }
+ .dossier-body,.archive-dialog { touch-action:pan-y;overscroll-behavior:contain;-webkit-overflow-scrolling:touch; }
+}
+
+.flap-fastener{position:absolute;left:50%;bottom:16%;width:32px;height:32px;margin-left:-16px;border-radius:50%;background:radial-gradient(circle at 35% 28%,#f3d9df,#d5a6b3 70%);border:1px solid #986878;box-shadow:0 2px 3px #75445444,inset 0 0 0 3px #eac8d2;backface-visibility:hidden;transform:translateZ(.2px);pointer-events:none}.flap-fastener:after{content:"";position:absolute;inset:12px;border-radius:50%;background:#986878;box-shadow:0 1px 0 #fff5ef,inset 0 1px 2px #623d4e}@media(max-width:700px){.flap-fastener{width:26px;height:26px;margin-left:-13px}.flap-fastener:after{inset:10px}}

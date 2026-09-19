@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="480" viewBox="0 0 800 480">
+<defs><pattern id="grid" width="24" height="24" patternUnits="userSpaceOnUse"><path d="M24 0H0V24" fill="none" stroke="#756474" stroke-opacity=".09"/></pattern></defs>
+<rect width="800" height="480" fill="#eee9e5"/><rect width="800" height="480" fill="url(#grid)"/>
+<g font-family="Arial,sans-serif" fill="#292832">
+<text x="52" y="65" font-size="12" letter-spacing="3">HONOLULU / RESEARCH NOTES</text>
+<text x="52" y="132" font-family="Georgia,serif" font-size="57">SIOR</text>
+<text x="54" y="167" font-size="18" letter-spacing="1">classification taxonomy</text>
+<rect x="611" y="47" width="136" height="42" rx="21" fill="#d6c8d4"/><text x="679" y="73" text-anchor="middle" font-size="13">IBC 2024</text>
+<g fill="none" stroke="#b66e82" stroke-width="3"><path d="M176 295H270M270 295V250H350M270 295V350H350M500 250H554V295H625M500 350H554V295"/></g>
+<g stroke="#b6a8b5" stroke-width="1.5"><rect x="52" y="258" width="158" height="74" rx="6" fill="#f7f4f1"/><rect x="350" y="218" width="150" height="64" rx="6" fill="#d7d1e0"/><rect x="350" y="318" width="150" height="64" rx="6" fill="#d7d1e0"/><rect x="610" y="258" width="138" height="74" rx="6" fill="#ebcad2"/></g>
+<g font-size="14" text-anchor="middle"><text x="131" y="291">code</text><text x="131" y="311">excerpts</text><text x="425" y="255">classifications</text><text x="425" y="355">categories</text><text x="679" y="291">proposed</text><text x="679" y="311">requirements</text></g>
+<text x="52" y="434" font-size="11" letter-spacing="2" fill="#756474">EXTRACT → ORGANIZE → PROPOSE</text><text x="747" y="434" text-anchor="end" font-size="11" fill="#756474">y / o</text>
+</g></svg>
