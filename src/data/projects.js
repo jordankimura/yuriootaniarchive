@@ -40,17 +40,38 @@ export const projects = [
     name: "Maui Manifesto: A bureaucratic fairy tale",
     thumbnail: "/images/thumbnail_manifesto_400x200.png",
     description: "Short Fictional Story",
-    longDescription: "inspired by the DOGE office federal cuts. i wrote this when i was really stressed studying for my NCEES PE 8hr exam. i passed the exam but didnt follow through on getting licensed. ",
+    longDescription: "inspired by the DOGE office federal cuts. i wrote this when i was really stressed studying for my NCEES PE 8hr exam. i passed the exam and got licensed as a civil PE in the state of hawaii (PE-21807-0), but let it expire in april 2026. ",
     type: "writing",
     link: "https://docs.google.com/document/d/1AsiWM508LESZ6OvDDUjtbT45pn-Qp0Na/edit?usp=sharing&ouid=100373252258836087176&rtpof=true&sd=true"
   },
   {
     id: 7,
-    name: "Apothecary's Assemby",
+    name: "Apothecary's Assembly",
     thumbnail: "/images/thumbnail_apothecary_400x280.png",
     description: "Party Concept + Invitation",
     longDescription: "this was originally called \"stink party\". \n\ninspired by study (https://www.mdpi.com/2077-0383/10/23/5532) that showed zinc acetate + chlorhexidine diacetate mouthwash and tongue scraping were effective measures against bad breath. wanted to do a mini replication study with group of friends.\n\nfigured smelling people's breath and just having stink stuff like rotting meat would be a neat party concept but it got shot down so i just let it die haha.",
     type: "other",
     link: "https://docs.google.com/presentation/d/1kQsK6Dfi50-dGo0NHlD0Sgru255LrMLi/edit?usp=sharing&ouid=100373252258836087176&rtpof=true&sd=true"
   }
+  ,{
+    id: 8,
+    name: "SIOR Classification Taxonomy",
+    thumbnail: "/images/sior-taxonomy.svg",
+    description: "A proposed revision of Honolulu's SIOR qualification taxonomy.",
+    longDescription: "i was asked to help update the city and county of honolulu's SIOR qualification checklist for IBC 2024. i pulled out the load-bearing code excerpts, organized them into a new classification taxonomy, and proposed minimum qualification requirements using the existing IBC 2018-based matrix as precedent.",
+    type: "taxonomy",
+    link: "https://docs.google.com/spreadsheets/d/1JaXhQ8nSTquUQmgSBRKpZaa4EAz-3LPi/edit?gid=1171792831#gid=1171792831"
+  }
+  ,{
+    id: 9,
+    name: "Yomi — Tarot Card App",
+    thumbnail: "/images/yomi-artwork.jpg", images: [{src: "/images/yomi-artwork.jpg", alt: "Major and minor arcana artwork"}, {src: "/images/yomi-tarot.png", alt: "Yomi reading screen"}, {src: "/images/yomi-login.jpg", alt: "Yomi login screen"}, {src: "/images/yomi-strength.jpg", alt: "Strength card and interpretation"}],
+    description: "A tarot app and a first adventure in building software.",
+    longDescription: "built this during the opus 4.5 era with no prior experience coding, hosting a website, connecting a database, or dealing with apple app store registration (LOL). learned a lot by trying to make it all work.\n\nall 78 cards, major and minor arcana, were generated with midjourney and edited with nanobanana pro. vanity project tbh, but it was something i wanted to make.\n\nit never made it onto the apple app store (probably for the better). i let the vps subscription lapse and the llm connection seems to have died, so the reading service may no longer work. a little sad about that, but still glad i made it.",
+    type: "app",
+    link: "https://yomitarot.com",
+    sourceLink: "https://github.com/yuriootani-cpu/yomitarot"
+  }
 ]
+
+
